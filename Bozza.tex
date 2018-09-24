@@ -7,8 +7,65 @@
 \author{Pietro Meschini}
 \title{Forse non muore nessuno neanche stavolta}
 \begin{document}
+
+\chapter{La rete viaria urbana}
+Formalizzazione, tutta la roba dal libro di Gaetano.
+
 \chapter{Semafori Intelligenti}
+\section{Semaforizzazione adattiva}
+Perché fare i semafori che si adattano in tempo reale?
+
+Reattività alle condizioni inaspettate nel breve periodo
+
+Reattività agli incidenti
+
+\subsection{Il dilemma dell'ottimizzazione}
+In fondo è un modo di migliorare l'offerta per il traffico veicolare privato, causandone l'aumento.
+
+Inoltre incidenti, traffico smodato e imprevedibile sono tutte prerogative del trasporto privato. Si farebbe prima a cercare di curare il bisogno di trasporto privato che ad arginarne gli effetti dannosi.
+
+\section{Tipi di ottimizzazione}
+Tipi di ottimizzazione, roba dal libro.
 
 
+\chapter{Obiettivi Intelligenti}
+Definizione degli obiettivi dell'ottimizzazione classica e di quella sostenibile.
+
+Formalizzazione delle funzioni di costo:
+l'indice di coda (integrale tempo in coda per veicoli)/tempo passato nel corridoio fa cacare
+$$
+\frac{•}{•}\sum_{a \in C} \sum_{t \in T}{queu_{at}}}{\sum_{a \in C} \sum_{t \in T}{n_{at}}}
+$$
+
+non è reattivo soprattutto se gli archi sono lunghi perché il tempo in coda è comunque poco rispetto al totale
+
+ci vorrebbe tempo per km percorso, ma come faccio a calcolare lo spazio percorso?
+
+\chapter{Ottimizzazione con GLTM Genetico}
+Perché è una buona idea?
+E' una simulazione in grado di tenere conto di fenomeni complessi ma più veloce della micro.
+
+L'infrastruttura contiene dati in tempo reale etc.
+
+\section{General Link Transmission Model}
+Funzionamento generale, pregi e limitazioni rispetto all'applicazione come ottimizzatore.
+
+
+\section{Il modello in tempo reale}
+
+\section{Tuning del modello}
+
+
+\section{Tuning del Genetico}
+Effetti dimensioni popolazione, aggiustamenti mutazione
+
+\chapter{Risultati}
+\section{La qualità in termini assoluti}
+
+
+\section{Il confronto con microsimulazione}
+
+
+\section{Performance}
 
 \end{document}
