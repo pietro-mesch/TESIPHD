@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9.6210 64-bit) (preloaded format=pdflatex 2017.1.27)  23 SEP 2018 14:43
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9.6210 64-bit) (preloaded format=pdflatex 2017.1.27)  27 SEP 2018 18:54
 entering extended mode
 **./Bozza.tex
 (Bozza.tex
@@ -492,29 +492,25 @@ Chapter 1.
 
 ]
 Chapter 2.
-[3] [4
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 33.
+("C:\Program Files\MiKTeX 2.9\tex\latex\base\omscmr.fd"
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 33.
+ [3] [4
 
 ]
 Chapter 3.
-LaTeX Font Info:    Try loading font information for U+msa on input line 36.
+LaTeX Font Info:    Try loading font information for U+msa on input line 50.
 ("C:\Program Files\MiKTeX 2.9\tex\latex\amsfonts\umsa.fd"
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 36.
+LaTeX Font Info:    Try loading font information for U+msb on input line 50.
 
 ("C:\Program Files\MiKTeX 2.9\tex\latex\amsfonts\umsb.fd"
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-)
-! Undefined control sequence.
-l.37 \bigfrac
-             {\sum_{a \in C} \sum_{t \in T}{queu_{at}}}{\sum_{a \in C} \sum_...
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
-[5] [6
+) [5] [6
 
 ]
 Chapter 4.
@@ -524,23 +520,25 @@ Chapter 4.
 Chapter 5.
 [9] (Bozza.aux) ) 
 Here is how much of TeX's memory you used:
- 1956 strings out of 493333
- 22657 string characters out of 3139200
- 83279 words of memory out of 3000000
- 5495 multiletter control sequences out of 15000+200000
- 7815 words of font info for 30 fonts, out of 3000000 for 9000
+ 1976 strings out of 493333
+ 22974 string characters out of 3139200
+ 85279 words of memory out of 3000000
+ 5511 multiletter control sequences out of 15000+200000
+ 8161 words of font info for 31 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 27i,4n,24p,224b,149s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 27i,4n,24p,396b,149s stack positions out of 5000i,500n,10000p,200000b,50000s
 <C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cm
 bx12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmex10.pfb
 ><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Pro
 gram Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi7.pfb><C:/Program File
 s/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Program Files/MiKTeX 
 2.9/fonts/type1/public/amsfonts/cm/cmsl10.pfb><C:/Program Files/MiKTeX 2.9/font
-s/type1/public/amsfonts/cm/cmsy7.pfb>
-Output written on Bozza.pdf (9 pages, 86956 bytes).
+s/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/
+public/amsfonts/cm/cmsy7.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/am
+sfonts/cm/cmti10.pfb>
+Output written on Bozza.pdf (9 pages, 108058 bytes).
 PDF statistics:
- 60 PDF objects out of 1000 (max. 8388607)
+ 68 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

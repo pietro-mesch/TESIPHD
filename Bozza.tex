@@ -27,6 +27,20 @@ Inoltre incidenti, traffico smodato e imprevedibile sono tutte prerogative del t
 \section{Tipi di ottimizzazione}
 Tipi di ottimizzazione, roba dal libro.
 
+\subsection{BALANCE}
+
+\begin{itemize}
+\item Il modello è meglio o peggio di TRE ?
+\item Perché usare TRE che è molto più lento?
+\item come funziona BAL e cosa può fare?
+\end{itemize}
+
+Balance ha un modellino \emph{mesoscopico} tipo gltm (n realtà è proprio come GLTM al secondo) e fa un taglio delle reti intorno alle junction che vuole controllare. Sugli ingressi alle sottoreti (una per ogni junction) usa profili di flusso costanti, ma se può usa i flussi uscenti di una junction per determinare i flussi entranti in una a valle (propagazione).
+
+Il modello viene usato per ricavare le funzioni di costo FERMATE, LUNGHEZZA CODE e PERDITEMPO.
+Lui vede le code come F-E perché i suoi archi sono in realtà le corsie di svolta, ed usa una lunghezza MASSIMA per le code.
+
+
 
 \chapter{Obiettivi Intelligenti}
 Definizione degli obiettivi dell'ottimizzazione classica e di quella sostenibile.
@@ -34,7 +48,7 @@ Definizione degli obiettivi dell'ottimizzazione classica e di quella sostenibile
 Formalizzazione delle funzioni di costo:
 l'indice di coda (integrale tempo in coda per veicoli)/tempo passato nel corridoio fa cacare
 $$
-\frac{•}{•}\sum_{a \in C} \sum_{t \in T}{queu_{at}}}{\sum_{a \in C} \sum_{t \in T}{n_{at}}}
+\sum_{a \in C} \sum_{t \in T}{queu_{at}}{\sum_{a \in C} \sum_{t \in T}{n_{at}}}
 $$
 
 non è reattivo soprattutto se gli archi sono lunghi perché il tempo in coda è comunque poco rispetto al totale
