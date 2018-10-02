@@ -39,7 +39,7 @@ Tipi di ottimizzazione, roba dal libro.
 
 Balance ha un modellino \emph{mesoscopico} tipo gltm (n realtà è proprio come GLTM al secondo) e fa un taglio delle reti intorno alle junction che vuole controllare. Sugli ingressi alle sottoreti (una per ogni junction) usa profili di flusso costanti, ma se può usa i flussi uscenti di una junction per determinare i flussi entranti in una a valle (propagazione).
 
-Il modello viene usato per ricavare le funzioni di costo FERMATE, LUNGHEZZA CODE e PERDITEMPO.
+Il modello viene usato per ricavare le funzioni di costo FERMATE, LUNGHEZZA CODE (in realtà numero di veh in coda) e PERDITEMPO.
 Lui vede le code come F-E perché i suoi archi sono in realtà le corsie di svolta, ed usa una lunghezza MASSIMA per le code.
 
 Punti di forza di Balance:
