@@ -1,0 +1,42 @@
+\ProvidesPackage{mzk}
+
+%document layout
+\usepackage[top=3cm, bottom=3cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{url,graphicx,tikz,dsfont}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+%captions
+\usepackage[font=small,labelfont=sc,labelsep=endash,width=0.85\textwidth]{caption}
+
+%references
+\usepackage[square]{natbib}
+
+%paragraph and spacing
+\usepackage{parskip}
+\setlength{\parskip}{7pt plus3pt minus2pt}
+
+%figures
+\newcommand{\fig}[5]{
+\begin{figure}[#1]
+\begin{center}
+\includegraphics[#5]{#2}
+\caption{#4}\label{#3}
+\end{center}
+\end{figure}
+}
+
+%equations
+\newcommand{\eq}[2]{
+\begin{equation} \label{#1}
+#2
+\end{equation}
+}
+
+\newcommand{\req}[1]{
+(\ref{#1})
+}
+
+\endinput

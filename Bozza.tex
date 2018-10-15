@@ -1,11 +1,10 @@
-\documentclass[10pt,a4paper,twoside]{book}
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
-\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\documentclass[11pt,a4paper,twoside]{book}
+
 \author{Pietro Meschini}
 \title{Forse non muore nessuno neanche stavolta}
+
+\usepackage{mzk}
+
 \begin{document}
 
 \chapter{La rete viaria urbana}
@@ -57,6 +56,12 @@ Punti deboli:
 \item Probabilmente tende a massimizzare la capacità dove è più richiesta, favorendo lo scorrimento ma provocando un comportamento "ingordo" che crea problemi a valle.
 \end{itemize}
 
+\subsubsection{Requisiti}
+Balance lavora stage based, cambiando gli istanti di inizio degli interstage.
+Per forzare il comportamento "solo offset" bisogna bloccare la durata degli stage, e lasciare libertà totale a tutti gli interstage.
+
+Serve un detector con channel unico per ogni corsia interessante di approccio all'intersezione.
+
 
 \chapter{Obiettivi Intelligenti}
 Definizione degli obiettivi dell'ottimizzazione classica e di quella sostenibile.
@@ -78,10 +83,16 @@ $$
 $$
 
 
-Il tutto è da normalizzare rispetto al numero di veicoli entrati su qualsiasi arco (forse meglio fare entrambe le somme arco per arco, più chiaro).
+Il tutto è da normalizzare rispetto al numero di veicoli entrati su qualsiasi arco.
 
 Altro obiettivo utile sarebbe guardare la congestione degli archi.
 Prendendo la congestione media si auto-pesano di più gli archi corti, il che avrebbe senso.
+Come indicatore della congestione, dal GLTM prendiamo la lunghezza della coda peggiore nell'intervallo rispetto all'arco $QUEL\in[0,1]$ quindi come funzione di costo
+\eq{e:maxqueue}{
+Q_{a}^{MAX} = \sup\{QUEL_{a,t}|t\in T\}
+}
+
+
 
 \chapter{Ottimizzazione con GLTM Genetico}
 Perché è una buona idea?
@@ -89,11 +100,34 @@ E' una simulazione in grado di tenere conto di fenomeni complessi ma più veloce
 
 L'infrastruttura contiene dati in tempo reale etc.
 
+Condizioni dei test di TRE:
+\begin{enumerate}
+\item TRE fa un equilibrio e produce TPRB per tutto il giorno: gli intervalli sono ben più lunghi di un ciclo di semaforo quindi le svolte sono mediate e dipendono solo da domanda e green share
+\item TRE salva l'istantanea dei flussi per cominciare le simulazioni di ottimizzazione a rete carica
+\item Gli offset vengono modificati e per ogni individuo si fa un caricamento al secondo su una finestra temporale ristretta, partendo dall'istantanea salvata
+\end{enumerate}
+
+\fig{htbp}{PIX/DIAG-dta-scheme_550x320.png}{f:ass}{L'assegnazione di TRE}{width=0.8\textwidth}
+
+Quantificare errori dovuti all'uso di TPRB fisse 
+
+Data una finestra temporale di una certa lunghezza
+
 \section{General Link Transmission Model}
 Funzionamento generale, pregi e limitazioni rispetto all'applicazione come ottimizzatore.
 
+Quale intervallo di risultati si può usare? Data l'incertezza e le approssimazioni, ha senso usare i risultati al secondo?
+
+Non varrebbe la pena guadagnare tempo usando intervalli di 6s ?
+\emph{Non importa, si guadagna tempo ma per ora il tempo non ci preoccupa. Semmai si fa una prova a posteriori una volta determinato quale combinazione degli altri parametri funziona meglio}.
+
 
 \section{Il modello in tempo reale}
+
+\subsection{Corridoio di ottimizzazione}
+Definito come una serie di link.
+I link attraversano un certo numero di intersezioni, alcune delle quali sono amministrate da un semaforo.
+Fra l'inizio e il primo semaforo, fra i semafori, e dopo l'ultimo, i link sono accorpati in sezioni. I KPI vengono calcolati su di essi.
 
 \section{Tuning del modello}
 
@@ -102,6 +136,15 @@ Funzionamento generale, pregi e limitazioni rispetto all'applicazione come ottim
 Effetti dimensioni popolazione, aggiustamenti mutazione
 
 \chapter{Risultati}
+Test da fare:
+\begin{description}
+\item[Domanda stabile subcritica]
+\item[Domanda stabile supercritica]
+\item[Riduzione di capacità alla fine del corridoio] per vedere se TreGen tiene le code a monte o fa andare tutti a morire in fondo.
+\end{description}
+
+
+
 \section{La qualità in termini assoluti}
 
 
