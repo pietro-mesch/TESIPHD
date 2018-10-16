@@ -44,3 +44,9 @@ Punti deboli:
 \item non vede l'arco ma solo l'approccio: forse una volta che la coda ha raggiunto il sensore per lui tutte le situazioni sono uguali, e sotto carico non gli cambia più niente
 \item Probabilmente tende a massimizzare la capacità dove è più richiesta, favorendo lo scorrimento ma provocando un comportamento "ingordo" che crea problemi a valle.
 \end{itemize}
+
+\subsubsection{Requisiti}
+Balance lavora stage based, cambiando gli istanti di inizio degli interstage.
+Per forzare il comportamento "solo offset" bisogna bloccare la durata degli stage, e lasciare libertà totale a tutti gli interstage.
+
+Serve un detector con channel unico per ogni corsia interessante di approccio all'intersezione.

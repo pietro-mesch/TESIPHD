@@ -4,11 +4,34 @@ E' una simulazione in grado di tenere conto di fenomeni complessi ma più veloce
 
 L'infrastruttura contiene dati in tempo reale etc.
 
+Condizioni dei test di TRE:
+\begin{enumerate}
+\item TRE fa un equilibrio e produce TPRB per tutto il giorno: gli intervalli sono ben più lunghi di un ciclo di semaforo quindi le svolte sono mediate e dipendono solo da domanda e green share
+\item TRE salva l'istantanea dei flussi per cominciare le simulazioni di ottimizzazione a rete carica
+\item Gli offset vengono modificati e per ogni individuo si fa un caricamento al secondo su una finestra temporale ristretta, partendo dall'istantanea salvata
+\end{enumerate}
+
+\fig{htbp}{PIX/DIAG-dta-scheme_550x320.png}{f:ass}{L'assegnazione di TRE}{width=0.8\textwidth}
+
+Quantificare errori dovuti all'uso di TPRB fisse 
+
+Data una finestra temporale di una certa lunghezza
+
 \section{General Link Transmission Model}
 Funzionamento generale, pregi e limitazioni rispetto all'applicazione come ottimizzatore.
 
+Quale intervallo di risultati si può usare? Data l'incertezza e le approssimazioni, ha senso usare i risultati al secondo?
+
+Non varrebbe la pena guadagnare tempo usando intervalli di 6s ?
+\emph{Non importa, si guadagna tempo ma per ora il tempo non ci preoccupa. Semmai si fa una prova a posteriori una volta determinato quale combinazione degli altri parametri funziona meglio}.
+
 
 \section{Il modello in tempo reale}
+
+\subsection{Corridoio di ottimizzazione}
+Definito come una serie di link.
+I link attraversano un certo numero di intersezioni, alcune delle quali sono amministrate da un semaforo.
+Fra l'inizio e il primo semaforo, fra i semafori, e dopo l'ultimo, i link sono accorpati in sezioni. I KPI vengono calcolati su di essi.
 
 \section{Tuning del modello}
 

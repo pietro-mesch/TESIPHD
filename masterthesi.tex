@@ -1,0 +1,1033 @@
+%%%~~~~~
+\documentclass[12pt,a4paper]{report}
+\title{Diamond DA-42 \\ Physical Model of the Landing Gear \\ for Real-Time simulation}
+\author{Pietro Meschini \\0907403}
+\date{}
+
+%\usepackage[adobe-utopia]{mathdesign} %looks like cambria
+%\usepackage{kpfonts} 				   %mathmode is crap
+%\usepackage{txfonts}				   %ugly as shit
+\usepackage{palatino}
+\usepackage[T1]{fontenc}
+
+\usepackage{url,graphicx,tikz,dsfont}
+
+\usepackage[top=3cm, bottom=3cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage[font=small,labelfont=sc,labelsep=endash,width=0.85\textwidth]{caption}
+\usepackage[square]{natbib}
+
+\usepackage{parskip}
+\setlength{\parskip}{7pt plus3pt minus2pt}
+
+\newcommand*\circled[1]{
+\tikz[baseline=(char.base)]{
+    \node[shape=circle,draw,inner sep=1pt] (char) {#1};}
+}
+\newcommand{\virgolette}[1]{
+\textquotedblleft #1\textquotedblright
+}
+
+\newcommand{\mm}{\scriptsize{[mm]}}
+\newcommand{\Pa}{\scriptsize{[Pa]}}
+\newcommand{\kN}{\scriptsize{[kN]}}
+
+\newcommand{\figura}[5][htbp]{
+\begin{figure}[#1]
+\begin{center}
+\includegraphics[#3]{#2}
+\caption{#4}\label{#5}
+\end{center}
+\end{figure}
+}
+\newcommand{\tabella}[5][htbp]{
+\begin{table}[#1]
+	\begin{center}
+		\texttt{
+		\begin{tabular}{#2}
+		#5		
+		\end{tabular} } \label{#3}\\ \vspace{3mm}
+		\footnotesize{Table \ref{#3}: #4}
+	\end{center}
+\end{table}
+}
+
+\newcommand{\eq}[2]{
+\begin{equation} \label{#1}
+#2
+\end{equation}
+}
+
+\newcommand{\req}[1]{
+(\ref{#1})
+}
+
+\newcommand{\de}[1]{
+\mathrm{d} #1 
+}
+
+\newcommand{\dif}[2]{
+\frac{\delta#1}{\delta#2} 
+}
+
+\newcommand{\difp}[2]{
+\frac{\delta#1}{\delta#2} \, \dot{#2} 
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\maketitle
+\abstract
+
+\tableofcontents
+\pagebreak
+\subsection*{About Notation} \addcontentsline{toc}{subsection}{On Vector Notation}
+It is convenient to introduce straight away the conventions used for vector and angle notation throughout this dissertation:\\
+
+\emph{\textbf{Vectors}} are denoted by a bar and have three components unless otherwise specified, as will be the case for velocities that are \emph{by definition} confined to a plane. For example:\\
+\begin{tabular}{ll}
+ $\bar{F}$ & is a force in three-dimensional space\\
+
+ $\bar{F}_{xy}$ & its projection in the $xy$ plane still has three components\\
+ 
+ $\bar{v}_s$ & the slip velocity will be specifically defined as two-dimensional\\
+\end{tabular}\\
+
+\emph{\textbf{Oriented Segments}} representing the distance between two points are denoted by the arrow overhanging the capital letters that identify the points, following the order given by the direction of the vector. Quite simply:\\
+\begin{tabular}{ll}
+$\overrightarrow{AB\;}$ & is the vector from $A$ to $B$ and it is equal to $-\overrightarrow{BA\:}\,$.\\
+\end{tabular}\\
+
+\emph{\textbf{Moduli and Components}} simply lack the bar or arrow. Components are denoted by their subscripts and are positive according to the frame of reference:\\
+\begin{tabular}{ll}
+$\bar{v}\,=\,(v_x,v_y)$ & is a two-dimensional vector\\
+$v\,=\, \sqrt{{v_x}^2+{v_y}^2}$ & its magnitude
+\end{tabular}\\
+\\
+
+\emph{\textbf{Angles}} are denoted by Greek letters, the only exception being $\omega$ which is the wheel angular velocity as usual.
+
+
+
+\chapter*{Physical Model\\ of the Landing Gear}\addcontentsline{toc}{chapter}{Physical Model of the Landing Gear}
+In order to assess the performance of control loops in a real-time flight simulator, the aircraft model used for the simulation must include a representation of the landing gear. Prior to this work the aircraft model in use was therefore limited to airborne operations and only contemplated the landing gear as far as the drag and pitching moment of the aircraft were concerned.
+While a very simple numerical model could suffice for take-off and landing simulation or even pilot training purposes, the final objective of this study demands that the landing gear model should represent the real structure as faithfully as possible. This involves taking directly into account the way in which forces are physically transmitted from the ground to the airframe, with special attention to the interaction between tires and runway: realistic modelling of the tire behaviour and the forces occurring at the tire-runway interface is an essential requisite for the accurate prediction and avoidance of wheel locking and dangerous wheel skid situations. 
+
+The Diamond DA42 features a standard tricycle type retracting landing gear. For the purposes of this study it is only necessary to model the behaviour of the landing gear in the extended  position: any effects on the aircraft's inertia matrix arising from landing gear position or movement are momentarily disregarded.
+
+The general approach used to predict the forces and moments which the landing gear exerts on the aircraft body is to first calculate the tire forces as they are generated in the interaction with the ground, and subsequently propagate them through the suspension system and to the airframe. A number of transformations\footnote{See Appendix \ref{apx:trans}} are used in this process to switch between the different frames of reference (see table \ref{tab:FORs}) used to simplify the analysis.
+
+In the following chapters the different components of the DA42 landing gear are presented, with detailed explanation of the methods used to model their behaviour.
+
+
+\chapter{Tire Model} \label{tireintro}
+In order to predict the ground handling qualities of the aircraft, it is crucial that the forces developed in the interaction between tires and runway should be reproduced as realistically as possible.
+Working from a set of physical properties that identify a certain tire, a tire model can be used to compute forces and moments of interest (see fig.\ref{fig:tireforces:intro}) as the response to the wheel's position and velocity with respect to the road surface.
+\figura{piczero.jpg}{}{tire forces(a picture with tire part names, 3/4 view and top view) }{fig:tireforces:intro}
+
+The tire forces illustrated in Figure \ref{fig:tireforces:intro} are not limited to the driving and cornering forces calculated by the tire model. In fact for realistic simulation all of the forces described below must be computed at every instant:
+\begin{description}
+\item[Normal reaction $\mathbf{F_z}$]: subject to loading, the function of the tire is to deform, acting like a non-linear spring/damper to reduce the effect of unevenness of the road, or absorbing part of the impact during an aircraft landing. Originating from the tire volumetric compression and the elastic deformation of the tire carcass, the reaction force is considered normal to the tire-ground interface plane.
+Its magnitude is a generic function of the tire loaded radius $R_\ell$ and its rate of change $\dot{R_\ell}$ depending on various tire characteristics such as shape, inflation pressure and carcass stiffness.
+Even outside of the static equilibrium condition, the normal reaction roughly corresponds in magnitude to the instantaneous tire loading, which is an input of any tire model. They directly influence the maximum friction forces that can be developed between the rubber and the road surface, and the relationship between tire loading and tire deformation is important for determining the size of the contact area corresponding to a given load.
+
+\item[Longitudinal and lateral forces, $\mathbf{F_x}$ and $\mathbf{F_y}$]: these are the main purpose and most obvious reason for the success of rubber tires. All the engine power, the braking effort, the steering input from the pilot must ultimately be transmitted to the ground through the elastic deformation the tire undergoes as it rolls, and most importantly the friction at the tire\slash ground interface.\\
+The distribution and magnitude of these forces in the contact patch is strictly dependent on the tire slip, a measure\footnote{described extensively in section \ref{ssec:slipdef}} of the relative motion between the tire and the surface it is travelling on: simply put, driving and braking forces arise with longitudinal slip, when the wheel is trying to roll faster or slower than the roll-wise linear velocity of its hub; cornering forces are generated by lateral slip, when the wheel tends to slide sideways in the direction in which it cannot roll.\\
+These two conditions very often occur simultaneously, and the tire responses in the two directions are strongly coupled. Accurately rendering the complex relation between combined slip and the resulting tire forces is one of the main challenges of every tire model. 
+
+\item[Self aligning torque $\mathbf{M_z}$]: a side effect of the uneven distribution of driving and cornering forces. As these do not develop uniformly along the length of the contact patch they create a moment about the $z$ axis which generally tends to re-align the wheel with the direction of travel, a phenomenon well known to all drivers. In fact, it constitutes such a fundamental element of the "natural feedback loop" that modern power steering systems are still designed to let the self aligning torque be felt at the wheel, and even steer-by-wire vehicles and simulators include it in the force feedback for a realistic feel.
+
+\item[Rolling resistance torque $\mathbf{M_y}$] is mainly due to viscous dissipation of energy as the tire carcass is deformed. Due to its difficult analytical representation, many simple tire models ignore it altogether \citep{compare74}, others \citep{wong01} propose simple functions of tire load (the subject is further discussed in section \ref{sec:parameasures}). 
+Rolling resistance is generally negligible compared with friction forces as long as the tire operates under design conditions but is of comparable magnitude with aerodynamic drag and acquires significance at low speed or when calculating the maximum stopping distance in the eventuality of a complete failure of the brake circuit.
+\end{description}
+
+\section{Slip definitions} \label{sec:slipdef}
+In vehicle dynamics \virgolette{the slip} , short for tire slip, and the slip angle give a measure of the relative motion between the tire and the surface it is moving on.
+This section introduces the definitions used throughout this dissertation and describes the relevant tire kinematics, illustrated in figure \ref{fig:tirekinematics}. All velocity and force vectors considered in this section are two-dimensional and defined parallel to the plane containing the tire contact patch.\\
+The frame of reference, as indicated, is centered in the contact patch: the $x$ axis is positive in the direction of rolling (forward) while $y$ is parallel to the wheel axis and positive to the right, as prescribed in \citep{SAEj670e}. It follows that the angular velocity should be negative for a wheel rolling towards the positive $x$ direction: this is disregarded and instead the angular velocity is defined as a positive scalar for positive wheel speed.
+
+\figura{pix/slipdefsven.jpg}{width=\textwidth}{Kinematics of a rolling tire during combined braking and cornering. Scale of force vectors assumes isotropic tire behaviour.}{fig:tirekinematics}
+
+Given the wheel \emph{travel speed} $\bar{v}=(v_x , v_y)$ the \emph{slip angle} $\alpha$ quantifies its deviation from the wheel orientation ($y=0$) as
+\begin{equation}\label{eqn:slipalfa}
+tan(\alpha) = {v_y \over v_x}
+\end{equation}
+
+The circumferential velocity of the wheel is
+
+\begin{equation}\label{eqn:VcOmegaRe}
+\bar{v}_c=\omega R_e
+\end{equation}
+
+The \emph{effective} rolling-radius $R_e$ is defined by the ratio
+
+\begin{equation}\label{eqn:ReVxSuOmega0}
+R_e = {v_x}/{\omega_0}
+\end{equation} where $\omega_0$ is the angular velocity of the equivalent free-rolling wheel\footnote{A \emph{free-rolling wheel} rolls without slipping, with its centre travelling at the same speed as the tangential velocity of all points on its circumference. In this case, the speed is $v_x$. This may sound like a circular definition for the effective radius: refer to page \pageref{sec:parameasures} (see fig.\ref{fig:effradius}) where the method of calculating $R_e$ is explained.???}.\\
+
+The \emph{slip velocity} $\bar{v}_s$ describes the relative motion of the tire to the \virgolette{oncoming} road surface
+\begin{equation}\label{eqn:slipvel}
+\bar{v}_s = (v_x - v_c , v_y)
+\end{equation}
+and its direction in the wheel frame of reference is denoted by the \emph{slip velocity angle}
+\begin{equation}\label{eqn:slipvelbeta}
+tan(\beta) = {v_sy \over v_sx}
+\end{equation}
+
+
+Finally, the \emph{tire slip} is defined as the slip velocity normalised with a reference velocity. The following definitions use different references, but it should be noted that in all three cases the resulting slips are collinear with the slip velocity:
+\begin{equation}\label{eqn:slips}
+\bar{\sigma} = (\sigma_x , \sigma_y) = {\bar{v}_s \over v_c}; \qquad \bar{\kappa} = (\kappa_x , \kappa_y) = {\bar{v}_s \over v_x};
+\qquad \bar{s} = (s_x , s_y) = {\bar{v}_s \over v};
+\end{equation}
+It is general practice to describe tire forces as functions of one or the other definition of slip, rather than the slip velocity itself: this implies the assumption that slip forces are independent from the slip velocity magnitude $v_s$. However at least the sliding friction is indeed velocity dependent and disregarding this limits the validity of a model, giving rise to scaling problems which have been tackled in different ways, discussed in countless works such as \citep{sven09} and summarised in the next section.
+
+The same convention is followed throughout this work and results are presented, according to ISO and SAE standards\nocite{iso91,sae}\footnote{[SAE Recommended Practice J670e, 1976];[ISO8855, 1991]}, using the \virgolette{forward velocity slip} to represent longitudinal slip the form
+\begin{equation}\label{eqn:lambda}
+\lambda = 100\kappa_x [ \% ]
+\end{equation} and the slip angle $\alpha \: [deg]$ for lateral slip.
+
+The slip definitions as presented in \req{eqn:slips} ensure sign consistency between the different slips, and are such that the force generated always has the opposite sign to the slip. Thus braking corresponds to a positive slip generating a negative force, and steering right (negative $\alpha$) generates a positive lateral force (see figure \ref{fig:magicformula}). Besides, it should be clear that although the signs are consistent, the limit values at the ends of the slip range are different for different definitions: for example the two longitudinal slips used in this work assume the following values 
+\begin{center}
+\texttt{
+\begin{tabular}{cccc} \label{tab:slipranges}
+       &   WHEEL LOCK       &   ROLLING   & WHEEL SPINNING\\
+SLIP   & $\lim_{v_c \to 0}$ & $v_c = v_x$ & $\lim_{v_x \to 0}$\\
+\hline
+$\lambda$& 1					& 0			  & $-\inf$ \\
+$\sigma_x$& $\inf$				& 0			  & -1\\
+\end{tabular}}
+\end{center}
+It is therefore clear that $\lambda$ should the slip definition of choice to represent braking slip.\\
+Conversion between the different slip definitions is also straightforward
+\begin{center} \begin{tabular}{rcccc}
+$\bar{\kappa}$ &=& $(\lambda , tan(\alpha))$ &=& ${\bar{\sigma} \over 1 + \sigma_x}$\\
+ & & & & \\
+$\bar{\sigma}$ &=& ${(\lambda , tan(\alpha)) \over (1 - \lambda)}$ &=& ${\bar{\kappa} \over 1 - \kappa_x}$\\
+\end{tabular} \end{center}
+
+
+\section{Choice of a suitable Tire Model}
+Models aiming to predict tire behaviour have been developed since as early as the 1940s in the automotive and aircraft industry and road safety bureaus in several countries \citep{compare74}.
+These range from the purely analytical approaches used in the early days to the fully empirical \virgolette{Magic Formula} , first presented by H.B. Pacejka in \citep{pacejka87} and currently used in most commercial applications.
+
+\subsection*{Empirical and Analytical tire models}
+Empirical methods yield the most accurate results across a wider range of slip values as demonstrated in \citep{wong} \citep{sven09}. However, they require a significant amount of experimental data to cover the intended validity envelope, in order to determine a large number of tire specific parameters by curve fitting techniques. Their governing equations are often publicly available, but have little or no physical meaning, as is the case for the aforementioned Magic Formula, presented in \citep{pacejka2002}. The method alone is good for nothing without appropriate calibration data, whose acquisition requires sophisticated, purpose built equipment, and is therefore extremely costly and time consuming.\\
+They are most popular with automotive and aircraft companies, generally interested in modelling as accurately as possible just one specific tire, e.g. during the design stage of the suspension system of a specific vehicle or to evaluate the performance of an advanced stability control loop.
+
+On the other hand, analytical methods are based on simplifying assumptions about the nature of the system and require the knowledge of a limited number of parameters (such as friction coefficients) which are easily measured directly, or even estimated in a worst case scenario. Simple algebra is then used to derive expressions which maintain a clear relationship with the physics they represent.
+The various assumptions made necessary by the complexity of the dynamics under examination mean that results are not always reliable. For example, as already mentioned in relation to \req{eqn:slips} , due to the increasing relevance of sliding friction forces, the braking force at high longitudinal slip and high speed is largely overestimated as a consequence of sliding friction being generally assumed speed-independent.
+Transient time effects are also difficult to model without complicating the equations ???
+
+Semi empirical models generally derive from an attempt to correct an analytical model to better depict the real behaviour of tires in one or another aspect. Again, they often introduce scaling coefficients and coupling functions that serve the purpose but have no physical significance, and require experimental data for calibration.
+
+The choice of a suitable model is then, first of all, dictated by the availability and type of tire data, and secondly a matter of balancing the quality of the results with the complexity of the model, based on the specific purpose of the analysis.\\
+As mentioned before, the tire specific calibration data required by the most versatile empirical methods is hard to obtain, and those who invested time and resources to possess it are not keen to share it.
+Unfortunately, the circumstances in which this work was carried out meant it was impossible to directly acquire even the most basic of experimental data, which had to be estimated or deduced from literature.
+It therefore makes little sense to take empirical or semi-empirical approaches with insufficient information, and these are not considered a viable choice for this work.
+
+\subsection*{Comparison of analytical models}
+Analytical models are compared (table \ref{tab:analyticap}) based on the different assumptions on which they are constructed, the reliability of their predictions for the conditions in which they are likely to be applied, and overall complexity.
+
+The considerable simplification, adopted by many of the models listed in ???, of assuming the tire carcass walls to be stiff does not cause too much trouble in modelling the non-steering wheels of the main landing gear, as it is shown that results for braking forces (i.e. pure longitudinal slip) are not significantly affected.
+However, the tire carcass definition has a remarkable impact on the accuracy of results from analytical models regarding transient time effects and lateral slip forces in general.
+While it can be reasonably assumed that the main landing gear will not experience very high slip angles, the nose wheel is involved in the high lateral slip manoeuvres which constitute its main function of steering the aircraft. For this reason it is important to somehow factor in the tire carcass flexibility in the lateral direction (where it is most relevant) to the best of what is allowed by the tire data available.
+
+The assumption that the normal pressure distribution across the contact patch can be described by a parabolic function is not far fetched and has been proven to yield reasonably accurate results. The increased precision that can be achieved with a more realistic pressure distribution is generally not significant enough to justify the effort of obtaining experimental data and/or the increase in model complexity.
+
+\section{The Brush Model} \label{sec:brush}
+The brush model is a well-known fully analytical approach to tire modelling. Its popularity peaked in the 1960s and 1970s before the advent of empirical methods, and it is at least referred to in most of the works mentioned in this study.
+Its importance is still widely recognised for the direct and \virgolette{educational} way in which it describes the physics behind tire behaviour, as testified by the detailed explanation that the most influential authors in the field still dedicate to it in their textbooks, such as \citep{wong01} and \citep{pacejka02}.
+
+A thorough validation study was recently carried out by \citep{sven09} highlighting how the results from a properly set up brush model can rival the latest magic formula in coherence with experimental data up to the point of \emph{full sliding} (pages \pageref{patch:regions}) corresponding to the peak tire force. After this point divergence occurs since the brush model in its standard form does not include velocity dependency of friction.
+
+In this section the stiff carcass hypothesis is first used to introduce the basic assumptions of the brush model, explaining the relation between the slip and tire forces and moments. The effects of camber are then considered, and finally modelling of carcass flexibility is examined in relation to the potential benefits in terms of dynamic simulation performance.
+
+\subsection{Basics}
+The Brush Model gets its name from the partitioning of the tire tread on which it is based.
+It assumes that the forces in the contact patch are caused by elastic deformation of the volume of rubber between the \emph{rigid} tire carcass and the ground, which is \virgolette{sliced} perpendicularly to the rolling direction into infinitesimal \emph{bristle} elements.
+Each bristle extends laterally across the full width of the contact patch as shown in figure \ref{fig:brushbase}, and is free to deform independently in the longitudinal and lateral directions.
+
+\figura{pix/brushbase.jpg}{width=12cm}{Deformation of tire tread according to the brush model. Elements of infinitesimal thickness in the $x$-direction, frame of reference is in accordance with figure \ref{fig:tirekinematics}. The contact patch has half length $a$ and $x_s$ is the longitudinal coordinate that marks the transition from adhesion to sliding. (Top: side view; Bottom: top view)}{fig:brushbase}
+
+The Brush Model further assumes that the contact patch can be divided into two distinct regions:\label{patch:regions}
+\begin{description}
+\item[Adhesive] region where tread elements undergo elastic deformation as they travel away from the leading edge into the contact patch: the elastic force is balanced by static friction so that each bristle is pinned between the carcass and the ground surface;
+\item[Sliding] region where the ever increasing elastic force finally exceeds the static friction, and bristle elements start sliding back to their original shape: the sliding friction force opposing their motion relative to the ground surface is transmitted to the tire carcass until they reach the rear edge of the contact patch.
+\end{description}
+
+Following the approach of \citep{nikravesh} these concepts can be applied to compute the forces for combined slip, as explained in the following sections.
+
+\subsection*{Forces in the Adhesive region} \label{ssec:adhesiveforces}
+Assume that the specific bristle element attached to the carcass at position $x$ (see Figure \ref{fig:brushbase}) belongs to the adhesive region of the contact patch. Assume all velocities $v_x$ , $v_y$ and $v_c$ to be constant over the integration interval $[0,t_c(x)]$.
+It follows that the bristle can only be in contact with the road at the point described by
+
+\eq{eqn:ades1}{
+\begin{array}{rcrcl}
+x_r(x)  &=& a &\displaystyle -\int_{0}^{t_c(x)} & v_x \de{t} \\
+y_r(x)  &=&   &\displaystyle \int_{0}^{t_c(x)} & v_y \de{t} \\
+\end{array}
+}
+where $t_c(x)$ is the time elapsed since the bristle entered in contact with the road at $\bar{x_r}=(a,0)$.
+The deformation is then
+\eq{eqn:ades2}{
+\begin{array}{rcl}
+\delta_{x}(x)  &=& x_r(x) - x \\
+\delta_{y}(x)  &=& y_r(x) \\
+\end{array}
+}
+Since $x$ is the position on the carcass, it moves at speed $v_c$ so that $t_c(x) = (a-x)/v_c$, which in combination with \req{eqn:ades1} gives the displacements as
+\eq{eqn:ades3}{
+\begin{array}{rcccl}
+\delta_{x}(x)  &=& \displaystyle- \frac{v_x - v_c}{v_c}(a-x) &=& -\sigma_x (a-x) \\
+\delta_{y}(x)  &=& \displaystyle- \frac{v_y}{v_c}(a-x) &=& -\sigma_y (a-x) \\
+\end{array}
+}
+where the right hand side equality uses the slip definition given in \ref{eqn:slips}.
+The assumption of a stiff carcass \label{stifcarcass} means that all deformations in the tire body occur exclusively within the thickness of the tread, which implies that $\bar{\delta} \equiv \bar{\delta_{b}}$ the \emph{bristle} displacement, so that that bristle deformation accounts for the whole displacement. The assumption of linear elasticity then leads to an expression for the force acting on the bristle:
+\eq{eqn:adesDF}{
+\begin{array}{rcl}
+\de{F_{ax}}(x)  &=& -c_{px} \de{x} \delta_{xb}(x)\\
+\de{F_{ay}}(x)  &=& -c_{py} \de{x} \delta_{yb}(x)\\
+\end{array}
+}
+with $c_{px}$ and $c_{py}$ the tread longitudinal and lateral stiffness per unit length (see \ref{sec:parameasures}).
+%???relax to slow vchange
+Substituting for $\bar{\delta_b}$ and integrating \req{eqn:adesDF} over the adhesive region the total elastic tire force is found to be
+\eq{eqn:adesF}{
+\begin{array}{rcl}
+F_{ax} = \displaystyle \int_{x_s}^{a} \, \de{F_{ax}}(x)  &=& -c_{px} \sigma_x \int_{x_s}^{a} \, (a-x) \de{x}\\
+F_{ay} = \displaystyle \int_{x_s}^{a} \, \de{F_{ay}}(x)  &=& -c_{py} \sigma_y \int_{x_s}^{a} \, (a-x) \de{x}\\
+\end{array}
+}
+which shows that to compute the total value the size of the adhesive region, delimited by $x_s$ must be known.
+
+\subsubsection*{Size of the adhesion region}
+The break-away point where the tread elements begin sliding is determined by the largest force that can be carried by static friction at the tire-road interface.
+Friction is considered anisotropic, with $\mu_{sx}$ and $\mu_{sy}$ the friction coefficients in the two directions. %???
+Considering the infinitesimal bristle at position $x$, the concept of \emph{available} static friction force can be described with the elliptic constraint
+
+\eq{eqn:elliptic}{\left(\frac{dF_{ax}(x)}{dF_z(x) \mu_{sx}}\right)^2 + \left(\frac{dF_{ay}(x)}{dF_z(x) \mu_{sy}}\right)^2 \leq 1}
+
+illustrated in figure \ref{fig:elliptic}.
+\figura{pix/fric_ellipse.jpg}{width=8cm}{Illustration of the static friction constraint for anisotropic rubber characteristics}{fig:elliptic}
+
+As a result the magnitude of the maximum force depends on the direction of slip, although in general the direction of $d\bar{F}(x)$ and $\bar{\sigma}$ is only equal if $c_{px}/c_{py}=\mu_{sx}/\mu_{sy}$ while for isotropic friction coefficients only, the elliptic constraint reduces to the simple condition that the vector sum of forces in the $x$ and $y$ directions do not exceed the static friction.
+
+By combining with \req{eqn:ades3} and \req{eqn:adesDF} the friction constraint becomes
+
+\eq{eqn:elliptic2}{\sqrt{\left(\frac{c_{px} \sigma_x}{\mu_{sx}}\right)^2 + \left(\frac{c_{py} \sigma_y}{\mu_{sy}}\right)^2}(a-x) \leq q_z(x)}
+
+where $q_z(x)$ is the pressure distribution such that $dF_z(x)=q_z(x)dx$. A common simplification\footnote{proposed for example in \citep{compare74} and evidently not far from reality as shown in \citep{nhtsa}, chapters 5, 6 and 7. ???} is to describe the pressure distribution as a symmetric parabolic function of position within the contact patch
+\eq{eqn:presdist}{q_z(x)=\frac{3F_z}{4a}(1-(\frac{x}{a})^2)}
+so that $dF_z = 0$ at the extremes $x=\pm a$.
+It follows that the position $x_s$ of the break-away point can be found by setting $x=x_s$ and solving \req{eqn:elliptic2} for equality, obtaining
+
+\eq{eqn:elliptic3}{\sqrt{\left(\frac{c_{px} \sigma_x}{\mu_{sx}}\right)^2 + \left(\frac{c_{py} \sigma_y}{\mu_{sy}}\right)^2}(a-x_s) = \frac{3F_z}{4a^3}(a-x_s)(a+x_s)}
+
+which gives the desired solution
+
+\eq{eqn:xs}{ x_s(\sigma_x , \sigma_y)=\frac{4a^3}{3F_z}\sqrt{\left(\frac{c_{px} \sigma_x}{\mu_{sx}}\right)^2 + \left(\frac{c_{py} \sigma_y}{\mu_{sy}}\right)^2}-a}
+with the limitation that $x_s \in [-a,a]$.
+In the case of \emph{pure} slip, i.e. when either $\sigma_x$ or $\sigma_y$ is zero, full sliding ($x_s = a$) occurs at the \emph{limit} slips thus defined as
+
+\eq{eqn:limitslips}{\sigma^\circ_x = \frac{3F_z \mu_{sx}}{2a^2c_{px}} \qquad \qquad \sigma^\circ_y = \frac{3F_z \mu_{sy}}{2a^2c_{py}}}
+
+In order to considerably simplify notation, the normalised slip parameter $\Psi(\sigma_x,\sigma_y)$ can now be introduced, defined as
+
+\eq{eqn:PSI}{\Psi(\sigma_x,\sigma_y) = \sqrt{\left(\frac{\sigma_x}{\sigma^\circ_x}\right)^2 + \left(\frac{\sigma_y}{\sigma^\circ_y}\right)^2}}
+
+allowing to rewrite \req{eqn:xs} as
+
+\eq{eqn:xsPsi}{x_s(\sigma_x,\sigma_y) = (2\Psi(\sigma_x,\sigma_y) - 1)a}
+
+Partial sliding occurs for values of $\Psi(\sigma_x,\sigma_y)$ smaller than unity. For $\Psi \geq 1$ the contact patch is fully sliding and none of the tread elements are in static contact with the road: the adhesion forces become $F_{ax} = F_{ay} = 0$. 
+
+\subsubsection*{Adhesion Force}
+Once the size of the adhesive region is known, it is possible to solve the integrals in \req{eqn:adesF} which yield the total static forces
+\eq{eqn:adesFpsi}{
+\begin{array}{c}
+F_{ax} = -2a^2c_{px}\sigma_x \, (1-\Psi(\sigma_x,\sigma_y))^2\\
+ \\
+F_{ay} = -2a^2c_{py}\sigma_y \, (1-\Psi(\sigma_x,\sigma_y))^2\\
+\end{array}
+}
+It should be noted that it follows from \req{eqn:adesDF} that although combined slips do affect the \emph{size} of the adhesive region, the force per unit length arising from tread deformation is independent of slip direction:
+\eq{eqn:dfdx}{
+\begin{array}{c}
+\displaystyle \frac{F_{ax}(\sigma_x , x)}{dx} = -c_{px}\sigma_x \, (a-x)\\
+ \\
+\displaystyle \frac{F_{ay}(\sigma_y , x)}{dx} = -c_{py}\sigma_y \, (a-x)\\
+\end{array}
+}
+The elastic forces grow linearly with slope $c_{p i} \sigma_i$ as the bristle elements travel into the adhesion region, until they exceed the maximum static friction determined by the local normal reaction and cause the tread to start sliding: considering pure longitudinal slip, this is illustrated in Figure \ref{fig:sliparabola}.
+
+\figura{pix/sliparabola.jpg}{width=12cm}{Illustration of longitudinal force generation at pure longitudinal slip.
+The area hatched with vertical lines under the line with gradient $\sigma_x c_{px}$ is the total adhesive force, culminating in $x_s$ where the elastic force exceeds the maximum static friction as determined by $\mu_{sx}$ and the pressure distribution $q_z(x)$.
+The sliding force corresponds to the horizontally striped area under the dashed parabola, representing the same pressure distribution multiplied by the (lower) dynamic friction coefficient $\mu_{kx}$.
+The limit case of full sliding at pure slip is also shown: for slips $\sigma_x > \sigma ^{\circ}_x$ full sliding occurs and there is no intersection between the elastic and static friction curves.}{fig:sliparabola}
+
+\subsection*{Forces in the sliding region}
+The total normal force acting on the sliding region is obtained from the definitions \req{eqn:presdist} \req{eqn:PSI} as
+
+\eq{eqn:totslidingFz}{F_{sz} = \int_{-a}^{x_s(\sigma_x,\sigma_y)} \: q_z(x) \de{x} = F_z \, \Psi^2(\sigma_x,\sigma_y)(3-2\Psi(\sigma_x,\sigma_y))}
+
+At this point it is useful to make the common assumption of \emph{isotropic} sliding friction (see \ref{compare74}) so that $\mu_{kx} = \mu_{kx} = \mu_{k}$: the sliding friction force is then collinear with the slip velocity and has magnitude $F_{sz(\sigma_x,\sigma_y)\mu_k}$, and its components are given by the angle $\beta$ as defined in \ref{fig:tirekinematics}
+\eq{eqn:slidingF}{\bar{F}_{s}(\bar{\sigma}) = -\mu_k F_{sz}(\bar{\sigma})(cos(\beta)\, ,\,sin(\beta))}
+
+\subsection{Forces at Combined Slip}
+The total tire force is given by the combination of static and sliding friction forces described by \req{eqn:adesFpsi} and \req{eqn:totslidingFz} respectively:
+\eq{eqn:totF}{
+\begin{array}{c}
+F_{x}(\bar{\sigma}) = F_{ax}(\bar{\sigma}) + F_{sx}(\bar{\sigma})\\
+ \\
+F_{y}(\bar{\sigma}) = F_{ay}(\bar{\sigma}) + F_{sy}(\bar{\sigma})\\
+\end{array}
+}
+
+From equation \req{eqn:xs} it is clear that in case of combined slip i.e. when both $\sigma_x \neq 0$ and $\sigma_y \neq 0$, the contact region shrinks (and the sliding region grows accordingly) compared to the pure slip situation represented in Figure \ref{fig:sliparabola} where $\bar{\sigma}=(\sigma_x \, , \, 0)$.
+
+\figura{pix/sliparabola2.jpg}{width=12cm}{The effect of combined slip. Compare to Figure \ref{fig:sliparabola}: the adhesive region grows smaller, while the gradient of the elastic force remains unchanged. The sliding region grows, and the hatched area under the curve now represents only the longitudinal component of the sliding force i.e. $\bar{F}_{s}(\sigma_x,0)$ for the same sliding contact surface, as opposed to the total value as in the previous case.}{fig:sliparabola2}
+
+Consider now Figure \ref{fig:sliparabola2}
+Equation \req{eqn:dfdx} proves that the slope of the adhesive force must be the same as for the pure slip case, but the break-away point is now determined by the line with gradient $c_{px} \sigma ^{\circ}_x \Psi(\sigma_x, \sigma_y)$ derived from \req{eqn:adesFpsi}, and identifies a smaller adhesive region leading to a smaller total adhesion force.
+Hence sliding occurs simultaneously in both directions as $\Psi$ approaches unity, and it should be clear already from \req{eqn:PSI} that values of $\Psi$ greater than one have no physical significance\footnote{leading to the necessity to implement limits in the code as explained in section \ref{c:SIM}}.
+
+\subsection*{Linearised Stiffness}
+The braking and cornering stiffness as described further in \ref{sec:parameasures} are the gradients of the linearised \emph{pure-slip} force curves around zero slip and can be obtained by derivation of \req{eqn:totF} which under the assumptions made so far yields
+\eq{eqn:tireStif}{
+\begin{array}{rcccl}
+ C_x   &\, = \, &\displaystyle   \left. -\frac{\delta F_{x}(\sigma_x,0)}{\delta \sigma_x} \right|_{\sigma=0}  &\, = \, & 2c_{px}a^2\\
+ \\
+ C_y   &\, = \, &\displaystyle   \left. -\frac{\delta F_{y}(\sigma_y,0)}{\delta \sigma_x} \right|_{\sigma=0}  &\, = \, & 2c_{py}a^2\\
+\end{array}
+}
+\subsection*{Self-aligning Torque}
+The self-aligning torque consists of a main part $M'_z$ due to the asymmetric distribution of the lateral force $F_y$ along the contact patch, and higher order terms due to the deformation of the tire itself, the first of which $M''_z$ will be discussed while others can safely be ignored \citep{wong01}.
+
+The torque contribution about the centre of the contact patch, generated by the tread element at position $s$ is 
+
+\eq{eqn:dtorque}{dM'_z(x) \, = \, dF_y(x) \, x}
+
+In the adhesive region $dF_y(x)$ is given by \ref{eqn:dfdx} while in the sliding region it depends linearly on the pressure distribution $q_z(x)$ defined in \req{eqn:presdist}. Integrating over the two regions separately gives
+
+\eq{eqn:m1a}{M'{az}(\bar{\sigma})=-c_{py} \int_{x_s(\bar{\sigma})}^{a} \: x(a-x) \de{x}=
+	-c_{py}\, a^3\, \sigma_y \frac{2}{3}\left(\frac{}{}1-\Psi(\bar{\sigma})\right)^2 \, \left(4\Psi(\bar{\sigma})-\frac{}{}1 \right)}
+
+\eq{eqn:m1s}{M'{az}(\bar{\sigma})=-\mu_{ky} sin(\beta) \,\int_{a}^{x_s(\bar{\sigma})} \: x \,q_z(x) \de{x}=
+	3\mu_{kx} sin(\beta)\, a\, F_z \Psi^2(\bar{\sigma})\left(\frac{}{}1-\Psi(\bar{\sigma})\right)^2}
+	
+then naturally
+\eq{eqn:m1}{M'_{z}(\bar{\sigma}) = M'_{az}(\bar{\sigma}) \, + \, M'_{sz}(\bar{\sigma})}
+
+Expressions \req{eqn:m1a} and \req{eqn:m1s} already show that clearly the self aligning torque is influenced by combined slips in the form of variations in $\Psi$, but only subsists associated with a lateral slip ($\sigma_y \neq 0$, $\beta \neq 0$).
+Under these conditions the tire is deflected laterally, and the point of action of the longitudinal force is offset from the mid plane of the wheel.
+
+This produces the same effect as a longitudinal deflection coupled with the lateral force, which is the additional torque $M''z$ mentioned earlier.
+Still assuming that the tire side walls do not deform, the contribution from each individual bristle element is given by
+\eq{eqn:m2z}{dM''_z(x) \,=\, dF_y(x)\delta_{xb}(x) \, - \, dF_x(x)\delta_{yb}(x)}
+Once again integration is performed separately over the two contact regions, obtaining the deformation $\delta_{xb}$ from \req{eqn:ades3} for the adhesive region and using the infinitesimal sliding force with \req{eqn:adesDF} in the sliding region (lengthy derivation left out here, see \ref{apx:equations}). This results in
+
+\eq{eqn:m2a}{M''_{az}(\bar{\sigma}) = \frac{4}{3} (C_x - C_y) \, a \, \sigma_x \sigma_y \left(1-\Psi(\bar{\sigma}) \right)^3}
+
+\eq{eqn:m2s}{M''_{sz}(\bar{\sigma}) = \frac{6}{5} (\frac{1}{C_x} - \frac{1}{C_y})\, \mu_{k}^2 \, a \, sin(\beta) cos(\beta) F_z^2
+				\Psi^3(\bar{\sigma})(10 - 15\Psi(\bar{\sigma}) + 6\Psi^2(\bar{\sigma}))}
+				
+The total second order alignment torque is given, as before, by the sum of \req{eqn:m2a} and \req{eqn:m2s}, although the assumption of a stiff carcass under which these were derived means that the lateral deformation is sure to be underestimated, and with it the value of the additional $M''_z$. It is also evident that considering the definition of carcass stiffness given in \req{eqn:tireStif} the second order terms disappear under the assumption of isotropic stiffness per unit length $c_p$ as it implies that $C_x = C_y$.
+
+However as discussed further in section \ref{sec:carstif} it is desirable to avoid making either of these assumptions for the present model. The total self aligning torque should therefore take into account all terms presented so far
+\eq{eqn:m2}{M_z(\bar{\sigma}) = M'(\bar{\sigma}) + M''(\bar{\sigma})}
+and the torsional self-aligning stiffness is defined like the other two as
+\eq{eqn:momstif}{ C_z = \, \left. -\frac{\delta M_{z}(\sigma_y,0)}{\delta \sigma_y} \right|_{\sigma=0}  = \, \frac{2}{3} c_{py}a^3 = C_y\frac{a}{3}}
+
+
+\subsection{Effect of Camber}
+\figura{pix/camber_old.jpg}{width=\textwidth}{Rear view of a cambered wheel.\\
+Left: the rolling radius is not uniform across the contact patch.\\
+Right: the centre of the contact patch does not fall under the centre of the wheel.}{fig:camber0}
+
+The lateral force arising from cambering the wheel can be expressed through the Brush Model.
+The effect of camber is essentially to add an offset to the lateral deformation of the tire carcass.
+When the tire is vertical, as considered so far, the projection in the contact patch of any point moving on its circumference is a straight line, while camber causes such trajectories to curve \emph{away} from the centreline on the side opposite to the tilt, as shown in Figure \ref{fig:camber1}.
+\figura{pix/camber_sven.jpg}{width=14cm}{Top view of the contact patch showing bristle deformation $\bar{\delta}$ offset by $(0,\delta_{y,cam})$}{fig:camber1}
+
+Deviation from the uncambered position is given by
+\eq{eqn:camdev}{y(x) = -sin(\gamma)(\sqrt{R^2-x^2} - \sqrt{R^2-a^2})}
+where $R$ is the \emph{average} radius (i.e. the radius at the symmetry plane, see Figure \ref{fig:camber0}) of the wheel.
+This expression leads to unmanageable equations when combined with the standard pressure distribution \req{eqn:presdist} so it is commonly approximated, for example in \citep{nikravesh} with a parabolic function similar to $q_z(x)$
+\eq{eqn:camdist}{\delta_{y,cam}(x) \, =\, -\gamma k (a^2 - x^2)}
+where $k$ is obtained from equating the integrals of \req{eqn:camdev} and \req{eqn:camdist} so that the \emph{average} camber deflection is respected in the approximation
+\eq{eqn:camkfactor}{\int_{-a}^{a} \delta_{y,cam}(x) \de{x} \, = \, \int_{-a}^{a} y(x) \de{x} \quad \Rightarrow \quad 
+					k \simeq \frac{3}{4} \frac{R-\sqrt{R^2-a^2}}{a^2}}
+which simplifies the calculations considerably. The \emph{baseline} deformation of a bristle travelling straight along the contact patch centreline in static contact with the ground is then $\delta_{y,cam}$, which for a rigid carcass can be added linearly to \req{eqn:ades3} obtaining
+\eq{eqn:camdeltas}{
+\begin{array}{rcl}
+\delta_{xb}(x)  &=& -\sigma_x \, (a-x) \\
+\delta_{yb}(x)  &=& -\sigma_y \, (a-x) + \gamma k \, (a^2 -x^2) \\
+\end{array}
+}
+
+\subsubsection*{Size of the adhesion region}
+The derivation used in section \ref{ssec:adhesiveforces} can be followed again adding the camber distribution from \req{eqn:camdist} to the lateral term in the elliptic constraint expressed in \req{eqn:elliptic2}.
+The definition of normalised slip is also extended to account for camber
+
+\eq{eqn:PSI2}{\Psi(\bar{\sigma},\gamma) = \frac{\gamma^{\circ 2}}{\gamma^{\circ 2} - \gamma^2}
+				\left(\frac{\sigma_y \gamma}{\sigma^\circ_y \gamma^\circ} + \sqrt{\left(\frac{\sigma_x}{\sigma^\circ_x}\right)^2+
+				\left(\frac{\sigma_y}{\sigma^\circ_y}\right)^2 - \left(\frac{\sigma_x \gamma}{\sigma^\circ_x \gamma^\circ}\right)^2}\right)}
+
+With the limit slips $\sigma^\circ_x$ and $\sigma^\circ_y$ as defined previously in \req{eqn:limitslips} and the limit camber angle
+\eq{eqn:limcam}{\gamma^\circ \, = \, \frac{3F_z\mu_{s}}{2C_yka}}
+the expression for the break away point location is exactly as in \req{eqn:xsPsi}
+\eq{eqn:xsPsi2}{x_s(\bar{\sigma},\gamma) = (2\Psi(\bar{\sigma},\gamma) - 1)a}
+
+As before, values of $\Psi$ larger than unity lack physical interpretation. 
+Since the camber distribution has the same form as $q_z(x)$ camber has no effect on the position of the break-away point as long as $\sigma_x = \sigma_y = 0$ (see Figure \ref{fig:sliparabolacam}) but causes $\Psi$ to suddenly jump to infinity when it crosses the limit value. 
+Another computational limit is posed by the square root in \req{eqn:PSI2} which becomes complex if the camber angle exceeds the limit value, which is to say $\gamma / \gamma^\circ > 1 \,$.
+Although as shown in \ref{apx:camber} this is not likely to happen during normal operation, measures are taken to ensure that the simulation is stable under such circumstances, as explained in Chapter \ref{c:model}.
+
+\figura{pix/sliparabolacam.jpg}{width=12cm}{Force generation due to slip and camber. It is clear that the extra deflection caused by camber anticipates sliding by a small distance but the overall force contribution (upper hatched area) is positive.}{fig:sliparabolacam}
+
+
+\subsubsection*{Forces and torque}
+As appears obvious from Figure \ref{fig:sliparabolacam} camber contributes solely to the elastic forces developed in the adhesive region, while the sliding region is affected in size but not in the manner of generating forces.
+It is possible to apply the lateral force formula derived in section \ref{ssec:adhesiveforces} with the additional camber displacement and $\Psi$ from \req{eqn:PSI2}
+\eq{eqn:faycam}{F_{ay,cam}(\bar{\sigma},\gamma) \, = \, \int_{x_s(\bar{\sigma},\gamma)}^{a} \, c_{py} \gamma k \,(a^2- x^2) \de{x} \, = \,
+										\frac{2}{3}\gamma k a C_{y} \left( \frac{}{} 2\Psi(\bar{\sigma},\gamma)^3 -3\Psi(\bar{\sigma},\gamma)^2 +1\right)}
+
+In case of pure cambering below the limit angle the lateral force is
+\eq{eqn:f0cam}{F_{0,cam}(\gamma) \, = \, C_\gamma \gamma}
+where the camber stiffness $C_y$ is defined as usual as
+\eq{camstiff}{C_\gamma \, = \, \left. \frac{\delta F_y(\bar{0},\gamma)}{\delta \gamma} \right|_{\gamma=0} \, = \, \frac{2kaC_y}{3} = \frac{F_z \mu_{sy}}{\gamma^\circ}}
+
+
+\subsection{Carcass Flexibility}
+The brush model described so far is based on the assumption of a stiff carcass.
+In reality the carcass is flexible and particularly in the lateral direction exhibits considerable deformation, which significantly affects the tire behaviour.
+
+To examine the phenomenon from a Brush Model perspective the bristles and the carcass are regarded as separate spring elements connected in series, with the two main differences that bristles are still considered independent elements while the carcass (i.e. the carcass side wall) deforms as a continuous body, and that carcass deflection $\delta_{yc,tot}$ is not limited to the contact patch.
+It is then convenient to consider the \virgolette{offset} deflection at the extremes of the contact patch, and from it define the relative carcass deflection 
+$\delta_{yc}(x)=\delta_{yc,tot}(x) - \delta_{yc,tot}(a)$ so that the total displacement of a bristle element with respect to the \emph{already shifted} carcass is
+
+\eq{eqn:carcdisp}{\delta_{y}(x) = \delta_{yb}(x) + \delta_{yc}(x)}
+
+and from the equilibrium condition between the infinitesimal spring elements
+\eq{eqn:carcforcequil}{dF_{yb}(x) \: = \: dF_{yc}(x) \: = \: dF_y(x)}
+
+Let $F'_y(\sigma_y)$ denote the total lateral force for a tire with flexible carcass.
+The deflection at position $x$ given in \ref{ssec:adhesiveforces} still holds within the adhesion zone since req{eqn:ades3} is a purely kinematic relation.
+The force acting on the bristle element at $x$ is then
+
+\eq{carcDFa}{dF'_ay(x) = c_{py}\delta{yb}(x) dx = - c_{py} (\sigma_x (a-x) + \delta_yc(x))}
+and when the element starts sliding
+\eq{carcDFs}{dF'_sy(x) = \mu_k dF_z(x)}
+%???
+According to an assumption discussed since \citep{nhtsa} and endorsed by \citep{pacejka02} (illustrated in figure \ref{fig:carcdeflect}) the carcass remains straight as long as it is held by static friction, deforming at a constant rate as it rolls \virgolette{into} the contact patch: the deflection rate depends on the lateral force.
+\figura{pix/carcdeflect.jpg}{width=12cm}{Lateral displacements in and around the contact patch. Carcass and tread deformations shown separately.}{fig:carcdeflect}
+The deflection at a given position in the adhesive region is
+\eq{eqn:dyc}{\delta_{yc}(x) = -\frac{F'_y(\sigma_y)}{C_c}(a-x)}
+where $C_c$ is related to the carcass lateral stiffness.
+
+Following the familiar procedure including \req{eqn:carcdisp} now gives the force holding the element at position $x$ in static contact with the ground, this time accounting for the flexible carcass
+\eq{carcDFdasha}{dF'_ay(x) = c_{py} \delta_{yb}(x) \, dx = -c_{py} \left(\sigma_y - \frac{F'_y(\sigma_y)}{C_c} \right)(a - x)\, dx}
+
+It is then possible to solve \req{eqn:elliptic} for $x_s$ at pure lateral slip
+\eq{eqn:xscarc}{c_{py}(\frac{F'_y(\sigma_y)}{C_c} - \sigma_y) = \frac{3\mu_{s}F_z}{4a^3} (a+x_s)}
+but it becomes evident that since the definition of $x_s$ will now contain $F'_y$, integration over the contact patch to find the total lateral force as previously done in \req{eqn:adesF} will not produce a smooth relationship.
+A solution can still be found by numerical methods and the performance of this simplified model as presented so far is assessed in chapter \ref{c:rev}.
+
+Nevertheless, important information can be obtained regarding the effect of flexible carcass on the total cornering stiffness $C'_y$ and the limit slip $\sigma'^\circ_y$. 
+Assuming the condition of full sliding at pure lateral slip i.e. $\sigma_y = \sigma'^\circ_y$, so that $x_s = a$ and $F'_y(\sigma'^\circ_y) = \mu_k F_z$, then solving \req{eqn:xscarc} for $\sigma'^\circ_y$ yields that
+
+\eq{eqn:limycarc}{\sigma'^\circ_y = F_z (\frac{3\mu_s}{2a^2\, c_{py}} + \frac{\mu_k}{C_c})}
+which compared to \req{eqn:limitslips} shows that carcass flexibility $C_c$ delays the break away point as far as lateral slip is concerned (see figure \ref{fig:flexcarisgood}). Notice that under the stiff carcass assumption $C_c \rightarrow \inf$ the extra term on the right hand side tends to zero and $\sigma'^\circ_y\rightarrow \sigma^\circ_y$.
+
+The total cornering stiffness $C'_y$ is obtained at very small slip as per definition, assuming that the entire contact patch is in static contact and adhesive forces account for the entire lateral tire force $F'_y$. Therefore
+\eq{eqn:cdash}{C'_y = \left. \frac{dF'_y(\sigma_y)}{d\sigma_y} \right|_{\sigma=0} = 
+						-\frac{d}{d\sigma_y} \left. \int_{-a}^{a}c_{py}\delta_{yb}(x)\de{x} \right|_{\sigma=0} =
+						2a^2 \, c_{py} \, (1-\frac{C'_y}{C_c})}
+whence equating the first and last expressions the cornering stiffness is found as
+\eq{eqn:cdashy}{C'_y = \frac{C_c \, 2a^2 c_p}{C_c + 2a^2 c_p}}
+with the term $c_p = c_{py} = c_{px}$ now representing the reasonable assumption that the rubber behaves isotropically, so far ignored to allow factoring in the side wall flexibility in the stiff carcass model derivation.
+
+The divergence between braking and cornering stiffness is now expressed by
+\eq{eqn:cc}{\frac{C_x C'_y}{C_x - C'_y}}
+where $C_x = 2a^2 c_p$ as before according to \req{eqn:tireStif}. The limit slip \req{eqn:limycarc} can then be obtained in terms of the \emph{measurable} stiffnesses
+\eq{eqn:limslipy2}{\sigma'^\circ_y = (\frac{2}{C_x}) + \frac{1}{C'_y}}
+
+\subsubsection*{Effect on Self-aligning Torque}
+The effect of carcass deformation is an additional torque of the same form of the second-order tread deformation torque described previously by equations \req{eqn:m2a} and \req{eqn:m2s}, to which it can be linearly added\footnote{as a matter of fact the second-order carcass deformation torque is much larger than the tread related term. At the present level of accuracy it would not be wrong to consider the former the only relevant additional torque (see \ref{apx:demos})}. It takes the form
+\eq{eqn:carcaddtorque}{M''_{zc}(\bar{\sigma},\gamma) = F_x(\bar{\sigma},\gamma) \, (\bar{\sigma},\gamma) \, (\frac{1}{C_{cx}}-\frac{1}{C_{cy}})}
+where the stiffnesses are those of the carcass \emph{alone} and can be calculated from \req{eqn:cardyn6} (derived in the next section).
+
+\subsubsection{Effect on tire dynamics}
+As mentioned, flexibility of the tire carcass considerably affects the time transient response of the tire, particularly in the lateral direction where the real structure deviates most significantly from the assumption of rigidity. The following formulation is based on derivations presented in \citep{nhtsa} and \citep{pacejka02}, but adapted for continuity to use the $\sigma$-slips adopted so far, and further simplified by the reasonable assumption that the carcass is indeed rigid in the longitudinal direction for the reasons presented in \ref{tire:req}.
+The main point is that due to carcass flexibility the slips \virgolette{measured} at the rim generally differ from each other, by an amount given by the rate of deformation of the carcass:
+\eq{eqn:cardyn1}{\sigma'_x = \sigma_x \qquad \qquad \sigma'_y = \sigma_y + \frac{\delta_{cy}}{v_c}}
+where the primed variables refer once again to (flexible) carcass values, as opposed to the values at the rim (normal variables).
+The left column of \req{eqn:cardyn1} simply confirms the assumption of carcass stiffness in the longitudinal direction, and will be left out for brevity from this derivation.
+
+Assuming the carcass to behave like a linear spring-damper in the lateral direction gives
+\eq{eqn:cardyn2}{F'_y = C_{cy}\delta_{cy} + D_{cy}\dot{\delta_{cy}}}
+where $C_{cy}$ is the carcass lateral stiffness, $D_{cy}$ its damping coefficient and all other symbols have their usual meaning explained in the previous sections.
+
+From \req{eqn:cardyn1} and the time derivative of \req{eqn:cardyn2} the difference between rim and contact patch slip is given as
+
+\eq{cardyn3}{\sigma'_y - \sigma_y = \frac{\dot{\delta_{cy}}}{v_c} = \frac{\dot{F'_y}}{C_{cy}v_c} - D_{cy}\frac{\ddot{\delta_{cy}}}{v_c}}
+
+Substituting for $\ddot{\delta_{cy}} / v_c $ from the time derivative of \req{eqn:cardyn1} ($v_c$ assumed constant) and partial time derivatives of the lateral force the plain differential equation is readily obtained:
+
+\eq{eqn:cardyn4}{\sigma'_y - \sigma_y =
+	\frac{1}{C_{cy}v_c} \left[\difp{F'_y}{\sigma'_x} + \left(\dif{F'_y}{\sigma'_y}-D_{cy}v_c\right)\dot{\sigma'_y} + \difp{F'_y}{\gamma'_x}\right] 
+	+ D_{cy}\dot{\sigma_y}}
+
+from which emerges that the system is potentially unstable in slip regions where the slip-force curve has positive slope if the damping is not sufficient. In \citep{pacejka02} it is suggested to simply force $\delta F'_y / \delta \sigma'_y \leq 0$ but as shown in \ref{apx:carcdamp} it was found that the damping value such that $D_{cy}v_{c,min} > \mathrm{sup}(\delta F'_y / \delta \sigma'_y)\,$,where $v_{c,min}$ is the wheel speed threshold \footnote{made necessary for simulation purposes, see \ref{model:wheels}} is well within reasonable values.
+It follows that the system is well posed for all $v_c \geq v_{c,min}$ using physically meaningful parameter. %???
+
+\subsubsection*{Relaxation Length} \label{introrelax}
+If \req{eqn:cardyn4} is re-written assuming small pure slip and neglecting damping and camber, it gives the simplified relation
+\eq{eqn:cardyn4simp}{\sigma'_y - \sigma_y = \frac{1}{C_{cy} v_c} \difp{F'_y}{\sigma'_y} = 
+											\frac{1}{v_c} \left(\frac{-C_y}{C_{cy}}\right) \dot{\sigma'_y}}
+
+Compare this with the definition of relaxation length $\sigma^* \,$ (see \ref{sec:relax}), which relates the slip at rim and tread as
+\eq{eqn:cardyn5}{\frac{\sigma^*}{v_c} \, \dot{\sigma'_y} \sigma'_y \, = \, \sigma_y }
+and it appears evident that the relaxation length is related to the stiffnesses as
+\eq{eqn:cardyn6}{\sigma^*_x = \frac{C_x}{C_cx} \qquad \qquad \sigma^*_y = \frac{C_y}{C_cy}}
+where the equation for the $x$-direction was merely included to point out that under the assumption of longitudinally stiff carcass $C_cx \rightarrow \inf$ and $\sigma^*_x = 0$.
+
+It should also be noted that \req{eqn:cardyn5} is not a linear time-invariant system as it depends on $v_c$.
+The relaxation length differential relationship is in fact space invariant, as becomes evident by changing the independent variable to the rolling distance $s$ and operating the substitution
+$$
+\dif{\sigma'_y}{t} = \dif{\sigma'_y}{s} \dif{s}{t} \qquad \mathrm{and} \qquad \dif{s}{t} = v_c
+$$
+obtaining a much simpler equation relating the dynamics of wheel rim and tread
+\eq{eqn:cardyn7}{\dif{\sigma'_y}{s} \, = \, \frac{1}{\sigma^*_y}(\sigma_y - \sigma'_y)}
+which serves the purpose of illustrating the concept of relaxation length in a more intuitive way, but should not be used in the model for the stability reasons previously stated.
+
+
+\subsection{Conclusions}
+An exhaustive derivation is presented in the previous sections, highlighting the characteristics of the Brush Model tailored to the purpose of this study. The main requirements described in the introduction to this chapter (page \pageref{tireintro}) are met.
+??? more later ???
+
+The main advantage of the model just described is the very small number of parameters it requires: nevertheless only very few of them can be determined with certainty at present. The following sections illustrate, often with reference to the derivation just carried out, the methods used to address the issue.
+
+\section{Tire Parameters} \label{sec:parameasures}
+The brush model described in the previous section requires a number of tire parameters to be known. Most of them only concern the static behaviour of the tire, and can be measured with a relatively simple test rig (???maybe more about this, not fundamental).
+
+The following section describes the significance of such parameters, and illustrates along with standard measurement procedures, the assumptions that were made in an attempt to obtain reasonably accurate estimates proceeding from actual tire geometry and physically meaningful known tire characteristics.
+
+For load-dependent characteristics a specific set of curves is generated for each tire, which can change quite considerably depending on the assumptions made. Figures \ref{fig:normalrxn} and \ref{fig:patcharea} in the Results chapter show examples of such curves.
+
+It is well understood that despite the best efforts some of the values used are probably inaccurate to different degrees, and the urgency of validating the model cannot be stressed enough.
+For this reason, as explained in detail in Chapter \ref{c:model}, the main characteristic of the model is the possibility to readily access any of the properties in question and to replace them with more accurate values as soon as they become available.
+
+Some parameters could however be validated or obtained from authoritative sources: validation checks are presented in the Results and Validation chapter from page \pageref{c:rev}, and a summary of all parameters and their current degree of reliability is presented at the end of this section.
+Detailed calculations are presented where necessary in Appendix \ref{apx:param}.
+
+\subsection{Normal Reaction and Contact Patch Area} \label{ssec:normrxn}
+Tire loading is of fundamental importance to any tire model, as it influences directly the magnitude of all other forces in play: hence the total normal reaction the tire can produce as it is compressed must be known before any tire model can be applied.
+Furthermore, the area of the contact patch between tire and ground plays an important role in the derivation of analytical models, and appears in the explicit form of the force-slip equations.
+The two are strictly correlated and are both nonlinear functions of tire compression. They depend largely on the tire initial shape and elastic properties, as well as on the inflation pressure.
+They can both be measured on a vertical press test rig by correlating the vertical displacement of the wheel hub to an appropriate force reading, and to the size of the tire \virgolette{footprint} on the flat test bed respectively. ??? 
+For radial air-filled pneumatics, the carcass stiffness and viscosity contribute very little to the overall rigidity of the tire, compared to the effects of high internal pressure in response to a reduction in volume.
+
+Since the real correlation between normal reaction (or contact area) and the loaded rolling radius $R_\ell$ is not available as empirical data during the development of the present model, the following assumptions are made and used to generate curves for the main deformation-dependent tire parameters$F_z(R_\ell)$ and $a(R_\ell)$:
+\begin{itemize}
+\item The undeformed shape of the tire is approximated by a simple rotation solid, identified by a number of parameters \footnote{provided by the manufacturer in \citep{GYtirespecs}} shown in Figure \ref{fig:tireshape} and Table \ref{tab:tiredim}. Refer to Appendix \ref{apx:tireshape} for further details.
+\figura{piczero.jpg}{}{tire shape parameters explained}{fig:tireshape}
+
+\tabella{rccccc}{tab:tiredim}{Tire Measurements and Inflation Pressure}{
+	 & $R_{rim}$\mm& $R_{wall}$\mm& $R_{max}$\mm & $W_0$\mm & $p_0$\Pa \\
+\hline
+NOSE &   64        &     160      &     180      &   116    &  606739  \\
+MAIN &   76        &     172      &     193      &   150    &  468843  \\
+\hline
+}
+
+\item The tire is compressed as it encounters the runway surface: the contact patch is modelled as a planar cut (perpendicular to the rolling radius) which simply subtracts a portion of the volume from the original tire shape (see Figure \ref{fig:tirecut}). Other deformations, e.g. sagging of the side walls, are neglected.
+
+\item The tire volumetric compression is considered isothermal in order to use the relation???
+the normal reaction is then calculated simply as the internal tire pressure times the area of the contact patch
+
+\item Viscous effects are limited to the tire carcass and are modelled by a separate function of the compression rate $\dot{R_\ell}$
+
+\end{itemize}
+\subsubsection*{Tire geometry}
+The first step is therefore to model the deformations occurring in the tire as a function of the loaded radius.
+The tire volume is obtained by integrating the area of concentric \virgolette{drum} shapes along the radius of the tire from the rim to the track. Each element at a distance $r$ from the wheel hub has a circumference of $2\pi r$ and the same width as the local width of the tire. When the rolling radius is smaller than the external radius of the undeformed tire, some of these shapes intersect the ground plane (see fig.\ref{fig:tirecut}) and their contribution to the volume integral becomes a fraction of the original value: it is easy to relate the change in surface area of each element to the ratio of its undeformed and loaded radii using the \virgolette{Cut Circle} formula of which proof is given in Appendix \ref{apx:cutcircle}. 
+
+\figura{piczero.jpg}{}{Integration of tire volume}{fig:tirecut}
+
+With reference to figures \ref{fig:tireshape} and \ref{fig:tirecut}, it is evident that the total volume of the tire for a given loaded radius $R_\ell$
+is given by the integral
+\begin{equation}\label{eqn:vol1}
+V(R_\ell)\: = \:\int_{R_{rim}}^{R_{ext}} w(r)\, \rho(r,R_\ell) \, r\, \mathrm{d}r
+\end{equation}
+where $w$ is the width of the element at radius $r$ and $\rho$ is the centre angle identifying how much of a given section is in contact with the ground. 
+
+Each of these factors can be substituted by its explicit expression in terms of $r$ and $R_\ell$ presented in Appendix \ref{apx:tireshape}.
+Sagging of the side walls is shown to have a negligible influence on the changes in volume.
+
+\subsubsection*{Tire Compression}
+The internal volume corresponding to a given loaded radius can then be compared to the original volume of the tire. From the assumption that air inside the tire behaves like a perfect gas undergoing an isothermal compression, the volume ratio can be used to calculate the new internal pressure of the loaded tire:
+\begin{equation} \label{eqn:tirepres}
+p(R_\ell) = \frac{p_0 V_0}{V(R_\ell)}
+\end{equation}
+where the subscript zero indicates the initial volume and inflation pressure as specified in table \ref{tab:tiredim}. %???get the volume!
+
+The normal reaction should then be calculated simply as the product of internal pressure and contact patch area, however the assumptions made so far about the manner of tire compression neglect the carcass bending rigidity entirely, and were shown to greatly overestimate $\delta a / \delta R_\ell$ in the vicinity of $R_\ell = R_{ext}$ compared to experimental data presented in various publications.
+
+The normal reaction curve is then obtained from a fit of known load/deformation points obtained either from tire specifications\footnote{rating and bottoming loads from \citep{GYtirespecs}} or from direct measurement and presented in \ref{apx:param} in tables \ref{tab:main_loads} and \ref{tab:nose_loads}.
+The vertical stiffness curve then is as good a representation of the real behaviour as could be validated, and is still assumed to be entirely due to inflation pressure and compression since the tire's own stiffness, as the \virgolette{Flat Tire Bottoming Load} quoted in \cite{GYtires} suggests, is negligible (\citep{nhtsa}).
+Consequently, the volume associated to each loading condition can still be used to determine the pressure as in \req{eqn:tirepres}, allowing to size the contact patch to satisfy the assumption that $F_z(R_\ell) = p(R_\ell) * A(R_\ell)$ where $A$ is the area of the contact patch, so that
+\eq{eqn:patchalf}{a(R_\ell)=\left.\frac{F_z}{p}\right|_(R_\ell) \frac{1}{w_0}}
+where the use of $w_0$ denotes that the contact patch half length $a$ is calculated as the \emph{equivalent} length for constant tread width in accordance with \req(eqn:stif).
+
+This method is proven to give good results up to about 120\% of the rating load, above which the deformation of the tire side walls becomes so severe that the width of tire in contact with the ground exceeds the tread width, causing \req{eqn:patchalf} to yield unreasonable values.
+Given the expected normal operational tire loading of about 50\% rating load, it is deemed acceptable to limit the values of $a$ according to simple geometry considerations in order to avoid numerical errors in the simulation.
+
+\subsection{Effective Radius}
+The \emph{effective} rolling-radius $R_e$ is defined as the ratio between the forward velocity of the wheel hub and the angular velocity of the equivalent \emph{free rolling wheel} as mentioned in \ref{sec:slipdef} equation \req{eqn:ReVxSuOmega0}. 
+The definition of free rolling \emph{without slipping} however refers to a rigid body such as the disc in figure \ref{fig:freerolling} which satisfies condition \req{eqn:freerolling} of proceeding, in a static frame of reference, at a linear speed equal to the tangential velocity of a point on its rim with respect to the centre.
+
+\figura{piczero.jpg}{}{The concept of free rolling, as opposed to positive (left) and negative slip (right)}{fig:freerolling}
+\eq{eqn:freerolling}{v_x \, = \, \omega \, r}
+Although the concept of slip expressed in figure \ref{fig:freerolling} is indeed the same as the tire slip introduced in \ref{sec:slipdef} it is evident that it doesn't in itself require the introduction of an \emph{effective} rolling radius which at any rate, for a rigid disc, would necessarily be the same as the \emph{actual} geometric radius.
+
+In fact, $R_e$ appears in the Brush Model as the means of obtaining  the linear velocity of the tire carcass \emph{in the contact patch} from the actual angular velocity of the wheel as expressed by equation \req{eqn:VcOmegaRe} reminded below:
+$$ \bar{v}_c=\omega R_e $$
+It should be clear that $R_e$ is not a strictly physical dimension but more of a geometrical device used to apply simple free rolling wheel kinematics to the more complex case of a deformable tire.
+In reality, it is itself a non linear function of the tire loaded radius: it depends largely on the tire belt stiffness and the way it behaves under compression.
+The method for measuring it is easily understood by considering its geometric derivation found in \cite{Misset}.
+
+\figura{pix/effective_rolling_radius.jpg}{width=14cm}{Effective Radius derivation}{fig:re1}
+With reference to figure \ref{fig:re1} consider a tire of radius $R$ pressed against a flat surface until the loaded radius is $R_\ell$.\\
+Given a rotation by $\phi \,$, observe that
+\begin{description}
+\item point $A$ on the rim moves from its initial position directly below the wheel hub $O$ to $B$;
+\item point $C_\ell$ moves from the centre of the contact patch to $D_\ell$;
+\item point $C_0$ (which \emph{represents} where $C_\ell$ would be on a non deformed tire) moves along the circumference to $D_0$.
+\end{description}
+whence follows that
+\eq{eqn:re1}{x_\ell =\overline{C_\ell E_\ell} =  R_\ell tan\phi \qquad \qquad x_0 = R\, sin(\phi)}
+The effective rolling radius can then be defined as the arbitrary radius for which the arc corresponding to an angular displacement $\phi$ has the same length as the distance travelled by a point in the contact patch over the same displacement:
+\eq{eqn:redef}{x =\overline{C_\ell D_\ell} = \phi R_e }
+It is evident from figure \ref{fig:re1} that 
+\eq{eqn:relims}{R_\ell \leq R_e \leq R \,}
+proof of which is provided by dividing \req{eqn:redef} by both columns of \req{eqn:re1} to obtain the ratio of effective radius to loaded radius and original radius respectively
+\eq{eqn:reratios}{\frac{R_e}{R_\ell} = \frac{x}{x_\ell} \frac{tan(\phi)}{\phi} \qquad \qquad \frac{R_e}{R} = \frac{x}{x_0} \frac{sin(\phi)}{\phi}}
+and noting that the right hand equation yields that
+$$
+R_e < R \qquad \forall x | x \leq \frac{x_0}{sin(\phi)} \phi = R \phi
+$$
+which corresponds to the physically obvious assumption that the distance covered by a point in the compressed contact patch is not longer than the arc described by a point on the tire circumference over the same angular displacement: the equivalent of saying that the tire belt does not stretch under  compression.
+In absence of empirical data any arbitrary choice of an $R_e(R_\ell)$ profile is good as long as condition \req{eqn:relims} is satisfied, although in cases such as this where a large tire deflection can be expected, the range thus defined allows a gap between the maximum and minimum estimate of more than 30\% (\cite{GYtirespecs} ) with notable effects on wheel dynamics as described by \req{eqn:VcOmegaRe} and \req{nhtsa}.
+As remarked by \cite{wkg}, choosing $R_e(R_\ell)=R_\ell$ or $R_e(R_\ell)=R$ obviously under- and overestimates the real value: with reference to figure \ref{fig:reest}, taking as $\phi$ equal to half the centre angle incident on the contact patch so that $E_\ell \equiv D_0$ the effective radius can be modelled as 
+\eq{eqn:resinphi}{ R_e(R_\ell) = \frac{sin(\phi(R_\ell))}{\phi(R_\ell)}}
+supposing that, coherently with the assumptions made in calculating the area of the contact patch\footnote{The relationship between $\phi$ and $R_\ell$ is explained in detail in \ref{apx:cutcircle}} in \ref{ssec:normrxn}, the portion of tire track flat against the ground is compressed so that $D_\ell \approx E_\ell$.
+Besides, \req{eqn:resinphi} reflects the fact that $R_e$ should be a nonlinear, decreasing function of loaded radius with $R_e(R)=R$, and being acceptably consistent with experimental results presented in \cite{wkg} and \cite{Misset} it is used in the present model.
+
+Normally $R_e$ would be measured directly using \req{eqn:redef} , by marking radial positions on the tire side wall, and measuring the distance travelled by one of the marks on a flat moving track, while the wheel is turned by a known angle. as in the case of a rigid or non deformed tire.
+It should further be noted that taking the time derivative of \req{eqn:redef} under the assumption that the load remains constant yields the already mentioned kinematic definition of effective rolling radius \req{eqn:VcOmegaRe}.
+
+\figura{piczero.jpg}{}{tire normal reaction and contact area curves}{fig:tirecurves}
+
+
+\subsection{Friction Coefficients}
+The static and dynamic friction coefficients between tire and runway are of central importance towards the accurate determination of braking and cornering forces.
+They are defined as usual as the ratio of the friction force to normal reaction $F_z$ at a given interface plane, respectively
+
+\eq{eqn:fricdefs}{\mu_s = \frac{F_{\mu s}}{F_z} \qquad \qquad \mu_k = \frac{F_{\mu k}}{F_z}}
+
+with the fundamental difference that $F_{\mu s}$ is the \emph{maximum} force that static friction can counteract
+\footnote{generally defined as the friction force at the point of \emph{impending motion}, see for example \citep{mechMIT}}
+while $F_{\mu s}$ is the \emph{actual} force resisting motion in a given direction.
+Their different nature determines the different roles they play in the generation of tire forces, and realistic simulation of both phenomena requires particular expedients as described in \ref{sec:parkingsim}.
+
+
+Friction coefficients, as \req{eqn:fricdefs} suggests, are relatively straightforward to measure directly, and a plethora of textbooks and articles mention standard values of static and dynamic friction between pairs of the most common engineering materials.
+The well known drawback is that the slightest change in environmental conditions, such as temperature or the presence of more or less intentional \virgolette{lubrication}, can have a significant and somehow unpredictable impact on the value of friction coefficients and their ratio.
+This means that while single values are easily obtained for any reproducible conditions, extrapolating information from them can be dangerous, which leads to the necessity to ???
+
+Moreover, the velocity dependency of $\mu_k$ is a problem still under investigation, often circumvented with the use of arbitrary scaling factors (see \citep{kiebre}) or corrected for, using empirical data which presents the usual problem of being extremely specific and hard to obtain.\\
+Dynamic friction however acquires influence on the tire behaviour as, due to high slip, a larger and larger portion of the contact patch begins sliding following the mechanism presented in \ref{sec:brush} (pages \pageref{patch:regions} -\pageref{patch:regions}). It is therefore particularly relevant to the handling capability and responsiveness of a vehicle during \emph{extreme} manoeuvres in which loss of control has already happened or is imminent: these conditions are well outside the expected and intended operating envelope of the DA-42 and its control systems, and velocity dependency is ignored in this model with little consequence on the accuracy of results. %???
+
+Friction coefficients used in this project correspond to the \emph{optimal} values for rubber-concrete dry friction, as quoted in the most authoritative sources such as \citep{nhtsa} and \citep{wong01}, and an external scaling factor is used to apply (arbitrary) fluctuations or to simulate the effect of adverse runway conditions ???.
+
+ 
+\subsection{Relaxation Length} \label{sec:relax}
+As the main responsible for the transient time behaviour of a given tire, the relaxation length $\sigma^*$ is one of the few parameters that is almost always obtained experimentally, by measuring on a moving track the rolling distance required for slip forces to reach their steady state value following a step input in steering angle.
+This can be done according to the relationship given by \req{eqn:cardyn7} derived in \ref{introrelax}, keeping in mind that the relaxation length is also a function of the tire loading and deformation, as demonstrated in \citep{nhtsa}, and as such should be measured under a range of conditions in order to obtain significant information.
+The same text however contains experimental proof that the relaxation length is ultimately a rather predictable consequence of the tire side wall and tread stiffness, to which it can be related through simple mathematics, with reasonable confidence.
+The values of $\sigma^*$ used in this model are assumed to depend on the contact patch dimensions in accordance to what is quoted in chapter 9 of\citep{nhtsa} (cured by Pacejka):
+
+\eq{eqn:relaxnum}{
+\left\{
+\begin{array}{l}
+\sigma^* = 3a \quad \Psi < 1 \\
+\sigma^* \simeq 2a \quad \Psi = 1
+\end{array}
+\right.
+} 
+??? ADDREF Metcalf[55]
+
+The benefits of being able to accurately predict the velocity dependent lag between steering input and vehicle response are usually worth the time and cost of directly acquiring the information: it should be clear that relying blindly on an approximative estimation of the relaxation length can have disastrous consequences on the performance of lateral directional control (i.e. steering and differential breaking), which at any rate should be designed to account for possible deviations from the expected transient time behaviour of the steering wheels. %???
+
+\subsection{Carcass Stiffness} \label{sec:carstif}
+The tire carcass, due to its shape and construction, has very different stiffness properties along the three possible deformation directions, corresponding to the axes of the reference system introduced in \ref{sec:slipdef}.
+If in the radial direction the contribution of carcass stiffness to the normal reaction is negligible compared to the other forces involved, correct modelling of the relation between forces and deformations parallel to the ground has a significant impact on the estimation of driving and cornering forces. The longitudinal carcass stiffness in particular also affects the numerical stability of the simulation\footnote{the issue is further examined in Chapter \ref{c:model}, page \pageref{discrete}}.
+
+Depending on the tire model of choice, the different formulations impose different methods for estimating the lateral and longitudinal tire stiffness, which in general is obtained as the gradient of the friction force-slip relationship linearised around zero slip, as described by \req{tireStif}.
+
+A good starting point is the isotropic stiffness per unit length, calculated under the assumption of the \virgolette{rigid ring} carcass behaviour described in \ref{ssec:adhesiveforces} on page \pageref{stifcarcass}.
+Neglecting the influence of the steel cords and other reinforcement layers (since their main purpose is to provide the tensile strength needed to contain the internal pressure) a first approximation can be obtained simply from geometrical considerations based on commonly available tire rubber properties.
+
+\figura{piczero.jpg}{}{Shear modulus based isotropic tread stiffness}{fig:shear}
+
+Considering a finite tread element and the definition of shear modulus $G$ as shown in figure \ref{fig:shear} it follows that the \emph{tread} stiffness per unit length in the lateral and longitudinal directions are obtained from
+\eq{eqn:stif}{c_{px} = c_{py} = \frac{F}{\Delta x} = \frac{GA}{t} = G \frac{w}{t} \, dx}
+where G is the shear modulus of carbon black reinforced tire tread rubber given in \citep{nhtsa} and all other dimensions identified in figure \ref{fig:shear} are obtained for each tire from the manufacturer's data book \citep{GYtirespecs}. Note that \req{eqn:stif} assumes constant contact patch width: although this does not strictly correspond to reality it is in accordance with the way the size of the contact patch is determined in \req{eqn:patchalf}.
+
+The value thus obtained is within the expected range according to \citep{nhtsa}, which also proposes the analytically derived relation between the tread stiffness from \req{eqn:stif} and the carcass' own stiffness:
+\eq{eqn:stifratio}{c_p/c_cy = 55}
+asserting that a flexible carcass model with independent tread elements like the one used in the present study is likely to give reliable results quoting the work of ???ADDREF Fonda and Radt.
+
+It should be clear that following the process presented in the last two sections, the carcass stiffnesses are being estimated \emph{backwards} from a value of relaxation length validated in experiments which do not necessarily relate to the type of tire in question.
+It is an absolute priority to rectify the lack of experimental data as soon as possible, and starting from direct measurements of relaxation length and tire stiffnesses derive more accurate values to improve the reliability of the model.
+
+\subsection{Rolling Resistance}
+Wheels are specifically designed to minimise rolling resistance for a given load, speed and inflation pressure which together constitute the tire rating.
+Within the intended operational envelope the effect of rolling resistance is negligible compared to tire forces arising from friction e.g. during braking. It is however of comparable magnitude with the aerodynamic drag acting on the aircraft, and has a noticeable effect on the power required for taxiing and ground manoeuvring.
+The power dissipation in the rolling tire has been shown to depend mainly on the compound properties and the construction type: hysteresis of the tire carcass accounts for over 90\% of the loss as reported by \citep{williams} and is in turn affected by a number of factors including ply arrangement, carcass temperature, inflation pressure, load and speed. For this reason testing for rolling resistance torque is usually carried out in a laboratory, where it is possible to control environmental conditions accurately, thus obtaining more significant comparative results albeit not necessarily useful to estimate the actual power loss on a given surface type.
+
+It is generally accepted \citep{wong01}  that the resistance torque depends on tire loading and radius as
+\eq{eqn:rolres}{M_y = q_0 \,R_\ell |F_z|}
+where the tire specific factor $q_0$ can be used to include velocity dependence.
+
+\figura{piczero.jpg}{}{Velocity dependence of rolling resistance}{fig:rolrescurve}
+
+In \citep{pacejka02} an additional torque is proposed, based on the hypothesis that the difference between the rolling and effective radius acts as a disadvantageous lever for a torque applied at the rim to be transmitted to the ground: this is expressed as
+$$
+M_{y,add} = (R_e-R_\ell)F_x
+$$
+and is coherent with the analysis presented in \citep{sven07}  regarding driving/braking induced carcass deformation and subsequent energy losses.
+However the present model does not deal with driving wheels, and the magnitude of Pacejka's torque is negligible under all reasonably expected operating conditions.
+
+Formula \req{eqn:rolres} is instead expanded upon and the factor $q_0$ is given the form
+\eq{eqn:rolresfactor}{q_0 = \mu_{rol} \, tanh(4\frac{v_x}{v_{ref}})}
+where $\mu_{rol}$ is calculated so that the force developed agrees with the value provided by Diamond Aircraft, and $v_{ref}$ is a reference wheel speed at which the full rolling resistance is transmitted to the hub\footnote{this is merely a mathematical device to increase the numerical stability of the simulation, see \ref{???}}.
+The use of hyperbolic tangent allows to model rolling resistance as an asymptotically limited function of velocity while ensuring continuity across direction changes, according to common practice. The curve thus obtained (figure \ref{fig:rolrescurve}) however differs clearly (and conceptually) from the experimental evidence presented in \citep{nhtsa} which show that the rolling resistance coefficient can increase by as much as 30\% when approaching the tire rating speed; at the same time it confirms that the effect of rubber temperature, which could not be included in this simulation, has an even greater impact. Considering the magnitude of the forces considered however \req{eqn:rolres} is deemed an adequate approximation.
+
+
+\subsection{Summary}
+
+\section{Wheel Dynamics}
+
+
+
+\chapter{Suspension System}
+\section{Frames of Reference}
+\section{Nose Leg}
+\subsection{Steering}
+\section{Main Leg}
+\figura{main_lgear.png}{width=14cm}{left leg of the DA42 main landing gear }{fig:mainreal}
+The main wheels of the DA42 landing gear are mounted on two symmetrical non-steering legs featuring trailing arm "knee type" suspensions as shown in figure \ref{fig:mainreal} \citep{DA42mtnc}. 
+The following section illustrates the approach followed in modelling one of the main landing gear legs, and the propagation of forces from the wheel hub to the airframe.
+\figura{piczero.jpg}{width=5cm}{suspension member, joint and angle nomenclature}{fig:maincolors}
+As is clear from picture \ref{fig:maincolors} the suspension has a complex three-dimensional shape. It is however deemed acceptable to consider all members of the suspension to be lying in the same plane, chosen parallel to the aircraft centreline and containing the suspension "attachment" point $\mathds{A}$ and the midpoint of the wheel axle $\mathds{H}$. The angle between such plane and the vertical defines the transformation\footnote{Further described in Appendix \ref{apx:trans}.} between body axes and the \texttt{LEG} frame of reference.\\ 
+The lengths of different leg components are measured manually and in some cases deduced graphically from pictures of known scale. The same is done to determine the member angles in the unloaded leg position (aircraft suspended on jacks, figure \ref{fig:mainsize}) and for the full weight-on-wheels equilibrium point.
+\figura{piczero.jpg}{width=5cm}{dimensions and angles}{fig:mainsize}
+The system described so far clearly has only one geometric degree of freedom. For coding purposes the angle $\alpha_2$ is chosen as the representative system variable, from which all other angles can be univocally determined. 
+However, in order to calculate the forces and moments transmitted to the airframe, those carried by each single member must be known first.\\ These depend quite obviously on the external force transmitted by the tire and the braking torque at the hub $\mathds{H}$ but are also dependent on the force in the shock absorber, which is generally a function of its length and therefore of $\alpha_2$, but also of its compression velocity which is in turn a function of $\dot{\alpha_2}$.\\
+
+
+
+The sign convention adopted thoughout this study is that the force in a member is considered positive if the member is in compression, i.e. when the force vectors can be drawn \emph{pointing~out} from its ends. The pictures illustrating different scenarios in the following sections should help disperse any ambiguity.
+
+
+
+\subsection{Simple rolling}
+We begin by examining the behaviour of the suspension when no braking torque $T_B$ is being applied.\\
+Since the suspension is assumed perfectly rigid it is only free to move in its plane: moments at the hub which are not about the wheel axle, such as the self-aligning torque of the wheel, are simply\footnote{according to equation \ref{eq:momtrans} demonstrated in Appendix \ref{apx:demos}} propagated to the airframe. 
+We are only left to deal with the external force on the hub, which will be at a generic angle $\alpha_f$ to the vertical: dpending on its magnitude and direction and on the position of the system, different assumptions can be made.
+\subsubsection*{Lower limit position}
+\figura{piczero.jpg}{}{the suspension in the lower limit position}{fig:lowerlim}
+
+In the situation shown in Figure \ref{fig:lowerlim} we consider internal forces and moments in the members to be in balance, and regard the suspension as a rigid triangular frame. The system cannot deform because member \circled{3} is preloaded, all the others are perfectly stiff, and clockwise rotation of \circled{2} past its current position is physically restrained.\\
+The assumption is valid if all of the following conditions are satisfied:
+\begin{enumerate}
+	\item $\alpha_2$ is at its maximum value, with \circled{2} resting against the stops in $\mathds{K}$,
+	which in practice translates into:
+	$$({\alpha_2}_{o} - \alpha_2 )<\varepsilon$$
+	where $\varepsilon$ will be a necessary rounding error tolerance in the code.
+
+	\item the external force $F_e$ applied in $\mathds{H}$ is in the constrained direction, its moment about $\mathds{K}$
+	being opposed by the stops. This condition is satisfied when
+	$$sin(\alpha_f - \alpha_2)>0$$
+\end{enumerate}
+This is the lower equilibrium position and the natural configuration of the system at rest or with no external force $F_e$ applied, although in general the external force will not be zero due to the weight of the wheel.
+
+Furthermore, the rigidity assumption can be extended to all situations where \circled{2} is resting against the stops
+and the total moment about $\mathds{K}$ is in the constrained CCW direction, i.e. the structure will not deform as long as the CCW moment from
+${f_3}_{o}$ is enough to counter an eventual CW moment from $F_e$.
+Condition 2 above can then be relaxed accordingly, leading to the following system of conditions 
+on $F_e$, $\alpha_f$ and $\alpha_2$: 
+
+\begin{eqnarray}
+{\alpha_2}_{o} - \alpha_2 & <\varepsilon \\
+F_e \, \ell_2 \,sin(\alpha_f - \alpha_2) + {f_3}_{o} \, \ell_{2s} \, sin({\alpha_3}_{o} - \alpha_{2s}) & > 0
+\end{eqnarray}
+
+Finally, under these circumstances the forces and moment in $\mathds{A}$ are simply given by
+
+\begin{eqnarray}
+F_{Ax} & = & F_e \, sin(\alpha_f)\\
+F_{Az} & = & F_e \, cos(\alpha_f)\\
+M_{Ay} & = & |\overrightarrow{AH\:} \, \times \, \vec{F_e}|
+\end{eqnarray}
+
+\subsubsection*{Upper equilibrium position}
+
+\subsubsection*{Intermediate positions: a dynamic problem}
+Unless the system is static in either of its limit states, the equilibrium condition is generally not satisfied:
+it is possible however to determine the force transmitted to the airframe by examination of the forces
+carried by each member.\\
+
+\emph{Forces at the wheel Hub} \\
+It is convenient, in the analysis of the forces acting in $\mathds{H}$ to switch to a polar frame of reference
+centred in $\mathds{K}$ and hence decompose forces in the radial and tangential directions.
+\figura{piczero.jpg}{}{suspension in a generic position, forces at the wheel hub}{fig:hubforces}
+
+The only constraint is given by \circled{2} which carries an axial load that counteracts
+the radial component of all other forces. In the radial direction we have 
+$$\sum{\vec{F_{Hr}}} \,=\, f_2 + f_3\, cos(\alpha_3 - \alpha_2) + F_e\, cos(\alpha_f - \alpha_2) = 0$$ 
+leading to an equation to determine the load carried by member \circled{2}
+\begin{equation}\label{eqn:effedue}
+f_2 = - f_3\, cos(\alpha_3 - \alpha_2) - F_e\, cos(\alpha_f - \alpha_2)
+\end{equation}
+However \circled{2} is unable to apply any torque at the hinge unless it is the reaction provided by
+the stops, and therefore doesn't generally contribute to the balance of tangential forces.
+The unbalanced force on the wheel hub in the tangential direction will be
+$$F_{H\alpha}\,=\, f_3\, sin(\alpha_3 - \alpha_2) + F_e\, sin(\alpha_f - \alpha_2)$$
+and will exert a moment on \circled{2} about $\mathds{K}$ in the $y$ direction:
+\begin{equation}\label{eqn:momento}
+M_{Ky} \,=\, l_2\, F_{H\alpha} =\, f_3\, l_2\, sin(\alpha_3 - \alpha_2) + F_e\, l_2\, sin(\alpha_f - \alpha_2)
+\end{equation}
+This moment is itself a complex function of $\alpha_2$ and $\dot{\alpha_2}$,
+and determines the acceleration of member \circled{2} around its hinge,
+continuously modifying the geometry of the system.\\
+
+\emph{Forces at the attachment point} \\
+Forces acting on $\mathds{K}$ will propagate directly to $\mathds{A}$ as \circled{1} is considered built 
+into the airframe.
+Neither \circled{2} nor \circled{3} can transmit a pure torque to the airframe, but $f_2$ acting in $\mathds{K}$
+generates a moment which is felt at $\mathds{A}$.
+\begin{eqnarray}
+F_{Ax} & = & f_2 \, sin(\pi + \alpha_2) + f_3 \, sin(\pi + \alpha_3)\\
+F_{Az} & = & f_2 \, cos(\pi + \alpha_2) + f_3 \, cos(\pi + \alpha_3)\\
+M_{Ay} & = & f_2 \, l_1 \, sin(\pi + \alpha_2 - \alpha_1)
+\end{eqnarray}
+
+\subsection{Braking}
+
+\figura[h]{piczero.jpg}{}{braking torque and reactions}{fig:braking}
+When the brakes apply a torque on the wheel, the reaction torque will be experienced at the wheel hub,
+where the brakes stator discs and pistons are mounted.
+\subsubsection{Brake Actuators}
+
+\section{Parameter Estimation}
+
+
+\chapter{The Simulink Model} \label{c:model}
+Model requirements and constraints
+\section{Discrete Time Modelling} \label{discrete}
+\subsection{Step Size}
+\section{Main Structure and Data Flow}
+\section{Wheels} \label{model:wheels}
+\section{Xplane Interface}
+\section{Rate Transition}
+
+\chapter{Control Laws}
+Describe relations between applicable inputs and aircraft response to be considered in the design of the control loops
+\section{Braking Pressure}
+brake circuit pressure command to be applied in order to obtain a given braking force
+\section{Steering}
+\section{Friction Estimation}
+an analysis of a plausible method of estimating ground friction from lateral dynamics without wheel speed sensors
+\chapter{Results and Validation} \label{c:rev}
+\subsection{Brush Model}
+demonstration of results and validation of assumptions of Brush Model
+\subsubsection*{Flexible Carcass}
+Modelling of carcass flexibility improves the lateral performance of the Brush Model considerably, as shown in figure \ref{fig:flexcarisgood}
+\figura{pix/4_14_flexcarisgood.jpg}{width=\textwidth}{Evaluation of the lateral slip performance of Brush Model with flexible (dashed) and stiff carcass (dash-dotted) assumptions (see \ref{sec:brush}) against a magic formula parametrisation of empirical data from the same tire \citep{sven09}. Asterisks mark the onset of total sliding as the limit slips for tread only $\alpha^\circ $ (left) and flexible carcass $\alpha'^\circ $ (right) are reached.}{fig:flexcarisgood}
+\subsubsection*{Transient Time}
+effect on the dynamic response to steering
+effect of differential braking
+\section{Tire Parameters}
+\section{Equilibrium}
+\appendix
+\chapter{Model Parameters} \label{apx:param}
+\section{Tire Parameters}
+\tabella{rccccc}{tab:tabapxtires1}{Tire Measurements and Inflation Pressure}{
+	 & $R_{rim}$\mm& $R_{wall}$\mm& $R_{max}$\mm & $W_0$\mm & $p_0$\Pa \\
+\hline
+5.00-5   NOSE &   64        &     160      &     180      &   116    &  606739  \\
+15x6.0-6 MAIN &   76        &     172      &     193      &   150    &  468843  \\
+\hline
+}
+\tabella{rcc}{tab:main_loads}{Main tire, known data points for Load vs. Radius}{
+			& $R_\ell$\mm & $F_z$ \kN \\
+\hline
+Equilibrium &	168		  &	   4856   \\
+Rating      &	156       &	   8674   \\
+Bottoming   &	122       &    23576  \\
+\hline
+}
+
+\tabella{rcc}{tab:nose_loads}{Nose tire, known data points for Load vs. Radius}{
+			& $R_\ell$\mm & $F_z$ \kN \\
+\hline
+Equilibrium &	155       &	   2550   \\
+Rating      &	144       &	   9564   \\
+Bottoming   &	109       &    25800  \\
+\hline
+}
+\subsection*{Carcass lateral damping coefficient} \label{apx:carcdamp}
+\chapter{About the Code} \label{apx:code}
+Details about the code which would be tedious and irrelevant in the body of the report
+
+\chapter{Equations, Demonstrations and Transformations}
+\section{Lengthy and Untidy Equations} \label{apx:equations}
+\subsubsection*{Additional moment derivation}
+
+\section{Demonstrations}\label{apx:demos}
+
+\subsection*{Cut Circle Formula}\label{apx:cutcircle}
+Consider a circle of radius $\overline{OP}$ and a chord $\overline{AB}$ intersecting the radius in $P'$ as shown in figure \ref{fig:circleformula}
+
+\figura{piczero.jpg}{}{definitions for the cut-circle formulas}{fig:circleformula}
+
+If $\overline{OP}$ and $\overline{OP'}$ are known, the centre angle $\alpha$ and the length of the chord $\overline{AB}$ are easily obtained as
+
+\begin{equation} \label{eqn:circle}
+\alpha = arcos({OP' \over OP\,}) \qquad \qquad AB = 2\, OP \sqrt{1 - ({OP' \over OP\,})^2}
+\end{equation}
+
+\subsection*{Momentum Transfer Theorems}
+\begin{equation} \label{eq:momtrans}
+\vec{M_B} \, = \, \vec{M_A} + \overrightarrow{BA\:} \times \sum{\vec{F}}
+\end{equation}
+\section{Transformations}\label{apx:trans}
+This is essentially just a rotation about the x axis after which the suspension lies in the x-z plane and y defines the positive angle direction, as figure \ref{fig:mainrotation}
+
+\subsection*{Camber Limit Angle}\label{apx:camber}
+\subsection{Volume integrals}
+stiffness
+additional torque (Re-Rl)Fx irrelevant comp to uncert
+\subsection{Tire volume and deformation} \label{apx:tireshape}
+Tire volume explicit factors
+
+\nocite{*}
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{plainnat}
+\bibliography{LG_model_biblio}
+
+\end{document}

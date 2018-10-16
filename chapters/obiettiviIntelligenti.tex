@@ -18,7 +18,11 @@ $$
 $$
 
 
-Il tutto è da normalizzare rispetto al numero di veicoli entrati su qualsiasi arco (forse meglio fare entrambe le somme arco per arco, più chiaro).
+Il tutto è da normalizzare rispetto al numero di veicoli entrati su qualsiasi arco.
 
 Altro obiettivo utile sarebbe guardare la congestione degli archi.
 Prendendo la congestione media si auto-pesano di più gli archi corti, il che avrebbe senso.
+Come indicatore della congestione, dal GLTM prendiamo la lunghezza della coda peggiore nell'intervallo rispetto all'arco $QUEL\in[0,1]$ quindi come funzione di costo
+\eq{e:maxqueue}{
+Q_{a}^{MAX} = \sup\{QUEL_{a,t}|t\in T\}
+}
