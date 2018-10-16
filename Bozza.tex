@@ -8,106 +8,16 @@
 \title{Forse non muore nessuno neanche stavolta}
 \begin{document}
 
-\chapter{La rete viaria urbana}
-Formalizzazione, tutta la roba dal libro di Gaetano.
+\input{chapters/intro}
 
-\chapter{Semafori Intelligenti}
-\section{Semaforizzazione adattiva}
-Perché fare i semafori che si adattano in tempo reale?
+\input{chapters/laReteUrbana}
 
-Reattività alle condizioni inaspettate nel breve periodo
+\input{chapters/semaforiSvegli}
 
-Reattività agli incidenti
+\input{chapters/obiettiviIntelligenti}
 
-\subsection{Il dilemma dell'ottimizzazione}
-In fondo è un modo di migliorare l'offerta per il traffico veicolare privato, causandone l'aumento.
+\input{chapters/ottimizzatoreGenetico}
 
-Inoltre incidenti, traffico smodato e imprevedibile sono tutte prerogative del trasporto privato. Si farebbe prima a cercare di curare il bisogno di trasporto privato che ad arginarne gli effetti dannosi.
-
-L'unica ragione per fare ricerca nel campo dell'ottimizzazione semaforica è quella di vedere se attraverso i metodi euristici si riescono ad individuare soluzioni efficaci nel medio e lungo termine 
-
-\section{Tipi di ottimizzazione}
-Tipi di ottimizzazione, roba dal libro.
-
-\subsection{BALANCE}
-
-\begin{itemize}
-\item Il modello è meglio o peggio di TRE ?
-\item Perché usare TRE che è molto più lento?
-\item come funziona BAL e cosa può fare?
-\end{itemize}
-
-Balance ha un modellino \emph{mesoscopico} tipo gltm (n realtà è proprio come GLTM al secondo) e fa un taglio delle reti intorno alle junction che vuole controllare. Sugli ingressi alle sottoreti (una per ogni junction) usa profili di flusso costanti, ma se può usa i flussi uscenti di una junction per determinare i flussi entranti in una a valle (propagazione).
-
-Il modello viene usato per ricavare le funzioni di costo FERMATE, LUNGHEZZA CODE (in realtà numero di veh in coda) e PERDITEMPO.
-Lui vede le code come F-E perché i suoi archi sono in realtà le corsie di svolta, ed usa una lunghezza MASSIMA per le code.
-
-Punti di forza di Balance:
-\begin{itemize}
-\item Fa tante intersezioni
-\item E' veloce
-\item Aggiusta anche le durate degli stage
-\end{itemize}
-
-Punti deboli:
-\begin{itemize}
-\item Non è detto che le intersezioni si parlino tanto bene
-\item Non guarda avanti
-\item non vede l'arco ma solo l'approccio: forse una volta che la coda ha raggiunto il sensore per lui tutte le situazioni sono uguali, e sotto carico non gli cambia più niente
-\item Probabilmente tende a massimizzare la capacità dove è più richiesta, favorendo lo scorrimento ma provocando un comportamento "ingordo" che crea problemi a valle.
-\end{itemize}
-
-
-\chapter{Obiettivi Intelligenti}
-Definizione degli obiettivi dell'ottimizzazione classica e di quella sostenibile.
-
-Formalizzazione delle funzioni di costo:
-l'indice di coda (integrale tempo in coda per veicoli)/tempo passato nel corridoio fa cacare
-$$
-\frac{\sum_{a \in C} \sum_{t \in T}{queu_{at}}}{\sum_{a \in C} \sum_{t \in T}{n_{at}}}
-$$
-
-non è reattivo soprattutto se gli archi sono lunghi perché il tempo in coda è comunque poco rispetto al totale
-
-ci vorrebbe tempo per km percorso, ma come faccio a calcolare lo spazio percorso?
-
-Numero di fermate non è male, calcolato come integrale dell'aumento della QUEU in ogni intervallo, corretto aggiungendo l'eventuale deflusso se la coda alla fine dell'intervallo non si è azzerata.
-Questo comporta degli errori (da quantificare esattamente?) negli intervalli in cui la coda comincia o finisce.
-$$
-\sum_{a \in C} \sum_{t \in T} QUEU_{a,t} - QUEU_{a,t-1} + OFLW_{a,t} \Delta t
-$$
-
-
-Il tutto è da normalizzare rispetto al numero di veicoli entrati su qualsiasi arco (forse meglio fare entrambe le somme arco per arco, più chiaro).
-
-Altro obiettivo utile sarebbe guardare la congestione degli archi.
-Prendendo la congestione media si auto-pesano di più gli archi corti, il che avrebbe senso.
-
-\chapter{Ottimizzazione con GLTM Genetico}
-Perché è una buona idea?
-E' una simulazione in grado di tenere conto di fenomeni complessi ma più veloce della micro.
-
-L'infrastruttura contiene dati in tempo reale etc.
-
-\section{General Link Transmission Model}
-Funzionamento generale, pregi e limitazioni rispetto all'applicazione come ottimizzatore.
-
-
-\section{Il modello in tempo reale}
-
-\section{Tuning del modello}
-
-
-\section{Tuning del Genetico}
-Effetti dimensioni popolazione, aggiustamenti mutazione
-
-\chapter{Risultati}
-\section{La qualità in termini assoluti}
-
-
-\section{Il confronto con microsimulazione}
-
-
-\section{Performance}
+\input{chapters/risultati}
 
 \end{document}

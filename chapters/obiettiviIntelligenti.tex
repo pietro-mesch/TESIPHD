@@ -1,0 +1,24 @@
+\chapter{Obiettivi Intelligenti}
+Definizione degli obiettivi dell'ottimizzazione classica e di quella sostenibile.
+
+Formalizzazione delle funzioni di costo:
+l'indice di coda (integrale tempo in coda per veicoli)/tempo passato nel corridoio fa cacare
+$$
+\frac{\sum_{a \in C} \sum_{t \in T}{queu_{at}}}{\sum_{a \in C} \sum_{t \in T}{n_{at}}}
+$$
+
+non è reattivo soprattutto se gli archi sono lunghi perché il tempo in coda è comunque poco rispetto al totale
+
+ci vorrebbe tempo per km percorso, ma come faccio a calcolare lo spazio percorso?
+
+Numero di fermate non è male, calcolato come integrale dell'aumento della QUEU in ogni intervallo, corretto aggiungendo l'eventuale deflusso se la coda alla fine dell'intervallo non si è azzerata.
+Questo comporta degli errori (da quantificare esattamente?) negli intervalli in cui la coda comincia o finisce.
+$$
+\sum_{a \in C} \sum_{t \in T} QUEU_{a,t} - QUEU_{a,t-1} + OFLW_{a,t} \Delta t
+$$
+
+
+Il tutto è da normalizzare rispetto al numero di veicoli entrati su qualsiasi arco (forse meglio fare entrambe le somme arco per arco, più chiaro).
+
+Altro obiettivo utile sarebbe guardare la congestione degli archi.
+Prendendo la congestione media si auto-pesano di più gli archi corti, il che avrebbe senso.
