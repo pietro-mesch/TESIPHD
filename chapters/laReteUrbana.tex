@@ -119,3 +119,26 @@ g_{a,p} \in \left[ 0, t_p \right]
 \qquad \text{and} \qquad
 \gamma_{a,p} = \frac{g_{a,p}}{t_j^C}
 }
+
+It is not uncommon to have a lane group open during more than one phase: typically, an
+approach experiencing high traffic volumes is given the right of way over two or more
+consecutive phases without incurring further lost time in the phase change.
+
+The effective green of each arc $a$ is then calculated from the total effective green time it
+gathers over all relevant phases:
+\eq[.]{eq:gshrtot}{
+g_a = \sum_{p \in \s{P}_j} g_{a,p} \quad \text{with} \:
+\left\lbrace \begin{array}{ll}
+0 < g_{a,p} \leq t_p 	&	\text{if} \, a \in \s{A}_p	\\
+g_{a,p} = 0				&	\text{otherwise}		\\
+\end{array} \right.
+\quad \text{and} \quad
+\gamma_{a} = \frac{g_a}{t_j^C}
+}
+
+\subsubsection{Signal Offset}
+When multiple signals are involved, it is important to consider that vehicles that cross a signalised junction become packed into \emph{platoons}, which will eventually reach yet another signal-controlled stop line: adjusting the relative timing of adjacent junctions so that platoons meet a green light greatly affects the average delay incurred by the user. 
+
+Synchronisation issues are addressed by defining a global time reference, with all junctions sharing the same cycle time or integer fractions thereof.
+Each junction may then have all of its phase switching times anticipated or delayed in order to operate in concert with the neighbouring ones.
+The amount of time $t_j^O$, by which the beginning of a cycle at one junction $j$ lags or leads the global reference instant, is referred to as a positive or negative \emph{offset}, respectively.
