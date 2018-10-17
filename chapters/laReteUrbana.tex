@@ -59,7 +59,7 @@ p \in \wp \left( \s{Y}_j \right) : \prod_{y \in p} \prod_{z \in p} \delta_{yz} =
 }
 
 Clearly, the power set $\wp \left( \s{Y}_j \right)$ contains sets of manoeuvres that, although compatible and technically feasible, make little practical sense.
-The selection of an optimal set of phases $\s{P}_j$ satisfying relation \req{eq:phaseset} with respect to a specific objective (e.g. minimum total delay for given demand flows) is a combinatorial bi-level problem, usually solved through a \emph{what-if} approach in which the selection of a good set of phases remains largely a traffic engineer’s task.
+The selection of an optimal set of phases $\s{P}_j$ satisfying relation \req{eq:phaseset} with respect to a specific objective (e.g. minimum total delay for given demand flows) is a combinatorial bi-level problem, usually solved through a \emph{what-if} approach in which the selection of a good set of phases remains largely a traffic engineer's task.
 
 Conceptually, the determination of signal phases is thus driven by the interactions
 between manoeuvres. From a practical point of view, however, administration of the right of
@@ -81,4 +81,41 @@ of the arc effective outflow capacity, which may be affected by partial conflict
 manoeuvres allowed during the same phase. The HCM (2010) manual \ref{???} presents practical
 methods for quantifying such effects.
 
+\subsubsection{Signal Programs}
+A signal program contains the state switching times for all signals at a given junction.
+For signal planning and optimisation, it is practical to view the program as a succession
+of signal phases with specific durations, as portrayed in Figure \ref{f:plan}: during each phase a set of arcs are open, allowing users to carry out the corresponding manoeuvres, while the others arcs remain closed and accumulate queues.
 
+A program for junction $j$ consists therefore of a cyclic set of instructions spanning a period called \emph{cycle time} $t_j^C$: given a phase set $\s{P}_j$, these specify the start and end of each signal phase with respect to the beginning of the signal cycle.
+
+Transitions between subsequent phases are usually enacted via pre-timed signal state change sequences that handle the closure of a set of lane groups before opening the next.
+
+\subsubsection{Daily Schedule}
+It is common practice to tailor several signal programs to the traffic conditions normally
+observed at different times of the day, in order to meet each scenario with the best possible
+allocation of resources. The daily schedule defines the sequence of programs that each
+junction will run over the course of the day.
+
+\subsubsection{Cycle Time}
+The cycle time $t_j^C$ is the \emph{period} of the signal program, i.e. the time lapse between two occurrences of the same signal phase at a given junction.
+It affects the average delay and the level of saturation at which the intersection may operate. In general, longer cycle times imply larger average delays, but increase the total throughput, which may be necessary to deal with high demand flows by attenuating the effects of the time lost in signal phase changes.
+
+\subsubsection{Effective Green Shares}
+The nominal duration of each phase $t_p$ is seldom exploited by demand flows at the full
+capacity of the corresponding arcs: even assuming that vehicles are not held back by
+downstream congestion, it is necessary to account for some transient phenomena affecting the
+performance of a junction.
+
+As the signals turn green at the beginning of each phase, some time is lost before the
+queuing vehicles start moving, and some more passes before the flow through the stop line reaches the arc capacity.
+On the other hand, if a lane group remains open during two subsequent phases such effects will be smaller, in proportion.
+After taking into account all delays and extensions, the portion of cycle time during
+which a given lane group a may allow traffic onto the junction at full capacity is referred to as
+its \emph{effective green share}.
+The absolute and relative durations of effective green experienced by lane group $a$ during phase $p$ are denoted respectively as:
+
+\eq[.]{eq:gshr}{
+g_{a,p} \in \left[ 0, t_p \right]
+\qquad \text{and} \qquad
+\gamma_{a,p} = \frac{g_{a,p}}{t_j^C}
+}
