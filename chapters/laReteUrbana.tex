@@ -1,1 +1,84 @@
 \chapter{Signalisation of Urban Networks}
+\section{Anatomy of a Signal Plan}
+The following section briefly illustrates the main features of a signal plan devised for urban traffic regulation. This term encompasses all timings and schedules behind the delicate clockwork of traffic signals, from the elements that constitute a single signal program at one of the many junctions of the network, to the succession of network-wide program changes designed to meet the daily evolution of traffic demand and the propagation of vehicle flows.
+The features presented in this section fully define what is commonly called a pre-timed plan, and as such do not describe any real-time actuation or decision making logic.
+They are themselves, however, the decision variables of most optimisation methods and adaptive strategies, and it is crucial to understand their significance in order to appreciate the diversity of setting and control approaches illustrated in more detail throughout this chapter.
+
+\fig{htbp}{PIX/signalplan.png}{f:plan}{
+Elements of a network-wide signal plan: a daily schedule specifies the signal programs running at each intersection. The sequence and duration of signal phases repeats over the course of every signal cycle as specified by the different signal programs, administering junction capacity amongst the expected traffic flows. During each phase, a set of compatible manoeuvres is allowed through while the others remain closed.}{width=0.7\textwidth}
+
+\subsubsection{Signal Phases}
+Traffic signals exist mainly to separate conflicting traffic flows competing for the right of way at a road intersection. The natural way of doing so is to bundle compatible (e.g. non-secant) manoeuvres which may be safely performed simultaneously into signal phases, so that the corresponding flows may be allowed through the junction in turn.
+Phases are the fundamental blocks of a signal program, and are usually repeated in the same order at every signal cycle, although some signalisation systems provide phase skipping, usually as part of their public transport prioritisation strategy.
+Manoeuvres may pertain to different modes of transport, meaning that cars, trams and
+pedestrians are taken into joint consideration and can be given the right of way during the
+same signal phase.
+
+Consider a junction, i.e. a network node $j \in \s{N}$ where it is possible to perform a given set of manoeuvres $\s{Y}_j$ .
+The generic manoeuvre $y \in \s{Y}_j$ may be:
+\begin{itemize}
+\item a turn, from an arc $ a \in \s{A}_j^- $ of the node's backward star, to a forward star arc $b \in \s{A}_j^+$ ;
+\item a tram crossing or similar transport system specific operation;
+\item a pedestrian crossing affecting one or more arcs either entering or leaving the junction.
+\end{itemize}
+
+In order to present a straightforward definition of \emph{manoeuvres} in relation to junction layout and signalisation, the focus will henceforth be on the movement of private vehicles only, unless otherwise specified.
+It shall be clear that the principles of manoeuvre compatibility illustrated in this manner in Figure \ref{f:phasing} may be easily generalised to different and etherogeneous modes of transport, such as public transport, pedestrians and bicycles.
+
+\fig{htbp}{PIX/phasing.png}{f:phasing}{
+Manoeuvres at an intersection, conflict areas and possible phasing options: option A avoids
+direct conflicts between Eastbound (E-) and Westbound (W-) manoeuvres, as would be desirable if high volumes were expected along that direction;
+option B favours a lower number of phase changes (less time lost) assuming flows to be such that left turning vehicles have space to wait at the middle of the intersection, until the oncoming through flow decreases enough to let them cross.}{width=\textwidth}
+
+Given the layout of a junction $j$, different manoeuvres may or may not
+be safe to perform simultaneously, as exemplified in Figure \ref{f:phasing}.
+This information, which may well depend on the flow conditions, is easily represented by a square Boolean matrix where rows and columns correspond to each manoeuvre and elements comply with the following rule:
+
+\eq[.]{eq:phasing}{
+\delta_{yz} = \left\lbrace 
+\begin{array}{ll}
+1 & \text{if $y$ and $z$ are compatible} \\
+0 & \mathrm{otherwise}
+\end{array}
+\right.
+\forall y,z \in \s{Y}_j
+}
+
+Each possible subset of manoeuvres $p \subseteq \s{y}_j$ potentially identifies a \emph{signal phase}.
+A viable set of phases $\s{P}_j$ for the junction however must belong to the space of \emph{feasible} signal phases, i.e. all possible sets of manoeuvres contained in the power set $ \wp \left( \s{Y}_j \right)$ whose elements are mutually compatible according to \req{eq:phasing}.
+The union of all phases must also include every available manoeuvre at least once.
+
+Formally, $\s{P}_j$ must therefore comply with the following properties:
+\eq[.]{eq:phaseset}{
+\s{P}_j = 
+\left\lbrace 
+p \in \wp \left( \s{Y}_j \right) : \prod_{y \in p} \prod_{z \in p} \delta_{yz} = 1
+\right\rbrace
+\quad , \quad
+\bigcup_{p \in \s{P}} p = \s{Y}_j
+}
+
+Clearly, the power set $\wp \left( \s{Y}_j \right)$ contains sets of manoeuvres that, although compatible and technically feasible, make little practical sense.
+The selection of an optimal set of phases $\s{P}_j$ satisfying relation \req{eq:phaseset} with respect to a specific objective (e.g. minimum total delay for given demand flows) is a combinatorial bi-level problem, usually solved through a \emph{what-if} approach in which the selection of a good set of phases remains largely a traffic engineer’s task.
+
+Conceptually, the determination of signal phases is thus driven by the interactions
+between manoeuvres. From a practical point of view, however, administration of the right of
+way by means of traffic signals cannot transcend the junction layout.
+For example, it is only possible to separate manoeuvres into different phases if each has a dedicated lane that allows vehicles to queue for it without hindering traffic that is headed elsewhere. In fact, as everyday experience testifies, traffic signals do not allow or prohibit
+manoeuvres directly, but rather regulate vehicle egress from lanes (or lane groups) dedicated
+to specific sets of manoeuvres.
+
+Each lane or group of adjacent lanes $a$ sharing the same manoeuvre set $\s{Y}_a \in \s{Y}_j$ can be conceptually assimilated into a \emph{lane group}: a single independent arc $a \in \s{A}_j^-$
+of the node backward star.
+Let $\s{A}_p$ be the set of lane groups which are given the green light during signal phase $p$,
+and $\s{Y}_a$ the manoeuvres that can be performed from lane group $a$.
+The set of manoeuvres allowed during phase $p$ is therefore
+\eq[.]{eq:lights}{
+p = \bigcup_{a \in \s{A}_p} \s{Y}_a
+}
+The set of manoeuvres $\s{Y}_a$ specific to each lane group $a$ is relevant for the determination
+of the arc effective outflow capacity, which may be affected by partial conflicts with other
+manoeuvres allowed during the same phase. The HCM (2010) manual \ref{???} presents practical
+methods for quantifying such effects.
+
+
