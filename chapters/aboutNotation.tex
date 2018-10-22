@@ -1,3 +1,4 @@
+\pagebreak
 \section*{About Notation}
 A quick glossary of the relevant variables is provided below, alongside the units of each dimensional quantity.
 
@@ -6,54 +7,63 @@ topological elements may be dropped to simplify notation.
 
 \subsubsection*{Network Topology}
 \begin{tabu} to \textwidth {X[3,c] X[1,c] X[6,l]}
-$i,j \in \mathrm{N}$ & & nodes (junctions) \\[2pt]
+$i,j \in \nodset$ & & nodes (junctions) \\[2pt]
 
-$A,B \in A \subseteq \mathrm{N} \times \mathrm{N} $ & & arcs (lane groups) \\[2pt]
+$a,b \in \arcset \subseteq \nodset \times \nodset $ & & arcs (lane groups) \\[2pt]
 
-$\left( \mathrm{N}_{a}^{-} \; , \;\mathrm{N}_{a}^{+} \right) = a$ & & tail and head nodes of arc $a$ \\[2pt]
+$\length_a$ & \units{m} & length of arc $a$ \\[2pt]
 
-$\mathrm{A}_{i}^{+} = \left\lbrace a \in \mathrm{A} \, | \, \mathrm{N}_{a}^{-} = i \right\rbrace $ & & forward star of node $i$ (outgoing arcs)\\[2pt]
+$\left( \nodset_{a}^{-} \; , \;\nodset_{a}^{+} \right) = a$ & & tail and head nodes of arc $a$ \\[2pt]
 
-$\mathrm{A}_{i}^{-} = \left\lbrace a \in \mathrm{A} \, | \, \mathrm{N}_{a}^{+} = i \right\rbrace $ & & forward star of node $i$ (incoming arcs)\\[2pt]
+$\arcset_{i}^{+} = \left\lbrace a \in \arcset \, | \, \nodset_{a}^{-} = i \right\rbrace $ & & forward star of node $i$ (outgoing arcs)\\[2pt]
 
-$y,z \in \mathrm{Y}$ & & manoeuvres\\
+$\arcset_{i}^{-} = \left\lbrace a \in \arcset \, | \, \nodset_{a}^{+} = i \right\rbrace $ & & forward star of node $i$ (incoming arcs)\\[2pt]
+
+$y,z \in \manset$ & & manoeuvres\\
 
 \end{tabu} 
 
 
 \subsubsection*{Signal Phases}
 \begin{tabu} to \textwidth {X[3,c] X[1,c] X[6,l]}
-$p,q \in \mathrm{P}_{j}$ & & signal phases at junction $j$\\[2pt]
+$p,q \in \phaset_{j}$ & & signal phases at junction $j$\\[2pt]
 
-$\mathrm{A}_{p} \subseteq \mathrm{A}_{j}^{-} $ & & lane groups open during phase $p$ \\[2pt]
+$\arcset_{p} \subseteq \arcset_{j}^{-} $ & & lane groups open during phase $p$ \\[2pt]
 
 \end{tabu} 
 
 
 \subsubsection*{Signal Timing}
 \begin{tabu} to \textwidth {X[3,c] X[1,c] X[6,l]}
-$ t_j^C $ & s & cycle time at junction $j$\\[2pt]
-$ t_p   $ & s & nominal duration of phase $p$\\[2pt]
-$ g_a   $ & s & effective green duration for arc $a$\\[3pt]
-$ \displaystyle \gamma_a = \frac{g_a}{t_j^C} $ & & effective green share of arc $a$\\[2pt]
-$ t_j^L $ & s & time lost per cycle at junction $j$\\[2pt]
-$ t_j^O $ & s & offset of junction $j$ \\[2pt]
+$ \cycle{j} $ & \units{s} & cycle time at junction $j$\\[2pt]
+$ t_p   $ & \units{s} & nominal duration of phase $p$\\[2pt]
+$ g_a   $ & \units{s} & effective green duration for arc $a$\\[3pt]
+$ \displaystyle \gamma_a = \frac{g_a}{t_j^C} $ & \units{\%} & effective green share of arc $a$\\[2pt]
+$ \tlost{j} $ & \units{s} & time lost per cycle at junction $j$\\[2pt]
+$ \toffs{j} $ & \units{s} & offset of junction $j$ \\[2pt]
 \end{tabu} 
-
 
 
 \subsubsection*{Demand and Supply}
 \begin{tabu} to \textwidth {X[3,c] X[1,c] X[6,l]}
-$ q_{a} $ & veh/s & demand flow on arc $a$ \\[2pt]
-$ \hat{q}_a $ & veh/s & saturation flow of arc $a$ \\[2pt]
-$ \displaystyle \phi_a = \frac{q_a}{\hat{q}_a} $ & & flow ratio on arc $a$ \\[2pt]
-$ \displaystyle \chi_a = \frac{\phi_a}{\gamma_a} $ & & saturation on arc $a$ \\[2pt]
+$ \inflow_{a} $ & \units{veh/s} & demand flow on arc $a$ \\[2pt]
+$ \satflow_a $ & \units{veh/s} & saturation flow of arc $a$ \\[2pt]
+
+$ \displaystyle \flowratio_a = \frac{\inflow_a}{\satflow_a} $ & & flow ratio on arc $a$ \\[2pt]
+$ \displaystyle \saturation_a = \frac{\flowratio_a}{\gamma_a} $ & & saturation on arc $a$ \\[2pt]
 \end{tabu} 
+
+\subsubsection*{Simulation Parameters}
+\begin{tabu} to \textwidth {X[3,c] X[1,c] X[6,l]}
+$ \tau \in \simspan $ &  & intervals of the simulation window \\[2pt]
+$ \simintd $ & s & duration of interval $\tau$\\[2pt]
+\end{tabu}
+
 
 \subsubsection*{Performance Indicators}
 \begin{tabu} to \textwidth {X[3,c] X[1,c] X[6,l]}
-$ t_a^Q $ & s & queue clearance time on arc $a$ (per cycle)\\[2pt]
-$ \omega_a^{stop}$ & & share of $q_a$ stopping at or before $\mathrm{N}_{a}^{+}$ \\[2pt]
-$ \omega_a^d $ & s & average delay of arc $a$ \\[2pt]
-$ $ & & \\[2pt]
+$ \tclear{a} $ & s & queue clearance time on arc $a$ (per cycle)\\[2pt]
+$ \avgdelay{a} $ & s & average delay of arc $a$ \\[2pt]
+$ \stopratio{a}$ & & share of $\inflow_a$ stopping at or before $\nodset_{a}^{+}$ \\[2pt]
+$ \total{\corridor} $ & veh & cumulate of inflow to all sections of corridor $\corridor$ \\[2pt]
 \end{tabu}

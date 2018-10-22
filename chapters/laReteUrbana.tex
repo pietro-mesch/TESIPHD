@@ -14,10 +14,10 @@ Manoeuvres may pertain to different modes of transport, meaning that cars, trams
 pedestrians are taken into joint consideration and can be given the right of way during the
 same signal phase.
 
-Consider a junction, i.e. a network node $j \in \s{N}$ where it is possible to perform a given set of manoeuvres $\s{Y}_j$ .
-The generic manoeuvre $y \in \s{Y}_j$ may be:
+Consider a junction, i.e. a network node $j \in \nodset$ where it is possible to perform a given set of manoeuvres $\manset_j$ .
+The generic manoeuvre $y \in \manset_j$ may be:
 \begin{itemize}
-\item a turn, from an arc $ a \in \s{A}_j^- $ of the node's backward star, to a forward star arc $b \in \s{A}_j^+$ ;
+\item a turn, from an arc $ a \in \arcset_j^- $ of the node's backward star, to a forward star arc $b \in \arcset_j^+$ ;
 \item a tram crossing or similar transport system specific operation;
 \item a pedestrian crossing affecting one or more arcs either entering or leaving the junction.
 \end{itemize}
@@ -41,24 +41,24 @@ This information, which may well depend on the flow conditions, is easily repres
 0 & \mathrm{otherwise}
 \end{array}
 \right.
-\forall y,z \in \s{Y}_j
+\forall y,z \in \manset_j
 }
 
-Each possible subset of manoeuvres $p \subseteq \s{y}_j$ potentially identifies a \emph{signal phase}.
-A viable set of phases $\s{P}_j$ for the junction however must belong to the space of \emph{feasible} signal phases, i.e. all possible sets of manoeuvres contained in the power set $ \wp \left( \s{Y}_j \right)$ whose elements are mutually compatible according to \req{eq:phasing}.
+Each possible subset of manoeuvres $p \subseteq \manset_j$ potentially identifies a \emph{signal phase}.
+A viable set of phases $\phaset_j$ for the junction however must belong to the space of \emph{feasible} signal phases, i.e. all possible sets of manoeuvres contained in the power set $ \wp \left( \manset_j \right)$ whose elements are mutually compatible according to \req{eq:phasing}.
 The union of all phases must also include every available manoeuvre at least once.
 
-Formally, $\s{P}_j$ must therefore comply with the following properties:
+Formally, $\phaset_j$ must therefore comply with the following properties:
 \eq[.]{eq:phaseset}{
-\s{P}_j = 
+\phaset_j = 
 \left\lbrace 
-p \in \wp \left( \s{Y}_j \right) : \prod_{y \in p} \prod_{z \in p} \delta_{yz} = 1
+p \in \wp \left( \manset_j \right) : \prod_{y \in p} \prod_{z \in p} \delta_{yz} = 1
 \right\rbrace
 \quad , \quad
-\bigcup_{p \in \s{P}} p = \s{Y}_j
+\bigcup_{p \in \phaset} p = \manset_j
 }
 
-Clearly, the power set $\wp \left( \s{Y}_j \right)$ contains sets of manoeuvres that, although compatible and technically feasible, make little practical sense.
+Clearly, the power set $\wp \left( \manset_j \right)$ contains sets of manoeuvres that, although compatible and technically feasible, make little practical sense.
 The selection of an optimal set of phases $\s{P}_j$ satisfying relation \req{eq:phaseset} with respect to a specific objective (e.g. minimum total delay for given demand flows) is a combinatorial bi-level problem, usually solved through a \emph{what-if} approach in which the selection of a good set of phases remains largely a traffic engineer's task.
 
 Conceptually, the determination of signal phases is thus driven by the interactions
@@ -68,15 +68,15 @@ For example, it is only possible to separate manoeuvres into different phases if
 manoeuvres directly, but rather regulate vehicle egress from lanes (or lane groups) dedicated
 to specific sets of manoeuvres.
 
-Each lane or group of adjacent lanes $a$ sharing the same manoeuvre set $\s{Y}_a \in \s{Y}_j$ can be conceptually assimilated into a \emph{lane group}: a single independent arc $a \in \s{A}_j^-$
+Each lane or group of adjacent lanes $a$ sharing the same manoeuvre set $\manset_a \in \manset_j$ can be conceptually assimilated into a \emph{lane group}: a single independent arc $a \in \arcset_j^-$
 of the node backward star.
-Let $\s{A}_p$ be the set of lane groups which are given the green light during signal phase $p$,
-and $\s{Y}_a$ the manoeuvres that can be performed from lane group $a$.
+Let $\arcset_p$ be the set of lane groups which are given the green light during signal phase $p$,
+and $\manset_a$ the manoeuvres that can be performed from lane group $a$.
 The set of manoeuvres allowed during phase $p$ is therefore
 \eq[.]{eq:lights}{
-p = \bigcup_{a \in \s{A}_p} \s{Y}_a
+p = \bigcup_{a \in \arcset_p} \manset_a
 }
-The set of manoeuvres $\s{Y}_a$ specific to each lane group $a$ is relevant for the determination
+The set of manoeuvres $\manset_a$ specific to each lane group $a$ is relevant for the determination
 of the arc effective outflow capacity, which may be affected by partial conflicts with other
 manoeuvres allowed during the same phase. The HCM (2010) manual \ref{???} presents practical
 methods for quantifying such effects.
@@ -86,7 +86,7 @@ A signal program contains the state switching times for all signals at a given j
 For signal planning and optimisation, it is practical to view the program as a succession
 of signal phases with specific durations, as portrayed in Figure \ref{f:plan}: during each phase a set of arcs are open, allowing users to carry out the corresponding manoeuvres, while the others arcs remain closed and accumulate queues.
 
-A program for junction $j$ consists therefore of a cyclic set of instructions spanning a period called \emph{cycle time} $t_j^C$: given a phase set $\s{P}_j$, these specify the start and end of each signal phase with respect to the beginning of the signal cycle.
+A program for junction $j$ consists therefore of a cyclic set of instructions spanning a period called \emph{cycle time} $t_j^C$: given a phase set $\phaset_j$, these specify the start and end of each signal phase with respect to the beginning of the signal cycle.
 
 Transitions between subsequent phases are usually enacted via pre-timed signal state change sequences that handle the closure of a set of lane groups before opening the next.
 
@@ -129,7 +129,7 @@ gathers over all relevant phases:
 \eq[.]{eq:gshrtot}{
 g_a = \sum_{p \in \s{P}_j} g_{a,p} \quad \text{with} \:
 \left\lbrace \begin{array}{ll}
-0 < g_{a,p} \leq t_p 	&	\text{if} \, a \in \s{A}_p	\\
+0 < g_{a,p} \leq t_p 	&	\text{if} \, a \in \arcset_p	\\
 g_{a,p} = 0				&	\text{otherwise}		\\
 \end{array} \right.
 \quad \text{and} \quad

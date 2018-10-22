@@ -1,6 +1,29 @@
-\chapter{Obiettivi Intelligenti}
+\chapter{Smart Objectives}
 Definizione degli obiettivi dell'ottimizzazione classica e di quella sostenibile.
 
+\subsection{Fundamental Quantities}
+The following quantities are calculated on the corridor over the entire simulation, and represent the reference quantities for calculation of key performance indicators.
+
+\subsubsection*{Section and Corridor Total}
+The \emph{section total} is defined as the integral of the inflow to a given section of the corridor $a \in \corridor$, obtained piecewise in this case, as the total number of vehicles entered during each interval of the simulation window:
+\eq[.]{eq:stotal}{
+\total{a} \; = \sum_{\tau \in \simspan} \inflow_{a,\tau} \simintd
+}
+
+The \emph{corridor total} gives an aggregate measure of how frequented the corridor is on the whole: it does not carry information on which sections are busier, but accounts for all vehicles that accessed \emph{any} section during the simulation.
+
+It is obtained as the cumulative total over all corridor sections, according to
+\eq[.]{eq:ctotal}{
+\total{\corridor} \; = \sum_{a \in \corridor} \total{a}
+}
+
+Notice that $\total{a}$ implies no distinction based on whether the flows are coming from the previous section of the corridor or from a cordon arc, therefore vehicles travelling on more than one section are counted several times. 
+This reflects the fact that the corridor is being used \emph{more} if vehicles travel a greater portion of it than if they only were to use one section.
+
+The total inflow index $\total{\corridor}$ covers an important role as a \emph{checksum}, since it ensures that any improvements in other cumulative indices are not really due to the corridor accepting fewer vehicles because of a deterioration in the traffic conditions.
+
+
+\subsection{Dynamic Weighting}
 Formalizzazione delle funzioni di costo:
 l'indice di coda (integrale tempo in coda per veicoli)/tempo passato nel corridoio fa cacare
 $$
@@ -11,14 +34,15 @@ non è reattivo soprattutto se gli archi sono lunghi perché il tempo in coda è
 
 ci vorrebbe tempo per km percorso, ma come faccio a calcolare lo spazio percorso?
 
+
 Numero di fermate non è male, calcolato come integrale dell'aumento della QUEU in ogni intervallo, corretto aggiungendo l'eventuale deflusso se la coda alla fine dell'intervallo non si è azzerata.
 Questo comporta degli errori (da quantificare esattamente?) negli intervalli in cui la coda comincia o finisce.
 $$
 \sum_{a \in C} \sum_{t \in T} QUEU_{a,t} - QUEU_{a,t-1} + OFLW_{a,t} \Delta t
 $$
 
-
 Il tutto è da normalizzare rispetto al numero di veicoli entrati su qualsiasi arco.
+
 
 Altro obiettivo utile sarebbe guardare la congestione degli archi.
 Prendendo la congestione media si auto-pesano di più gli archi corti, il che avrebbe senso.
@@ -26,3 +50,5 @@ Come indicatore della congestione, dal GLTM prendiamo la lunghezza della coda pe
 \eq{e:maxqueue}{
 Q_{a}^{MAX} = \sup\{QUEL_{a,t}|t\in T\}
 }
+
+Prendendo invece la lunghezza totale della coda?
