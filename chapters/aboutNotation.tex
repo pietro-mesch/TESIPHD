@@ -59,12 +59,17 @@ $ \tau \in \simspan $ &  & intervals of the simulation window \\[2pt]
 $ \simintd $ & s & duration of interval $\tau$\\[2pt]
 \end{tabu}
 
-
+\subsubsection*{Simulation Results}
+\begin{tabu} to \textwidth {X[3,c] X[1,c] X[6,l]}
+$ \nveh{a,t} $ & \units{veh} & vehicles on arc $a$ at time $t$\\[2pt]
+$ \traveltime{a,t} $ & \units{s} & travel time for arc $a$ entering at time $t$ \\[2pt]
+\end{tabu}
 
 \subsubsection*{Performance Indicators}
 \begin{tabu} to \textwidth {X[3,c] X[1,c] X[6,l]}
 $ \tclear{a} $ & s & queue clearance time on arc $a$ (per cycle)\\[2pt]
 $ \avgdelay{a} $ & s & average delay of arc $a$ \\[2pt]
 $ \stopratio{a}$ & & share of $\inflow_a$ stopping at or before $\nodset_{a}^{+}$ \\[2pt]
-$ \total{\corridor} $ & veh & cumulate of inflow to all sections of corridor $\corridor$ \\[2pt]
+$ \total{a} \text{, } \total{\corridor} $ & \units{veh} & total inflow to arc $a$ or all sections of corridor $\corridor$ \\[2pt]
+$ \utspent{a} \text{, } \utspent{\corridor} $ & \units{s} & user time spent on arc $a$ or corridor $\corridor$ \\[2pt]
 \end{tabu}
