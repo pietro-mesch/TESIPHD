@@ -1,8 +1,12 @@
 \chapter{Smart Objectives}
-Definizione degli obiettivi dell'ottimizzazione classica e di quella sostenibile.
+\todo{Definizione degli obiettivi dell'ottimizzazione classica e di quella sostenibile.}
+
+\todo{Refer to the model outputs as described in section \ref{s:output}}
 
 \subsection{Fundamental Quantities}
 The following quantities are calculated on the corridor over the entire simulation, and represent the reference quantities for calculation of key performance indicators.
+
+The subscript $T$ is often dropped for readability, but is \emph{implied} for all quantities aggregated at the simulation span level and presented in the following section. 
 
 \subsubsection*{Section and Corridor Total}
 The \emph{section total} is defined as the integral of the inflow to a given section of the corridor $a \in \corridor$, obtained piecewise in this case, as the total number of vehicles entered during each interval of the simulation window:
@@ -22,8 +26,38 @@ This reflects the fact that the corridor is being used \emph{more} if vehicles t
 
 The total inflow index $\total{\corridor}$ covers an important role as a \emph{checksum}, since it ensures that any improvements in other cumulative indices are not really due to the corridor accepting fewer vehicles because of a deterioration in the traffic conditions.
 
+\subsubsection*{User Time Spent and User Time Travelled}
+The most direct way to calculate how much time is spent by users on the corridor during the simulation window is to integrate the total number of vehicles present on any section over all time intervals. The total and section \emph{User Time Spent} can be expressed as
+\eq{eq:utspent}{
+\utspent{\corridor} \; = \sum_{a \in \corridor} \utspent{a} \qquad \mathrm{where}
+\qquad \utspent{a} = \sum_{\tau \in \simspan} \nveh{a,\tau} \simintd
+}
+therefore accounting for any vehicles already on the corridor at the start of the simulation, but not for the time that will be spent to get out of it beyond the end of the look-ahead window.
+However, since it is impossible to know how much time the vehicles have \emph{already} spent on the corridor when the simulation begins, nor how far they have got down the arc they're found on, the time spent $\utspent{}$ is not suitable for estimating the corridor performance with respect to travelled distances. 
+
+Disregarding the initial vehicles $\nveh{\corridor}$ and only considering flows that enter a corridor section during the simulation, it is possible to extrapolate from the results exactly how much time those vehicles will spend \emph{travelling} the length of each arc, even beyond the end of the simulation. The average \emph{User Time Travelled} is still a measure of time, but obtained from flows and travel times as
+\eq[.]{eq:uttravelled}{
+\uttravelled{a} = \sum_{\tau \in \simspan} \traveltime{a,\tau} \; \inflow_{a,\tau} \; \simintd
+}
+
+\subsection{Performance Indicators}
+
+\subsubsection{Minutes per Kilometre Travelled}
+From the user point of view, it makes sense to evaluate the performance of the corridor by considering the time required to travel the desired distance.
+
+Referring to the User Time Travelled $\uttravelled{a}$ expressed by \eqref{eq:uttravelled} the \emph{Minutes per Kilometre} cost function
+\eq[]{eq:timedist}{
+\timedist{\corridor} =
+\sum_{a \in \arcset} 
+\frac{\uttravelled{a}}{\length_a \: \total{\corridor}}
+}
+uses the travel times experienced by all users, normalised with respect to the relevant section lengths and averaged over all vehicles involved with any part of the corridor during the simulation. This gives an overall measure of the fluidity of traffic on the corridor, and has the dimensions of a time per unit length. The choice of units (and name) for this performance indicator is therefore dictated solely by human-readability: it makes sense to count minutes spent in traffic to cover one kilometre, and it is easy to refer to the fact that for an average speed of 60 km/h the value of $\timedist{}$ would be 1.
+
 
 \subsection{Dynamic Weighting}
+
+
+
 Formalizzazione delle funzioni di costo:
 l'indice di coda (integrale tempo in coda per veicoli)/tempo passato nel corridoio fa cacare
 $$
@@ -31,8 +65,6 @@ $$
 $$
 
 non è reattivo soprattutto se gli archi sono lunghi perché il tempo in coda è comunque poco rispetto al totale
-
-ci vorrebbe tempo per km percorso, ma come faccio a calcolare lo spazio percorso?
 
 
 Numero di fermate non è male, calcolato come integrale dell'aumento della QUEU in ogni intervallo, corretto aggiungendo l'eventuale deflusso se la coda alla fine dell'intervallo non si è azzerata.
@@ -52,3 +84,6 @@ Q_{a}^{MAX} = \sup\{QUEL_{a,t}|t\in T\}
 }
 
 Prendendo invece la lunghezza totale della coda?
+
+
+\subsection{Cost Function Correlation}
