@@ -41,9 +41,9 @@ The macroscopic model performs an incremental traffic assignment, consisting of 
 The mesoscopic model begins by computing inflow profiles for each approach to a junction, determining in detail the expected dynamics of the relevant inflows over the course of a signal cycle, similarly to those described in \todo{ref scoot and formalise?} The notion of \emph{arc} in this context corresponds to that of \emph{lane group}, with the tail corresponding to the detector position (in accordance to the operational requirements specified in section \ref{s:balreq}), and the head with the signalised stop line.
 The flow through the stop line is calculated by propagation of the inflow, while modelling phenomena such as \todo{platoon dispersion along the link}
 \eq{e:dispersion}{
-\tilde{\inflow}_{a,\tau} = \frac{1}{2L+1} \sum_{\tilde{\tau}=\tau-L}^{\tau+L} \inflow_ {a,\tilde{\tau}}
+\tilde{\inflow}_{a,\tau} = \frac{1}{2L+1} \sum_{\tilde{\tau}=\tau-L}^{\tau+L} \inflow_ {a,\tilde{\tau}} \quad \text{where} \quad L=k \length_a / v_a
 }
-
+\todo{this dispersion would average anything out if tt = cycle/2}
 
 
 \section{Performance Index}
