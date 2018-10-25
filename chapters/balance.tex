@@ -27,7 +27,26 @@ Punti deboli:
 \item Probabilmente tende a massimizzare la capacità dove è più richiesta, favorendo lo scorrimento ma provocando un comportamento "ingordo" che crea problemi a valle.
 \end{itemize}
 
-\section{The Performance Index}
+\section{Traffic Model}
+Balance builds a two-level traffic model:
+\begin{description}
+\item[Macroscopic level]: \todo{based on OD and assignment, gives the inflow values to the junction subnetworks, runs once per optimisation window}
+\item[Mesoscopic level]: \todo{second-by-second flow model, generates flow profiles based on macro flows and decision variables, computes performance indices}
+\end{description}
+
+The macroscopic model performs an incremental traffic assignment, consisting of a series of partial assignments of increasing shares of the expected traffic volumes. Each share is assigned (all-or-nothing) according to a path search that accounts for the flows already assigned, finally obtaining an estimate of the total flows on all arcs of the network, \todo{by destination???}. These may be further refined using iterative corrections if real flow measures are available.
+
+\todo{OPTIMA may be plugged in here instead.}
+
+The mesoscopic model begins by computing inflow profiles for each approach to a junction, determining in detail the expected dynamics of the relevant inflows over the course of a signal cycle, similarly to those described in \todo{ref scoot and formalise?} The notion of \emph{arc} in this context corresponds to that of \emph{lane group}, with the tail corresponding to the detector position (in accordance to the operational requirements specified in section \ref{s:balreq}), and the head with the signalised stop line.
+The flow through the stop line is calculated by propagation of the inflow, while modelling phenomena such as \todo{platoon dispersion along the link}
+\eq{e:dispersion}{
+\tilde{\inflow}_{a,\tau} = \frac{1}{2L+1} \sum_{\tilde{\tau}=\tau-L}^{\tau+L} \inflow_ {a,\tilde{\tau}}
+}
+
+
+
+\section{Performance Index}
 For each sub-network $\arcset_j$ around a controlled junction $j$, Balance evaluates a composite performance index based on vehicle delay $D$, number of stops $S$ and queue lengths $Q$ which takes the following form:
 \newcommand{\qjxj}{\mathsmaller{\mathsmaller{(\flows{j},\controlvars{j})}}}
 \eq[,]{e:balancepi}{
@@ -36,10 +55,29 @@ For each sub-network $\arcset_j$ around a controlled junction $j$, Balance evalu
 \weight{a}{S} S_a\qjxj \: + \:
 \weight{a}{Q} Q_a\qjxj
 }
-where the $\weight{a}{}$ terms are arc specific weights on the value of each component performance function, while $\flows{j}$ represents a generic vector of flow values at the junction and $\controlvars{j}$ the set of decision variables.
+where the $\weight{a}{}$ terms are arc specific weights on the value of each component performance function, while $\flows{j}$ represents a generic vector of flow values at the junction and $\controlvars{j}$ the set of decision variables. 
+
+The delay, stops and queue terms are calculated by the mesoscopic model as detailed in the following sections.
+
+\subsubsection*{Balance Delay $D_a$}
+The delay on a lane group 
+
+\subsubsection*{Balance Stops $S$}
+The number of stops
+
+\subsubsection*{Balance Queue Length $Q$}
+Queues are
 
 \subsubsection{Balance Requirements} \label{s:balreq}
-Serve un detector con channel unico per ogni corsia interessante di approccio all'intersezione.
+\todo{Serve un detector con channel unico per ogni corsia interessante di approccio all'intersezione.}
+
+If the synchronisation between signals is to be properly optimised, flow profiles must be collected on the forward star arcs of the controlled junctions in order to better estimate the arrival rates at downstream stop lines, \todo{which would otherwise be assumed constant as described in section \ref{???}}
+
+\todo{To consider all relations between the signals and links in the network.
+For this it is necessary to use the flow profiles of the links which lead out of the subnet, as
+input variables for the signal groups which are located downstream. As described in chapter
+2.1.4.3, the traffic flow profiles of the entry-links of a sub-net are initialized with equally
+distributed profiles. If there is a traffic flow profile available for an exit-link of an adjacent}
 
 \subsection{Balance Settings} \label{s:balset}
 
