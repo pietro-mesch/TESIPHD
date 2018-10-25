@@ -15,9 +15,9 @@ $\length_a$ & \units{m} & length of arc $a$ \\[2pt]
 
 $\left( \nodset_{a}^{-} \; , \;\nodset_{a}^{+} \right) = a$ & & tail and head nodes of arc $a$ \\[2pt]
 
-$\arcset_{i}^{+} = \left\lbrace a \in \arcset \, | \, \nodset_{a}^{-} = i \right\rbrace $ & & forward star of node $i$ (outgoing arcs)\\[2pt]
+$\fstar{i} = \left\lbrace a \in \arcset \, | \, \nodset_{a}^{-} = i \right\rbrace $ & & forward star of node $i$ (outgoing arcs)\\[2pt]
 
-$\arcset_{i}^{-} = \left\lbrace a \in \arcset \, | \, \nodset_{a}^{+} = i \right\rbrace $ & & forward star of node $i$ (incoming arcs)\\[2pt]
+$\bstar{i} = \left\lbrace a \in \arcset \, | \, \nodset_{a}^{+} = i \right\rbrace $ & & backward star of node $i$ (incoming arcs)\\[2pt]
 
 $y,z \in \manset$ & & manoeuvres\\
 
@@ -28,7 +28,7 @@ $y,z \in \manset$ & & manoeuvres\\
 \begin{tabu} to \textwidth {X[3,c] X[1,c] X[6,l]}
 $p,q \in \phaset_{j}$ & & signal phases at junction $j$\\[2pt]
 
-$\arcset_{p} \subseteq \arcset_{j}^{-} $ & & lane groups open during phase $p$ \\[2pt]
+$\arcset_{p} \subseteq \bstar{j} $ & & lane groups open during phase $p$ \\[2pt]
 
 \end{tabu} 
 

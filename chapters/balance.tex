@@ -1,0 +1,46 @@
+\chapter{The Benchmark}
+\todo{This chapter introduces the Genetic Optimiser currently shipped with many OPTIMA systems, which will used as a sparring partner to evaluate the performance of the TRE based optimiser.}
+
+\begin{itemize}
+\item Il modello è meglio o peggio di TRE ?
+\item Perché usare TRE che è molto più lento?
+\item come funziona BAL e cosa può fare?
+\end{itemize}
+
+Balance ha un modellino \emph{mesoscopico} tipo gltm (n realtà è proprio come GLTM al secondo) e fa un taglio delle reti intorno alle junction che vuole controllare. Sugli ingressi alle sottoreti (una per ogni junction) usa profili di flusso costanti, ma se può usa i flussi uscenti di una junction per determinare i flussi entranti in una a valle (propagazione).
+
+Il modello viene usato per ricavare le funzioni di costo FERMATE, LUNGHEZZA CODE (in realtà numero di veh in coda) e PERDITEMPO.
+Lui vede le code come F-E perché i suoi archi sono in realtà le corsie di svolta, ed usa una lunghezza MASSIMA per le code.
+
+Punti di forza di Balance:
+\begin{itemize}
+\item Fa tante intersezioni
+\item E' veloce
+\item Aggiusta anche le durate degli stage
+\end{itemize}
+
+Punti deboli:
+\begin{itemize}
+\item Non è detto che le intersezioni si parlino tanto bene
+\item Non guarda avanti
+\item non vede l'arco ma solo l'approccio: forse una volta che la coda ha raggiunto il sensore per lui tutte le situazioni sono uguali, e sotto carico non gli cambia più niente
+\item Probabilmente tende a massimizzare la capacità dove è più richiesta, favorendo lo scorrimento ma provocando un comportamento "ingordo" che crea problemi a valle.
+\end{itemize}
+
+\section{The Performance Index}
+For each sub-network $\arcset_j$ around a controlled junction $j$, Balance evaluates a composite performance index based on vehicle delay $D$, number of stops $S$ and queue lengths $Q$ which takes the following form:
+\newcommand{\qjxj}{\mathsmaller{\mathsmaller{(\flows{j},\controlvars{j})}}}
+\eq[,]{e:balancepi}{
+\balpi{j}\qjxj = \sum_{a \in \bstar{j}}
+\weight{a}{D} D_a\qjxj \: + \:
+\weight{a}{S} S_a\qjxj \: + \:
+\weight{a}{Q} Q_a\qjxj
+}
+where the $\weight{a}{}$ terms are arc specific weights on the value of each component performance function, while $\flows{j}$ represents a generic vector of flow values at the junction and $\controlvars{j}$ the set of decision variables.
+
+\subsubsection{Balance Requirements} \label{s:balreq}
+Serve un detector con channel unico per ogni corsia interessante di approccio all'intersezione.
+
+\subsection{Balance Settings} \label{s:balset}
+
+

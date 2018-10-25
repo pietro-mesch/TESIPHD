@@ -1,4 +1,5 @@
 \ProvidesPackage{mzkvar}
+\usepackage{relsize}
 
 \newcommand{\s}[1]{
 \mathrm{#1}
@@ -6,10 +7,13 @@
 
 \newcommand{\units}[1]{$ \left[ \mathrm{#1} \right] $}
 
+%%%%%%%%%%%%%%%%%% TOPOLOGY %%%%%%%%%%%%%%%%%%%%
 \newcommand{\nodset}{\s{N}}
 \newcommand{\arcset}{\s{A}}
 \newcommand{\manset}{\s{Y}}
 \newcommand{\phaset}{\s{P}}
+\newcommand{\fstar}[1]{\s{A}_{#1}^{\scriptscriptstyle{\hspace{-2pt}+}}}
+\newcommand{\bstar}[1]{\s{A}_{#1}^{\scriptscriptstyle{\hspace{-2pt}-}}}
 
 \newcommand{\corridor}{\s{C}}
 \newcommand{\simspan}{\s{T}}
@@ -29,10 +33,19 @@
 \newcommand{\nveh}[1]{n_{#1}}
 \newcommand{\traveltime}[1]{t_{#1}^t}
 
-\newcommand{\stopratio}[1]{\omega_{#1}^{S}}
+%%%%%%%%%%%%%%%%% OUTPUT AND PERFORMANCE INDICATORS %%%%%%%%%%%%%%%%%%
+\newcommand{\outputofsomething}[2]{\omega_{#1}^{#2}}
+\newcommand{\weight}[2]{\alpha_{#1}^{\scriptscriptstyle{#2}}}
+%BALANCE
+\newcommand{\balpi}[1]{\outputofsomething{#1}{\scriptscriptstyle{PI}}}
+\newcommand{\flows}[1]{\mathbf{q}_{#1}}
+\newcommand{\controlvars}[1]{\mathbf{x}_{#1}}
+
+
+\newcommand{\stopratio}[1]{\omega_{#1}^{\scriptscriptstyle{S}}}
 \newcommand{\avgdelay}[1]{\omega_{#1}^{D}}
 \newcommand{\timedist}[1]{\omega_{#1}^{T}}
 \newcommand{\utspent}[1]{\omega_{#1}^{t}}
 \newcommand{\uttravelled}[1]{\omega_{#1}^{tt}}
 
-\newcommand{\total}[1]{\omega_{#1}^{n}}
+\newcommand{\total}[1]{\outputofsomething{#1}{n}}

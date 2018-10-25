@@ -17,36 +17,3 @@ L'unica ragione per fare ricerca nel campo dell'ottimizzazione semaforica è que
 \section{Tipi di ottimizzazione}
 Tipi di ottimizzazione, roba dal libro.
 
-\subsection{BALANCE}
-
-\begin{itemize}
-\item Il modello è meglio o peggio di TRE ?
-\item Perché usare TRE che è molto più lento?
-\item come funziona BAL e cosa può fare?
-\end{itemize}
-
-Balance ha un modellino \emph{mesoscopico} tipo gltm (n realtà è proprio come GLTM al secondo) e fa un taglio delle reti intorno alle junction che vuole controllare. Sugli ingressi alle sottoreti (una per ogni junction) usa profili di flusso costanti, ma se può usa i flussi uscenti di una junction per determinare i flussi entranti in una a valle (propagazione).
-
-Il modello viene usato per ricavare le funzioni di costo FERMATE, LUNGHEZZA CODE (in realtà numero di veh in coda) e PERDITEMPO.
-Lui vede le code come F-E perché i suoi archi sono in realtà le corsie di svolta, ed usa una lunghezza MASSIMA per le code.
-
-Punti di forza di Balance:
-\begin{itemize}
-\item Fa tante intersezioni
-\item E' veloce
-\item Aggiusta anche le durate degli stage
-\end{itemize}
-
-Punti deboli:
-\begin{itemize}
-\item Non è detto che le intersezioni si parlino tanto bene
-\item Non guarda avanti
-\item non vede l'arco ma solo l'approccio: forse una volta che la coda ha raggiunto il sensore per lui tutte le situazioni sono uguali, e sotto carico non gli cambia più niente
-\item Probabilmente tende a massimizzare la capacità dove è più richiesta, favorendo lo scorrimento ma provocando un comportamento "ingordo" che crea problemi a valle.
-\end{itemize}
-
-\subsubsection{Requisiti}
-Balance lavora stage based, cambiando gli istanti di inizio degli interstage.
-Per forzare il comportamento "solo offset" bisogna bloccare la durata degli stage, e lasciare libertà totale a tutti gli interstage.
-
-Serve un detector con channel unico per ogni corsia interessante di approccio all'intersezione.
