@@ -46,10 +46,10 @@ $ \toffs{j} $ & \units{s} & offset of junction $j$ \\[2pt]
 
 \subsubsection*{Demand and Supply}
 \begin{tabu} to \textwidth {X[3,c] X[1,c] X[6,l]}
-$ \inflow_{a} $ & \units{veh/s} & demand flow on arc $a$ \\[2pt]
+$ \flow_{a} $ & \units{veh/s} & demand flow on arc $a$ \\[2pt]
 $ \satflow_a $ & \units{veh/s} & saturation flow of arc $a$ \\[2pt]
 
-$ \displaystyle \flowratio_a = \frac{\inflow_a}{\satflow_a} $ & & flow ratio on arc $a$ \\[2pt]
+$ \displaystyle \flowratio_a = \frac{\flow_a}{\satflow_a} $ & & flow ratio on arc $a$ \\[2pt]
 $ \displaystyle \saturation_a = \frac{\flowratio_a}{\gamma_a} $ & & saturation on arc $a$ \\[2pt]
 \end{tabu} 
 
@@ -69,7 +69,7 @@ $ \traveltime{a,t} $ & \units{s} & travel time for arc $a$ entering at time $t$ 
 \begin{tabu} to \textwidth {X[3,c] X[1,c] X[6,l]}
 $ \tclear{a} $ & s & queue clearance time on arc $a$ (per cycle)\\[2pt]
 $ \avgdelay{a} $ & s & average delay of arc $a$ \\[2pt]
-$ \stopratio{a}$ & & share of $\inflow_a$ stopping at or before $\nodset_{a}^{+}$ \\[2pt]
+$ \stopratio{a}$ & & share of $\flow_a$ stopping at or before $\nodset_{a}^{+}$ \\[2pt]
 $ \total{a} \text{, } \total{\corridor} $ & \units{veh} & total inflow to arc $a$ or all sections of corridor $\corridor$ \\[2pt]
 $ \utspent{a} \text{, } \utspent{\corridor} $ & \units{s} & user time spent on arc $a$ or corridor $\corridor$ \\[2pt]
 \end{tabu}

@@ -11,7 +11,7 @@ The subscript $T$ is often dropped for readability, but is \emph{implied} for al
 \subsubsection*{Section and Corridor Total}
 The \emph{section total} is defined as the integral of the inflow to a given section of the corridor $a \in \corridor$, obtained piecewise in this case, as the total number of vehicles entered during each interval of the simulation window:
 \eq[.]{eq:stotal}{
-\total{a} \; = \sum_{\tau \in \simspan} \inflow_{a,\tau} \simintd
+\total{a} \; = \sum_{\tau \in \simspan} \flow_{a,\tau} \simintd
 }
 
 The \emph{corridor total} gives an aggregate measure of how frequented the corridor is on the whole: it does not carry information on which sections are busier, but accounts for all vehicles that accessed \emph{any} section during the simulation.
@@ -37,7 +37,7 @@ However, since it is impossible to know how much time the vehicles have \emph{al
 
 Disregarding the initial vehicles $\nveh{\corridor}$ and only considering flows that enter a corridor section during the simulation, it is possible to extrapolate from the results exactly how much time those vehicles will spend \emph{travelling} the length of each arc, even beyond the end of the simulation. The average \emph{User Time Travelled} is still a measure of time, but obtained from flows and travel times as
 \eq[.]{eq:uttravelled}{
-\uttravelled{a} = \sum_{\tau \in \simspan} \traveltime{a,\tau} \; \inflow_{a,\tau} \; \simintd
+\uttravelled{a} = \sum_{\tau \in \simspan} \traveltime{a,\tau} \; \flow_{a,\tau} \; \simintd
 }
 
 \subsection{Performance Indicators}

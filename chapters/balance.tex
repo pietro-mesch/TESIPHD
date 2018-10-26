@@ -27,23 +27,48 @@ Punti deboli:
 \item Probabilmente tende a massimizzare la capacità dove è più richiesta, favorendo lo scorrimento ma provocando un comportamento "ingordo" che crea problemi a valle.
 \end{itemize}
 
-\section{Traffic Model}
+\section{Traffic Model} \label{s:balancetrafficmodel}
 Balance builds a two-level traffic model:
 \begin{description}
 \item[Macroscopic level]: \todo{based on OD and assignment, gives the inflow values to the junction subnetworks, runs once per optimisation window}
 \item[Mesoscopic level]: \todo{second-by-second flow model, generates flow profiles based on macro flows and decision variables, computes performance indices}
 \end{description}
 
-The macroscopic model performs an incremental traffic assignment, consisting of a series of partial assignments of increasing shares of the expected traffic volumes. Each share is assigned (all-or-nothing) according to a path search that accounts for the flows already assigned, finally obtaining an estimate of the total flows on all arcs of the network, \todo{by destination???}. These may be further refined using iterative corrections if real flow measures are available.
+The macroscopic model performs an incremental traffic assignment, consisting of a series of partial assignments of increasing shares of the expected demand.\\
+Each iteration assigns the corresponding share of flows according to a path search that accounts for any delay due to the flows already assigned, finally obtaining an estimate of the total flows on all arcs of the network. These may be further refined using iterative corrections if real flow measures are available.
 
 \todo{OPTIMA may be plugged in here instead.}
 
-The mesoscopic model begins by computing inflow profiles for each approach to a junction, determining in detail the expected dynamics of the relevant inflows over the course of a signal cycle, similarly to those described in \todo{ref scoot and formalise?} The notion of \emph{arc} in this context corresponds to that of \emph{lane group}, with the tail corresponding to the detector position (in accordance to the operational requirements specified in section \ref{s:balreq}), and the head with the signalised stop line.
-The flow through the stop line is calculated by propagation of the inflow, while modelling phenomena such as \todo{platoon dispersion along the link}
+The mesoscopic model begins by computing an inflow profile $\iflob{a,\tau}$ for each approach to a junction, determining in detail the expected dynamics of the relevant inflows over the course of a signal cycle. \todo{ref scoot and formalise?} 
+
+The notion of \emph{arc} in this context corresponds to that of \emph{lane group}, with the tail corresponding to the detector position (in accordance to the operational requirements specified in section \ref{s:balreq}), and the head with the signalised stop line.
+The flow entering the arc during interval $\tau$ is assumed to reach the stop line in a future interval $\tau'$ by propagating forwards at \emph{constant speed}.
+The exit flow $\eflob{a}$ accounts for inflow, queue, lane capacity and signal timing, but not for any downstream effects:
+\eq[.]{e:balpropagation}{
+\text{with} \; \tau' \geq \tau \; | \; \tau_0 + \length_a / \vzero_a \in \tau'
+\qquad
+\eflob{a,\tau'} = \left\lbrace
+\begin{array}{ll}
+0 \qquad 	&	\text{if lane group is closed}	\\
+\max{\left(
+\satflow_a \: , \:
+\tfrac{\nveh{a,\tau}}{\simintd} + \iflob{a,\tau}'
+\right)}	&	\text{if lane group is open}		\\
+\end{array}
+\right.
+}
+
+The term $\iflob{a,\tau}'$ is used to model \todo{platoon dispersion along the link}
 \eq{e:dispersion}{
-\tilde{\inflow}_{a,\tau} = \frac{1}{2L+1} \sum_{\tilde{\tau}=\tau-L}^{\tau+L} \inflow_ {a,\tilde{\tau}} \quad \text{where} \quad L=k \length_a / v_a
+\iflob{a,\tau} = \frac{1}{2t+1} 
+\sum_{\tau''=\tau-t}^{\tau+t} \iflob{a,\tau''} 
+\quad
+\text{where} \quad t \in \mathds{N} = \length_a \backslash \vzero_a \simintd
 }
 \todo{this dispersion would average anything out if tt = cycle/2}
+
+\todo{describe propagation and define exit flow $e$}
+
 
 
 \section{Performance Index}
@@ -56,12 +81,27 @@ For each sub-network $\arcset_j$ around a controlled junction $j$, Balance evalu
 \weight{a}{Q} Q_a\qjxj
 }
 where the $\weight{a}{}$ terms are arc specific weights on the value of each component performance function, while $\flows{j}$ represents a generic vector of flow values at the junction and $\controlvars{j}$ the set of decision variables. 
-\todo{plus there's an undocumented arc global weight}
+\todo{plus there's an undocumented arc global weight }
 
 The delay, stops and queue terms are calculated by the mesoscopic model as detailed in the following sections.
 
 \subsubsection*{Balance Delay $D_a$}
-The delay on a lane group 
+Considering that the mesoscopic model regards lane groups as arcs, the total delay for a signal group over a given time window is approximated by the integral of time spent by vehicles on the corresponding arcs. 
+
+This is readily obtained from the arc occupancy profile during the desired time window, in turn obtained as the difference between the entry and exit cumulative flows (analogous to those defined for the GLTM in \todo{ref}) which in this case can be taken to be the integrals of the entry and exit flow profiles described in section \ref{s:balancetrafficmodel}:
+\eq[.]{eq:balcum}{
+\fcum{a,t} = \sum_{\tau < t} \iflob{a,\tau} \simintd
+\qquad \text{and} \qquad
+\ecum{a,t} = \sum_{\tau < t} \eflob{a,\tau} \simintd
+}
+\todo{maybe define and use $\tau$ endpoints}
+
+The difference is then taken to represent \emph{delayed} vehicles even though it will factor in \emph{all} vehicles travelling down the approach lane, even if they are not in fact hindered in any way, but given the nature of $\iflob{\tau}$ described by equation \eqref{e:balpropagation} and the short length accounted for (between the sensor and the stop line) this seems like an acceptable approximation. Finally, the \emph{total delay} is calculated over an interval $\simspan$ as:
+\eq[.]{e:baldelay}{
+D_{a,\simspan} = 
+\sum_{\tau \in \simspan} \total{a,\tau} \simintd =
+\sum_{\tau \in \simspan} \left( \fcum{a,\tau} - \ecum{a,\tau} \right) \simintd
+} 
 
 \subsubsection*{Balance Stops $S$}
 The number of stops
