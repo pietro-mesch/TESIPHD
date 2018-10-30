@@ -185,5 +185,63 @@ The problem takes the following form:
 \end{array}
 }
 
+\todo{finish copying in lagrangian approach}
 
-\subsubsection*{•}
+\subsubsection*{Webster Optimal Solution}
+The first and foremost formulation of optimal signal settings to lift the assumption of uniform vehicle arrivals is due to Webster (1958). The approach is based on a queueing system with Poissonian arrivals and a constant service rate equal to the capacity $\gshr{} \satflow$ of the signalised lane group.
+The average delay given for the steady state case by equation \req{e:avgdelay} was extended to obtain a more complete delay function for random arrivals, with an additional empirical term needed to
+improve the fit with \emph{experimental} observations.
+
+To simplify the optimisation problem, a reasonable green share allocation policy (widely
+known as \emph{Equisaturation Policy}) was chosen. This revolves around the idea that an equitable
+distribution of green share is obtained when all critical manoeuvres operate at the same
+saturation level: the higher the demand for a manoeuvre \emph{with respect to the capacity} of the
+relevant infrastructure, the higher the green share allocated to the corresponding signal phase.
+
+Furthermore, Webster worked under the assumptions that no over-saturation occur and average demand \emph{flows} are stable, i.e. and path choices made by road users are in no way a consequence of
+the signal setting. This assumption was removed by later scholars who tackled the global
+optimisation signal setting who route choice problem \todo{ref (Smith, 1984; Cipriani and Fusco,
+2008)}.
+
+Under the equisaturation policy, all phase saturation levels at a given junction are equal
+by definition. The \emph{available green time} can simply be allocated proportionally to the critical
+flow ratio of each phase:
+\eq{e:equisaturation}{
+\gshr{p} = \frac{\flowratio_p}{\flowratio_j} \: \frac{\cycle{j} - \tlost{j}}{\cycle{j}} 
+\quad \forall p \in \phaset_j
+}
+which yields meaningful results provided that the junction total flow ratio does not exceed its
+maximum value of 1 and the cycle time is sufficiently long to amortise the lost time.
+
+The approach can be extended to design for specific (not necessarily even) saturation
+values for each phase by rearranging equation \req{e:saturation} and solving for the green share: this may have practical sense in order to design a higher tolerance to high arrival rates
+into a given phase e.g. if it is strategically more important to keep queues at a minimum on a
+certain set of lanes than it is elsewhere.
+
+With this green share setting policy in place, the problem of minimising the average delay is reduced to a single variable function of the cycle length.\\
+The resulting solution for the cycle time that minimises average delay under probabilistic arrivals is rather complex and was approximated it through an empirical formula, widely known as the Webster optimum cycle time:
+\eq[.]{e:webstercycle}{
+\webstercycle{j} = \frac{\nicefrac{3}{2} \: \tlost{j} + 5}{1-\flowratio_j}
+}
+
+Notice from equations \todo{ref e:mincycle} and \req{e:webstercycle} how the cycle time invariably grows with the total flow ratio of the junction.
+It is also possible to extend \todo{ref e:mincycle} to get a target saturation level $\saturation_j$
+for the junction:
+\eq[,]{e:satcycle}{
+\cycle{j} \small{(\saturation_j)} = \frac{\tlost{j}}{1-\nicefrac{\flowratio_j}{\saturation_j}}
+}
+or even a vector $\vec{\saturation}_{\phaset_j}$ of critical saturation level values each phase, as in
+\eq[.]{e:satphases}{
+\cycle{j} \small{(\vec{\saturation}_{\phaset_j})} = 
+\frac{\tlost{j}}{1-\sum_{p \in \phaset_j} \nicefrac{\flowratio_j}{\saturation_j}}
+}
+
+It should be evident that saturation values greater than 1 correspond to \emph{oversaturated}
+conditions, under which the demand flows are not met with sufficient capacity and queue
+buildup is inevitable: such traffic conditions require radically different timing approaches.
+The rule of thumb mentioned in \todo{ref HCM (2008)} and generally followed in practice is that
+signals should be timed so that lanes operate at saturation levels below 0.85, allowing sufficient margin to deal efficiently with most possible traffic fluctuations, and discharge any queues within a few signal cycles.
+
+\subsubsection*{$P_0 Policy$}
+\todo{Might serve the argument for route choice conscious optimisation.}
+
