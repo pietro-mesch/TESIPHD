@@ -1,4 +1,5 @@
 \chapter{Signalisation of Urban Networks}
+\todo{Chapter intro and overview: elements of a signal plan and how they should be designed to serve the purpose.}
 \section{Anatomy of a Signal Plan}
 The following section briefly illustrates the main features of a signal plan devised for urban traffic regulation. This term encompasses all timings and schedules behind the delicate clockwork of traffic signals, from the elements that constitute a single signal program at one of the many junctions of the network, to the succession of network-wide program changes designed to meet the daily evolution of traffic demand and the propagation of vehicle flows.
 The features presented in this section fully define what is commonly called a pre-timed plan, and as such do not describe any real-time actuation or decision making logic.
@@ -86,7 +87,7 @@ A signal program contains the state switching times for all signals at a given j
 For signal planning and optimisation, it is practical to view the program as a succession
 of signal phases with specific durations, as portrayed in Figure \ref{f:plan}: during each phase a set of arcs are open, allowing users to carry out the corresponding manoeuvres, while the others arcs remain closed and accumulate queues.
 
-A program for junction $j$ consists therefore of a cyclic set of instructions spanning a period called \emph{cycle time} $t_j^C$: given a phase set $\phaset_j$, these specify the start and end of each signal phase with respect to the beginning of the signal cycle.
+A program for junction $j$ consists therefore of a cyclic set of instructions spanning a period called \emph{cycle time} $\cycle{j}$: given a phase set $\phaset_j$, these specify the start and end of each signal phase with respect to the beginning of the signal cycle.
 
 Transitions between subsequent phases are usually enacted via pre-timed signal state change sequences that handle the closure of a set of lane groups before opening the next.
 
@@ -97,7 +98,7 @@ allocation of resources. The daily schedule defines the sequence of programs tha
 junction will run over the course of the day.
 
 \subsubsection{Cycle Time}
-The cycle time $t_j^C$ is the \emph{period} of the signal program, i.e. the time lapse between two occurrences of the same signal phase at a given junction.
+The cycle time $\cycle{j}$ is the \emph{period} of the signal program, i.e. the time lapse between two occurrences of the same signal phase at a given junction.
 It affects the average delay and the level of saturation at which the intersection may operate. In general, longer cycle times imply larger average delays, but increase the total throughput, which may be necessary to deal with high demand flows by attenuating the effects of the time lost in signal phase changes.
 
 \subsubsection{Effective Green Shares}
@@ -115,9 +116,9 @@ its \emph{effective green share}.
 The absolute and relative durations of effective green experienced by lane group $a$ during phase $p$ are denoted respectively as:
 
 \eq[.]{eq:gshr}{
-g_{a,p} \in \left[ 0, t_p \right]
+\gren{a,p} \in \left[ 0, t_p \right]
 \qquad \text{and} \qquad
-\gamma_{a,p} = \frac{g_{a,p}}{t_j^C}
+\gshr{a,p} = \frac{\gren{a,p}}{\cycle{j}}
 }
 
 It is not uncommon to have a lane group open during more than one phase: typically, an
@@ -127,13 +128,13 @@ consecutive phases without incurring further lost time in the phase change.
 The effective green of each arc $a$ is then calculated from the total effective green time it
 gathers over all relevant phases:
 \eq[.]{eq:gshrtot}{
-g_a = \sum_{p \in \s{P}_j} g_{a,p} \quad \text{with} \:
+\gren{a} = \sum_{p \in \s{P}_j} \gren{a,p} \quad \text{with} \:
 \left\lbrace \begin{array}{ll}
-0 < g_{a,p} \leq t_p 	&	\text{if} \, a \in \arcset_p	\\
-g_{a,p} = 0				&	\text{otherwise}		\\
+0 < \gren{a,p} \leq t_p 	&	\text{if} \, a \in \arcset_p	\\
+\gren{a,p} = 0				&	\text{otherwise}		\\
 \end{array} \right.
 \quad \text{and} \quad
-\gamma_{a} = \frac{g_a}{t_j^C}
+\gshr{a} = \frac{\gren{a}}{\cycle{j}}
 }
 
 \subsubsection{Signal Offset}
@@ -141,4 +142,6 @@ When multiple signals are involved, it is important to consider that vehicles th
 
 Synchronisation issues are addressed by defining a global time reference, with all junctions sharing the same cycle time or integer fractions thereof.
 Each junction may then have all of its phase switching times anticipated or delayed in order to operate in concert with the neighbouring ones.
-The amount of time $t_j^O$, by which the beginning of a cycle at one junction $j$ lags or leads the global reference instant, is referred to as a positive or negative \emph{offset}, respectively.
+The amount of time $\toffs{j}$, by which the beginning of a cycle at one junction $j$ lags or leads the global reference instant, is referred to as a positive or negative \emph{offset}, respectively.
+
+\input{chapters/signalSetting}

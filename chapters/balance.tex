@@ -104,21 +104,24 @@ D_{a,\simspan} =
 } 
 
 \subsubsection*{Balance Stops $S$}
-The number of stops
+The number of stops is calculated
 
 \subsubsection*{Balance Queue Length $Q$}
 Queues are
 
 \subsubsection{Balance Requirements} \label{s:balreq}
-\todo{Serve un detector con channel unico per ogni corsia interessante di approccio all'intersezione.}
+In order to ensure that the flow values used for Balance calculations are accurate, the following technical requirements should be met:
+\begin{itemize}
+\item there must be \emph{one detector per lane} for all signalised lanes approaching a junction controlled by Balance, including pocket lanes;
+\item detectors must accurately count vehicles in adverse weather conditions and in case of congestion;
+\item detectors should be placed at least 20 m before the stop line, ideally between 40 and 50 m: in any case, the choice of placement should favour the ability to \emph{count} vehicles accurately over optimal distance.
+\end{itemize}
 
-If the synchronisation between signals is to be properly optimised, flow profiles must be collected on the forward star arcs of the controlled junctions in order to better estimate the arrival rates at downstream stop lines, \todo{which would otherwise be assumed constant as described in section \ref{???}}
-
-\todo{To consider all relations between the signals and links in the network.
-For this it is necessary to use the flow profiles of the links which lead out of the subnet, as
-input variables for the signal groups which are located downstream. As described in chapter
-2.1.4.3, the traffic flow profiles of the entry-links of a sub-net are initialized with equally
-distributed profiles. If there is a traffic flow profile available for an exit-link of an adjacent}
+In addition to the above, the performance can be improved if extra detectors are used in the following non-crucial positions:
+\begin{itemize}
+\item at the edge of the network, to help calibrate the origin-destination flow estimates;
+\item on the forward star arcs of controlled junctions, to gather flow profiles for the prediction of arrival rates at downstream signals, to optimise inter-junction synchronisation.
+\end{itemize}
 
 \subsection{Balance Settings} \label{s:balset}
 

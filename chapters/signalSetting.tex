@@ -1,0 +1,189 @@
+\section{Signal Setting}
+Long before microprocessors and sensors made adaptive real-time traffic control an everyday reality, the notion of signal plan optimisation identified with a range of techniques for designing good signal plans based on historical demand flows, which will henceforth be referred to as \emph{offline} signal setting.
+
+It is worth noting that such methods are not only still used for planning, but lie at the core of several adaptive signal setting approaches: once a \emph{signal setting policy} is chosen to determine the best signalisation parameters for given traffic conditions, it makes little difference from the methodological point of view whether the input variables are determined from historical data or fed in real-time by sensors. 
+
+Naturally, the notion of offline planning does not imply that the dynamic interaction between signal setting and driver behaviour can be disregarded: for example, the assumption often made that route choices are fixed and unaffected by signal settings has warranted the formulation of planning strategies which have proven quite patently inadequate in the real world, as first discussed in Dickson (1981). While optimisation of a single junction for given flows may be a relatively simple problem with an analytical solution, devising a plan for an entire network is an entirely different task.
+
+This section introduces the fundamentals of network signalisation design, describing the methods commonly used to determine the foremost features of a signal program, including cycle time, offsets and green share allocation.
+
+\subsection{Performance of Isolated Signalised Junctions} \label{s:performance}
+\todo{only a more specific case of junction}
+
+The concept of \emph{performance} of a signalised junction may be defined in several ways, but in general terms it represents a gauge of the interaction between supply and demand with respect to a choice of metrics. As such, it depends on the junction physical layout, on the distribution of vehicle arrivals in time and on the signal that regulates their departure times. 
+
+Several flow models were introduced in the scientific literature to reproduce arrival and departure phenomena.
+For all signal planning purposes, traffic flow is usually assimilated to a fluid stream according to the \emph{macroscopic} paradigm, which differs substantially from the microscopic approach where the trajectory of each single vehicle is explicitly considered.
+
+More specifically, vehicle \emph{departures} from a stop line are modelled as a uniform flow. If the \emph{arrival} flows are sufficiently lower than capacity, their inherent random component can be neglected and they are also considered deterministic.
+Conversely, if stochasticity of arrival flows is significant, as it occurs when they approach the relevant arc capacity, or are very low, a random component is added to the simple deterministic model as in \todo{ref Webster, (1956)}.
+This section will present the basic relationships between signal timing variables and junction performance with reference to the simple deterministic model.
+
+\subsubsection*{Queues and Queue Clearance}
+Consider a single arc (lane group) $a \in \bstar{j}$ entering a signalised junction $j \in \nodset$, with a constant demand flow of vehicles $\flow_a$ arriving over the entire cycle. The flow can only be discharged onto the junction during the effective green time, at the constant saturation flow rate $\satflow_a$ given by the arc capacity and possibly degraded due to conflicts with other arc flows. The \emph{flow ratio} between demand and saturation is denoted as:
+\eq[.]{e:flowratio}{
+\flowratio_a = \frac{\flow_a}{\satflow_a}
+}
+During the rest of the cycle, the departure rate is zero and vehicles have to stop, forming a \emph{queue}, which has to be discharged during the next green phase if it is not to grow indefinitely. 
+
+The saturation flow $\satflow_a$ must therefore be sufficient to serve the queue accumulated over the red phase, which has duration $\cycle{j}-\gren{a}$, in addition to the flow of vehicles that keep arriving during the green phase $\gren{a}$.
+
+This relationship is illustrated in figure \ref{f:queues} and may be formalised by considering the following expression for the \emph{queue clearance time} in terms of the signal timing and flows just described:
+\eq[.]{e:tclear}{
+\tclear{a} = 
+\frac{\flow_a \left( \cycle{j} - \gren{a}\right)}{\satflow_a - \flow_a} =
+\frac{\flowratio_a (1-\gshr{a})}{1-\flowratio_a} \: \cycle{j}
+\quad , \quad
+\forall a \in \bstar{j}
+}
+
+\subsubsection*{Vehicle Stops}
+In this context, it makes sense to assume that vehicles will stop if they reach the stop line during the red phase or if they have to join the back of a queue that has yet to be fully discharged, although this is a slightly conservative approximation as the back of the queue might not be standing still during the green phase.
+
+The number of vehicles that end up stopping (or significantly slowing down) during every signal cycle can therefore be expressed as
+\eq{e:queuestops}{
+\nveh{a} = \flow_a \left(\cycle{j} - \gren{a} + \tclear{a} \right) = 
+\satflow_a \: \tclear{a}
+}
+where the right-hand side equality is justified simply by the definition of clearance time $\tclear{}$ given by equation \req{e:tclear} under the assumption that standing vehicles will discharge onto the junction at the maximum possible flow rate during the effective green phase. 
+
+This in turn leads to the theoretical definition of the \emph{stop ratio}, an essential metric indicating what fraction of the total flow of vehicles will have to stop at the junction:
+\eq[,]{e:stopratio}{
+\stopratio{a} = \frac{\satflow_a \tclear{a}}{\flow_a \cycle{j}} = 
+\frac{1-\gshr{a}}{\-\flowratio_a}
+}
+which is proportional to the red share of the cycle time and increases as the arrival rate approaches the discharge capacity.
+Quite obviously for values of $\flowratio_a \geq 1$, but also if $\gshr{a} < \flowratio_a$ queues cannot be fully discharged at every cycle, and all vehicles end up stopping: in this case, the queue can grow indefinitely.
+
+\fig{htbp}{pix/queues.jpg}{f:queues}{
+Geometric determination of stopped vehicles and queue clearance for one approach given the relevant demand flow, saturation flow, cycle and green time.
+The grey triangle between the arrival cumulative, the departure cumulative and the horizontal axis covers the number of vehicles queuing at
+any given moment. 
+Notice that the number of standing vehicles $\nveh{a}^standing$ at the beginning of the effective green does not account for all vehicles that need to stop $\nveh{a}^stop$ according to the approximation given by equation \eqref{e:queuestops}.
+}{width=0.8\textwidth}
+
+\subsubsection*{Average Delay}
+Assuming constant arrival and departure rates, the total delay experienced at each cycle by all users from a given approach a corresponds to the integral over time of the queue size (the area of the greyed out triangle in Figure \ref{f:queues}), whence the average delay $\avgdelay{a}$ per vehicle is found to be
+\eq[,]{e:avgdelay}{
+\avgdelay{a} = 
+\frac{\left( \cycle{j} - \gren{a} \right) \left( \satflow_a \: \tclear{a} \right)}
+{2 \: \left( \flow_a \: \cycle{j} \right)} =
+\frac{\left( \cycle{j} - \gren{a} \right)^ 2 }
+{2 \: \left( 1 - \flowratio_a \right) \: \cycle{j}}
+}
+using \req{e:tclear} for the queue clearance time $\tclear{a}$.
+
+Clearly, the above equation \req{e:avgdelay} assumes no standing queues at the end of a cycle. More complex delay functions can be obtained by considering stochastic fluctuations of arrival flows \todo{ref (Webster, 1958)}. 
+Flows exceeding the arc capacity require the introduction of either simulation models or empirical adaptations of analytical models, such as the coordinate transformation method introduced by  \todo{ref Kimber and Hollis (1979)} and later adopted by the
+popular  \todo{ref HCM traffic manual (2010)}.
+
+\subsubsection*{Critical Flow Ratio and Saturation}
+The saturation flow characterising each lane group depends on various factors, such as
+\begin{itemize}
+\item total road width,
+\item visibility,
+\item conflicts with other manoeuvres served during the same phase,
+\item presence of dedicated turn bays to alleviate such conflicts.
+\end{itemize} 
+Conflicts are particularly relevant to left turns, or turns encroaching a pedestrian crossing: scrupulous phase planning can minimise the number and entity of such conflicts.
+
+The flow ratio $\phi_a$ quantifies the expected demand on a given lane group $a$ in relation to its \emph{nominal} saturation capacity.
+The saturation level $\saturation_a$ is determined by the ratio of demand flow to its \emph{outflow capacity}, which is further limited by the signal, inasmuch as each arc can only be open for a limited share of the available green time:
+\eq[.]{e:saturation}{
+\saturation_a = \frac{\flow_a}{\gshr{a} \, \satflow_a} = 
+\frac{\flowratio_a}{\gshr{a}}
+}
+For values of $\gshr{a} < \flowratio_a$ the saturation level is above 100 \% and the flow cannot be served, leading to queues that grow indefinitely until demand drops.
+
+When multiple lane groups are to be open simultaneously during phase $p$, the \emph{critical flow ratio} $\flowratio_p$ is given by the approach which is relying most heavily on the phase in question.
+The concept is formalised in equation \req{e:critflowrate} by scaling the flow ratio of each approach in proportion to the share of its green time represented by the current phase.
+
+In other words, in searching for the maximum flow ratio, only the share of flow that each lane group must serve during the specific phase is considered:
+\eq[,]{e:critflowrate}{
+\flowratio_p = \max{\left\lbrace \flowratio_a \frac{\gshr{a,p}}{\gshr{a}} 
+\; | \: a \in \arcset_p \right\rbrace}
+}
+whence conversely the \emph{critical lane group} of phase $p$ is also identified as
+\eq[.]{e:critlanegroup}{
+\arcset_p^* = \left\lbrace a \in \arcset_p \; | \: \flowratio_p = 
+\flowratio_a \frac{\gshr{a,p}}{\gshr{a}} \right\rbrace
+}
+
+The \emph{critical saturation} of signal phase $p$ is obtained by applying \req{e:saturation} to its critical lane group:
+\eq[,]{e:critsaturation}{
+\saturation_p = \frac{\flow_p}{\gshr{\arcset_p^*}}
+}
+noting that in the particular case where each lane group is only open during a single phase, critical saturation occurs on the one registering the highest flow ratio.
+
+Since different lane groups may experience different effective green shares, should be calculated using the effective green experienced by the same lane group during that phase, which is practically considered the \emph{phase effective green}:
+\eq[.]{e:effectivephasegreen}{
+\gren{p} = \gren{\arcset_p^* , p}
+}
+
+Finally, the total \emph{junction flow ratio}, which gives a measure of how busy the intersection really is, can be calculated as the sum of the critical flow ratios over all phases of the signal cycle:
+\eq[.]{e:juncflowratio}{
+\flowratio_j = \sum_{p \in \phaset_j} \flowratio_p
+} 
+
+
+\subsubsection*{Lost Time}
+Driver reactions are not instantaneous, and vehicles take a finite amount of time to
+accelerate and clear the junction. This implies that a non-negligible share of the signal cycle goes wasted, since demand is not served efficiently during the phase transitions:
+\begin{itemize}
+\item at every phase start, a few seconds pass before vehicles can flow at full capacity, causing a \emph{start-up time loss};
+\item at every phase end, sufficient time must be allowed for vehicles to clear the junction before others may safely carry out a conflicting manoeuvre, which represents a \emph{clearance loss}.
+\end{itemize}
+
+The start-up loss may be reduced by helping drivers to react more promptly, e.g. using a pre-green amber light or red count-down timers, which also seem to alleviate the stress of being stuck in a queue \todo{ref}.
+The clearance loss may only be mitigated by an accurate choice of signal phase sequence for given traffic conditions or, wherever possible, by appropriate modification of the junction layout, e.g. implementation of protected turn bays.
+
+The total lost time $\tlost{j}$ then depends on phase design and sequence, which in turn should
+be tailored to the geometry of junction $j$ in relation to the expected traffic conditions.
+Each phase contributes its own time losses $\tlost{j,p}$ to the total lost time, which may be
+quantified by the following relation between the effective phase green and the phase duration:
+\eq[.]{e:phasetimelost}{
+\tlost{p} = t_p - \gren{p}
+}
+The total time loss and the total effective green thus account for the whole signal cycle period:
+\eq[.]{e:totloss}{\cycle{j} = \tlost{j} + \sum_{p \in \phaset_j} \gren{p}} 
+
+
+\subsection{Formulation of the Signal Setting Problem}
+Conflicting sets of manoeuvres compete for the right of way at road intersections, and the
+main purpose of signalization is to distribute the junction capacity amongst them.
+
+It follows naturally that the allocation of green time to signal phases is the single most important step in signal setting: the cycle must be allotted according to the relative distribution of demand,
+lest the junction capacity go wasted and unnecessary queues form on critical approaches.
+
+As far as fixed timing is concerned, optimal allocation of green time is a straightforward
+process, yet it can be undertaken according to a number of different principles: early studies
+aimed to develop analytical equations, while modern simulation based methods rely on
+heuristics to shape the signal setting around a cost function that formalises the chosen signal
+setting policy. The next sections provide a general formulation of the problem and a few examples of objective implementation through different setting policies.
+
+\subsubsection*{Lagrangian Formulation}
+\newcommand{\grenvec}{\vec{\gren{}}_{\phaset_j}}
+The Signal Setting of junction $j$ can be formulated as an optimisation problem, i.e. to find
+effective green durations for each phase and cycle time that minimise an objective function while complying with a set of constraints.
+
+A popular choice of cost function may be the average delay at the intersection, given by the weighted average vehicle delay $\avgdelay{a}$ on all lane groups.\\Delay on each lane depends according to equation \req{e:avgdelay} on effective green shares, cycle length, and the relevant flows $\flow_a$ as illustrated in section \ref{s:performance}.
+
+For average delay optimisation of a junction $j$, consider a well-designed phase sequence $\phaset_j$ ensuring minimal conflicts and time losses. The signal program is then fully characterised by a vector of effective phase green shares $\grenvec \in \mathds{R}^{|\phaset_j|}$ together with the cycle time $\cycle{j}$.
+
+The problem takes the following form:
+\eq{e:lagrangian}{
+\begin{array}{lrl}
+\begin{array}{c}
+\textbf{min} \\
+\grenvec , \: \cycle{j}
+\end{array}
+& \avgdelay{j} = & \displaystyle \sum_{a \in \bstar{j}} \avgdelay{a} \flow_a
+\\ \\
+\text{subject to} & \cycle{j} - \tlost{j} = & \displaystyle \sum_{p \in \phaset_j} \gren{p}
+\\ \\
+ & \gren{p} \geq & \flowratio_p \: \cycle{j} \quad \forall p \in \phaset_j \\
+\end{array}
+}
+
+
+\subsubsection*{•}
