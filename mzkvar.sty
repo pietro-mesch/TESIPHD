@@ -1,9 +1,7 @@
 \ProvidesPackage{mzkvar}
 \usepackage{relsize}
 
-\newcommand{\s}[1]{
-\mathrm{#1}
-}
+\newcommand{\s}[1]{\mathrm{#1}}
 
 \newcommand{\units}[1]{$ \left[ \mathrm{#1} \right] $}
 
@@ -12,12 +10,16 @@
 \newcommand{\arcset}{\s{A}}
 \newcommand{\manset}{\s{Y}}
 \newcommand{\phaset}{\s{P}}
+\newcommand{\junset}{\s{J}}
 \newcommand{\fstar}[1]{\s{A}_{#1}^{\scriptscriptstyle{\hspace{-2pt}+}}}
 \newcommand{\bstar}[1]{\s{A}_{#1}^{\scriptscriptstyle{\hspace{-2pt}-}}}
+\newcommand{\tail}[1]{\s{N}_{#1}^{\scriptscriptstyle{-}}}
+\newcommand{\head}[1]{\s{N}_{#1}^{\scriptscriptstyle{+}}}
 
 \newcommand{\corridor}{\s{C}}
 \newcommand{\simspan}{\s{T}}
 \newcommand{\simintd}{\Delta t^{\tau}}
+
 
 
 
@@ -41,6 +43,7 @@
 
 
 
+
 %%%%%%%%%%%%%%%%%% SIGNAL TIMING %%%%%%%%%%%%%%%%%%
 \newcommand{\gren}[1]{g_{#1}}
 \newcommand{\gshr}[1]{\gamma_{#1}}
@@ -49,15 +52,21 @@
 \newcommand{\toffs}[1]{t_{#1}^O}
 \newcommand{\tclear}[1]{t_{#1}^Q}
 
+\newcommand{\offsvec}[1]{\mathbf{t}_{#1}^{\scriptscriptstyle{O}}}
+\newcommand{\grenvec}{\mathbf{\gren{}}_{\phaset_j}}
+\newcommand{\satvec}{\vec{\saturation}}
+
 \newcommand{\webstercycle}[1]{t_{#1}^{\small{C,Webster}}}
 \newcommand{\nveh}[1]{n_{#1}}
 \newcommand{\traveltime}[1]{t_{#1}^t}
 
 
 
+
 %%%%%%%%%%%%%%%%% OUTPUT AND PERFORMANCE INDICATORS %%%%%%%%%%%%%%%%%%
 \newcommand{\outputofsomething}[2]{\omega_{#1}^{#2}}
 \newcommand{\weight}[2]{\alpha_{#1}^{\scriptscriptstyle{#2}}}
+
 
 
 

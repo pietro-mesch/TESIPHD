@@ -1,1 +1,78 @@
-\section{Signal Synchronisation}
+\section{Signal Coordination}
+\fig{htbp}{PIX/greenwave.png}{f:earlysync}{Early signal synchronisation along a San Francisco arterial road, circa 1929. Bands A through T represent vehicle platoons \protect\footnotemark .}{width=\textwidth}
+\footnotetext{By City of San Francisco - Public domain (via Eric Fischer), CC BY-SA 3.0,\\ \url{https://commons.wikimedia.org/w/index.php?curid=34715929}}
+
+Traffic light coordination between adjacent junctions is an essential aspect of an
+optimal signalisation plan, with disposition of \emph{green waves} as its most notable and popular
+feature. Traffic in fact mostly travels along a limited number of main corridors, commonly referred
+to as \emph{arteries} carrying \emph{arterial traffic}.
+
+It has long been accepted as a reasonable compromise to minimise user discomfort along those, rather than taking on the much more intricate problem of reducing the total network delay.
+Although, undeniably, being able to drive through a streak of green signals already goes a long way towards
+improving the quality of a trip from the user point of view, signal coordination chiefly
+serves the purpose of ensuring an efficient use of the available infrastructure.
+
+It is in fact of the utmost importance to avoid unnecessary signal-induced delays and stops which could rapidly bring traffic to a grinding halt, even under rather mild conditions which the network could otherwise cope with.
+
+The search for a coordination solution that maximises usability of urban arteries under specific traffic conditions is still mostly carried out offline — as it was for the first attempts at smart arterial signalization, such as the pen-and-paper method portrayed in Figure \ref{f:earlysync}.
+To this end, a wide variety of methods have been the object of intensive research since the early 1980s, ranging from simple analytical approaches to heuristics.
+
+Analytical methods have brought about a number of popular applications which are still in use despite the fact that they mainly apply to low congestion scenarios; more complex methods, which account for demand flows and their propagation along the arterial, can deal with heavy congestion related phenomena, but invariably require a more detailed network model and rely on computationally demanding simulations rather than a closed-form problem formulation. An overview of the most prominent approaches to the signal coordination problem is given in the following sections.
+
+\subsection{The Traffic Corridor}
+\todo{Introduction}
+
+A traffic corridor $\corridor$ may be defined as an \emph{ordered} set of $n$ \emph{connected} arcs:
+\eq[.]{e:corridordef}{
+\arcset \supset \corridor = \left\lbrace a_1, a_2, \dotsc , a_n \right\rbrace \qquad \mathrm{with} 
+\quad \left\lbrace
+\begin{array}{l}
+a_{i-1} \in \bstar{a_i} \quad \forall i > 1 \\
+a_{i+1} \in \fstar{a_i} \quad \forall i < n \\
+\end{array}
+\right.
+}
+
+Although all nodes along the corridor are, strictly speaking, junctions, it makes sense in this context to define the ordered subset $\junset_\corridor$ of the $m$ \emph{signalised} junctions that actually regulate the flow on the corridor.
+This may be formalised as
+\eq{e:corridorjuncs}{
+\bigcup_{a \in C} \left\lbrace \tail{a}, \head{a} \right\rbrace \supset
+\junset_\corridor = \left\lbrace j_1, j_2, \dotsc , j_m \right\rbrace
+\quad \text{such that} \quad \forall j \in \junset_\corridor \quad
+\exists y \in \phaset_j | \{\bstar{y}, \fstar{y}\} \subset \corridor
+}
+where $\{\bstar{y}, \fstar{y}\}$ are the origin and destination lanes of some signalised manoeuvre $y$ that joins two arcs of the corridor.
+
+Coordination of junctions $\junset_\corridor$ is handled by offsetting their local timing instructions (as described at the end of section \ref{s:anatomy}), i.e. anticipating or delaying all phase changes rigidly without altering the necessary green shares determined on the basis of average demand flows.
+The global offset values (with respect to an arbitrary global time reference) of the junctions of corridor $\corridor$ may be represented by a vector $\offsvec{\corridor}$.
+
+Furthermore, it is assumed that all junctions of the corridor share the same cycle time, so that in the context of signal coordination the symbol $\cycle{\corridor}$ refers to all junctions, and may be even used without the subscript $\corridor$.
+
+
+\subsection{Bandwidth Maximisation} \label{s:bandmax}
+In relation to arterial traffic, the concept of \emph{progression bandwidth} emerges as a measure of the quality of a green wave setup along a \emph{corridor} and can be defined as the duration of the time window through which a vehicle may enter the artery and travel its entire length without encountering red lights nor standing queues.
+
+By reducing delays and number of stops along the most critical paths, bandwidth maximisation is a relatively straightforward but effective way to help the system meet user expectations about traffic fluidity, mitigating the stress associated with driving in a congested urban environment. Moreover, this type of signal coordination has proven highly beneficial in reducing the chance of rear end collisions and red signal violations \todo{ref (Li, Tarko 2010)} as well as pollution levels associated with the hiccupping stop-and-go driving often experienced under poorly coordinated signalisation.
+
+Bandwidth maximisation has been formulated as a Linear Optimisation problem since \todo{ref Little et al. (1981)} which led to development of the MAXBAND/MULTIBAND series of software solutions. These considered the offsets between junctions as the only decision variables, but provided a computationally viable method for one-way and two-way bandwidth maximisation relying solely on the target travel times between junctions and predetermined signal cycle length and green times. \todo{A more efficient solution method was introduced by ... ref Papola and Fusco (1988a) ... expand}.
+
+However, relevant discrepancies — dubbed \emph{bandwidth degradation} — were observed between the expected outcome and the real-world performance of the signal plans generated by these early methods. It is now universally accepted that, as \todo{ref Tsay and Lin (1988)} amongst many others pointed out, the underlying models were oversimplified and no account was taken of side flows and platoon dispersion. 
+
+Proposed extensions of the original method aimed to factor in queue and side flow clearance times, to produce a more realistic bandwidth model for phase offset determination. The analytical relationship between maximal bandwidth and minimum delay problems was finally formulated in \todo{Papola and Fusco (2000) ... analytical model, delays as function of the maximal bandwidth and other variables}.
+
+At present, offline arterial progression optimisation techniques invariably rely on some formulation of the \emph{bandwidth maximisation problem}, as in the cases illustrated in the next section, which is to say that their common objective is to maximise a \emph{theoretical} traffic throughput, often without much consideration for network performance \todo{(and online too! the point is: nobody looks beyond the throughput but we are trying to)}.
+
+\todo{Make it clear that the slack band concept is unorthodox but original, and implemented in the context of this work.}
+
+
+\subsubsection*{Mixed Integer Linear Programming Approach}
+\todo{Illustrate De Nunzio 2015 VSL bandwidth optimiser}
+
+\subsubsection*{The Slack Band Approach}
+\todo{Illustrate the slack bandwidth generalisation.}
+The idea of \emph{slack} bandwidth is an answer to the very strict definition of bandwidth given at the beginning of section \ref{s:bandmax}, according to which only the band running through all junctions counts for something, implying that:
+\begin{itemize}
+\item if one passing phase is particularly short, coordination between longer green phases may be disregarded \todo{(discuss fringes in MILP approach)};
+\item in bi-directional optimisation, maximisation of the return band may prioritise a very narrow band that \emph{just} makes it through all junctions (possibly degrading the main band significantly) over a very wide band divided in two or more chunks.
+\end{itemize} 
+\todo{To avoid this we consider the total band between any pair of junctions: illustrate algorithm.}

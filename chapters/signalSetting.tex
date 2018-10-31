@@ -162,7 +162,7 @@ heuristics to shape the signal setting around a cost function that formalises th
 setting policy. The next sections provide a general formulation of the problem and a few examples of objective implementation through different setting policies.
 
 \subsubsection*{Lagrangian Formulation}
-\newcommand{\grenvec}{\vec{\gren{}}_{\phaset_j}}
+
 The Signal Setting of junction $j$ can be formulated as an optimisation problem, i.e. to find
 effective green durations for each phase and cycle time that minimise an objective function while complying with a set of constraints.
 
@@ -230,7 +230,7 @@ for the junction:
 \eq[,]{e:satcycle}{
 \cycle{j} \small{(\saturation_j)} = \frac{\tlost{j}}{1-\nicefrac{\flowratio_j}{\saturation_j}}
 }
-or even a vector $\vec{\saturation}_{\phaset_j}$ of critical saturation level values each phase, as in
+or even a vector $\satvec_{\phaset_j}$ of critical saturation level values each phase, as in
 \eq[.]{e:satphases}{
 \cycle{j} \small{(\vec{\saturation}_{\phaset_j})} = 
 \frac{\tlost{j}}{1-\sum_{p \in \phaset_j} \nicefrac{\flowratio_j}{\saturation_j}}
