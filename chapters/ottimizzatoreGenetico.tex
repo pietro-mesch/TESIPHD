@@ -1,4 +1,5 @@
-\chapter{Ottimizzazione con GLTM Genetico}
+\chapter{A Real-Time Forecast-Based Genetic Algorithm}
+\todo{Needs complete rewriting}
 Perché è una buona idea?
 E' una simulazione in grado di tenere conto di fenomeni complessi ma più veloce della micro.
 
@@ -28,15 +29,21 @@ Non varrebbe la pena guadagnare tempo usando intervalli di 6s ?
 \subsection{GLTM Simulation Output} \label{s:output}
 \todo{Specify what quantities are ultimately calculated in a TRE simulation and can be considered its output.}
 
-\section{Il modello in tempo reale}
+\section{Real Time Data Integration}
+
 
 \subsection{Corridoio di ottimizzazione}
 Definito come una serie di link.
 I link attraversano un certo numero di intersezioni, alcune delle quali sono amministrate da un semaforo.
 Fra l'inizio e il primo semaforo, fra i semafori, e dopo l'ultimo, i link sono accorpati in sezioni. I KPI vengono calcolati su di essi.
 
-\section{Tuning del modello}
+\subsubsection*{Return Corridor Definition}
 
 
-\section{Tuning del Genetico}
-Effetti dimensioni popolazione, aggiustamenti mutazione
+\section{Genetic Algorithm}
+\todo{Describe implementation and tuning}
+\subsection{Time Dependent Weighting of Cost Functions}
+
+
+\section{Initial Population Seeding with Slack Bandwidth}
+\todo{Describe how the slackband is implemented to initialise the population and obtain better solutions faster.}

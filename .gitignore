@@ -1,6 +1,6 @@
 *.log
+REV/*
 Bozza.synctex.gz
-PRES/~$review1.pptx
 Bozza.aux
 Bozza.tex
 Bozza.log

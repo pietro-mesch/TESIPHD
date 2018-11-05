@@ -1,5 +1,14 @@
 \chapter{Smart Signals}
-\todo{This chapter presents adaptive signalisation approaches}.
+\todo{This chapter presents adaptive signalisation approaches. TO REVIEW.}.
+
+Over the years, many attempts have been made to render the signalisation system of urban networks capable of reacting autonomously to the traffic conditions, to address the mutable nature of demand. In this context, the term optimisation is used in its broader sense of choice of the best option, whether this is picked out of a set of previously planned solutions, tailored on-the-fly onto the current traffic conditions, or simply the result of a sequence of best possible actions evaluated individually: the main features of each class of very different approaches will be illustrated in the following sections.
+
+The one thing that all responsive traffic control systems have is the need to perceive the traffic state on the network by means of detectors. The type and quantity of information required for different optimisation approaches may vary, but in the end it always boils down to one, or a combination, of the following quantities:
+\begin{description}
+\item[flow]: the number of vehicles crossing a road section in a given amount of time
+\item[occupancy]: the percentage of time the sensor spends occupied by a vehicle
+\item[velocity]: the average speed of the vehicles through a road section
+\end{description}
 
 \section{Adaptive Signalisation}
 \todo{
@@ -11,6 +20,42 @@ Why do we need adaptive signals?
 \end{itemize}
 }
 
-\section{Tipi di ottimizzazione}
+\section{Traffic Actuated Signals}
+
+\subsection{Automatic Plan Selection}
+\todo{relevant because allows very careful optimisation of a scenario to devise a general plan that makes sense under even extreme circumstances. copy and review}
+
+\subsection{Traffic Actuated Control}
+\todo{relevant because more efficient and reliable than any offline optimisation but currently hardly ever does much more than increasing throughput. it could benefit from a more network conscious perspective. copy and review}
+
+\section{Real Time Signal Plan Generation}
+\todo{copy and review}
+
+Real time optimisers that perform plan generation are a class of proactive signal control systems that, based on current traffic conditions, seek to develop an optimal plan to apply in the immediate future, either from first principles or by continuous update of an existing pre-timed plan. While each plan is played out, the system gathers information to make the next.
+
+This mode of operation is often referred to as rolling horizon, and in order for the system to respond effectively (i.e. to capture and react to rapid changes in traffic conditions) the rolling horizon time step should be reasonably short, which imposes austere constraints on the optimisation methods. Some real-time optimisers with a very short rolling horizon step update the signalisation plan at every cycle, so that their behaviour may appear indistinguishable from that of an actuated controller.
+
+It is important however to understand the clear conceptual difference between the two: actuated controllers perform second-by-second decisions about the best action to perform instantly, while the systems considered in this section plan ahead, producing fully featured signal plans made of cycle times, offsets and green shares deemed optimal for dealing with the traffic conditions observed.
+
+\subsection{Incremental Analytical Optimisation}
+The most prominent member of this category is the \emph{Split Cycle and Offset Optimisation Technique} developed for research purposes in Glasgow, and first applied there in 1975 under the acronym SCOOT by which it is now popular all over the world, counting over a hundred active installations.
+It revolves around a centralised control unit which generates plans based on a real-time traffic snapshot gathered from detectors. The signalisation plans are continuously updated, with a frequency in the order of one to three cycle times, and may concern the entire network or \emph{regions} thereof which are expected to feature homogeneous traffic conditions.\\
+\todo{copy and review}
+
+\fig{htbp}{PIX/scoot.png}{f:scoot}{
+SCOOT Cyclic Flow Profiles and queue prediction: detector readings are used to update the flow profile, which is integrated to predict the queue forming at the downstream junction during the red phase. The information may prompt the system to anticipate or delay a phase change in order to accommodate the measured demand.}{width=0.8\textwidth}
+
+\subsection{Linear Quadratic Optimal Control}
+\todo{copy and review}
+
+\subsection{Traffic Gating}
+\todo{extremely relevant, it is the only approach known so far that attempts to prevent congestion by doing something counter intuitive like delaying flows upstream}
+
+Feedback Traffic Gating \todo{ref (Ekbatani 2012) }is a form of actuated signal control aiming to prevent oversaturation of critical portions of the network by holding back the incoming traffic flows — using deliberately exaggerated red phases — rather than attempting to deal with the flows already trapped in a congested area. In these respects, it constitutes a simple yet innovative method to induce more efficient utilisation of the existing infrastructure, and an answer to the patent performance degradation that currently feasible real-time optimisation solutions face under saturated conditions.
+\todo{copy and review}
+
+\subsubsection*{\todo{Network Fundamental Diagram Formulation}}
+
+\subsubsection*{\todo{Feedback Controller Design}}
 
 
