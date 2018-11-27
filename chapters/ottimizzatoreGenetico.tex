@@ -18,7 +18,7 @@ This chapter presents the approach in detail, beginning with an introduction to 
 
 \section{TRE simulation engine and Optima framework}
 The proposed optimisation method relies on the macrosimulation engine known as TRE, based on the eponymous Dynamic User Equilibrium assignment algorithm.
-TRE lies at the core of the \todo{optima, reliability, installations around the world}.\\
+TRE lies at the core of the Optima traffic management software suite, developed in Rome by PTV SISTeMa\footnote{ITS spinoff of Sapienza University, now part of the Porsche group and partner in the present work \todo{???}} and running in traffic control centres around the globe, where it has time and again proven its reliability and forecast accuracy.\\
 This section aims to illustrate its fundamental principles of operation, in order to clarify how they might affect the optimisation and better understand the role of the simulation engine within the architecture.
 
 \todo{introduce the idea of DTA as simulation, show route choice/network loading iterations}
@@ -28,7 +28,7 @@ This section aims to illustrate its fundamental principles of operation, in orde
 \todo{Traffic is considered to be a continuum, both as far as vehicle movements and trip-maker decisions are concerned}
 
 Trip planning and route choice models are extremely relevant to the accuracy of a DTA and to the computational effort involved.
-However, the representation of traffic propagating and interacting with the network and signals, and all related phenomena within the scope of the present study, falls upon the Dynamic Network Loading model.\\
+However, the representation of traffic as it propagates and interacts with the network and signals, and all related phenomena within the scope of the present study, falls upon the Dynamic Network Loading model.\\
 The most suitable macroscopic model for the task at hand is the General Link Transmission Model, which will be analysed in further detail over the next few sections.
 
 \subsection{General Link Transmission Model}
@@ -36,11 +36,11 @@ The \emph{General Link Transmission Model}, henceforth referred to as GLTM, is a
 
 It is built upon the representation of traffic as a partially compressible one-dimensional fluid flowing through the network according to the principles of \emph{Kinematic Wave Theory} (KWT), as developed independently by \cite{lighthill1955kinematic} and \cite{richards1956shock}.
 
-Its origins can be traced back to the \emph{Cell Transmission Model} first presented in relation to highway traffic by \cite{daganzo1994cell} and shortly after applied to network traffic in \citep{daganzo1995cell}: it was the first dynamic traffic representation based on hydrodynamic theory, and borrowed heavily from that field, as is most evident from the cell-based space discretisation of the road network adopted directly from computational fluid dynamics.
+Its origins can be traced back to the \emph{Cell Transmission Model} first presented in relation to highway traffic by \cite{daganzo1994cell} and shortly after applied to network traffic in \citep{daganzo1995cell}. CTM was the first dynamic traffic representation based on hydrodynamic theory, and borrowed heavily from that field, as is most evident from the cell-based space discretisation of the road network adopted directly from computational fluid dynamics.
 
 The need for cell discretisation was eliminated in the \emph{Link Transmission Model} presented by \cite{yperman2005link}. This innovative approach allowed dynamic network loading of large scale networks using a computationally efficient algorithm that only required calculations at intersection nodes, while solving for traffic propagation along whole links using kinematic wave theory: this allowed to do away with a significant complexity factor while still accurately modelling local flow restrictions and junction delays.
 
-The original LTM, presented in full detail in \cite{yperman2007link}, rather simplified the wave propagation problem relying on the \emph{simplified} kinematic wave theory proposed by\citep{newell1993simplified}, whereby only two possible wave propagation speeds re contemplated: a forwards one for free-flowing traffic, and one for the congested flow states to propagate backwards.
+The original LTM, presented in full detail in \cite{yperman2007link}, rather simplified the wave propagation problem relying on the \emph{simplified} kinematic wave theory proposed by \citep{newell1993simplified}, whereby only two possible wave propagation speeds are contemplated: a forwards one for free-flowing traffic, and one for the congested flow states to propagate backwards.
 This is a considerable approximation, as the relation between vehicle density, speed and the resulting flow is rather more complex in reality:
 the instrument provided by kinematic wave theory to express such relations in general is the Density-Flow Fundamental Diagram, illustrated in section \ref{s:fundiag}.
 
@@ -56,7 +56,7 @@ The features of the supply model described in the next sections, together with t
 In the GLTM, traffic propagates along links according to kinematic wave theory.
 As stated in section \ref{s:urbannetwork}, links are assimilated to weighted arcs of a directed graph, and as such are one-dimensional, one-directional and homogeneous along their length, stretching between locations $x^0$ (the tail node) and $x^1 = x^0 + \length$ (the head node): the actual link shape is inconsequential. As far as the arc model is concerned, there is no need to disambiguate arcs since they exist and are processed independently: arc subscripts can be dropped for ease of reading but are to be implied on all relevant quantities henceforth.
 
-The traffic state at a specific location $x \in \left[x^0, x^1\right]$ is characterised by three macroscopic variables:
+The traffic state at a specific location $x \in \left[x^0, x^1\right]$ along a link is characterised by three macroscopic variables:
 \begin{description}
 \item[flow] $\flow_x$ : vehicles through the link section per unit time;
 \item[density] $\density_x$ : average number of vehicles per unit length;
@@ -68,7 +68,7 @@ As is evident from their dimensions, only two of these quantities can be indepen
 \todo{link with next}
 
 \subsubsection{Fundamental Diagram} \label{s:fundiag}
-Kinematic wave theory assumes a functional relation between traffic density and flow, also known as the \emph{Fundamental Diagram} of traffic flow. It approximates the changes in the average behaviour of drivers as the road gets more crowded, and may take several forms, but it is invariably derived from the properties of the road, e.g. width, slope or parking. As such it is itself, conceptually, a property of the link, although it could also be made to depend on environmental factors and driver behaviour or be specific to a particular class of vehicles.
+Kinematic wave theory also assumes a functional relation between traffic density and flow, known as the \emph{Fundamental Diagram} of traffic flow. It approximates the changes in the average behaviour of drivers as the road gets more crowded, and may take several forms, but it is invariably derived from the properties of the road, e.g. width, slope or parking. As such it is itself, conceptually, a property of the link, although it could also be made to depend on environmental factors and driver behaviour, or be specific to a particular class of vehicles.
 
 A generic fundamental diagram expresses the relationship between flow and density under \emph{stationary} traffic conditions, i.e. it is derived as an equilibrium condition between flow speed and available space taking the general form
 \eq{e:fundiag_generic}{
@@ -77,31 +77,45 @@ q = f(k)
 which may be represented on a Density-Flow graph like the ones shown in Figure \ref{f:fundiag}.
 \fig{htbp}{PIX/undoguy.png}{f:fundiag}{Fundamental Diagram of a link, representing the functional relation between vehicular density and speed, resulting in different flow values for different congestion levels. Triangular form (left) and ??? form (right) are similarly shaped around the critical density value $\hat{\density}$, the jam density $\density_{jam}$ and the free flow speed $\vzero$.}{width=0.4\textwidth}
 
-The shape of a fundamental diagram reflects different assumptions about ??? but there are a few key features that are shared by all formulations:
+The shape of a fundamental diagram reflects different assumptions about traffic flow dynamics, but there are a few key features that are shared by all formulations:
 \begin{itemize}
 \item when density approaches \emph{zero} the speed approaches the maximum value attainable on the link ($\vzero$) but the flow tends to zero;
 \item maximum flow occurs at the \emph{critical density $\hat{\density}$} also referred to as the link capacity;
-\item beyond capacity, further increase in vehicular density induces a speed penalty that causes the flow to decrease
+\item beyond capacity, further increase in vehicular density induces a speed penalty that causes the flow to decrease;
 \item when vehicles reach the \emph{jam density} $\density_{jam}$ they are packed as closely as possible, and come to a standstill;
 \item for any flow state on the $k-q$ curve, the speed is given by the slope of the line connecting it to the origin;
 \item the rising branch diagram (i.e. to the left of $\hat{\density}$) represents free flowing 
 states, the descending branch represents congested states.
 \end{itemize}
 
-In a simple triangular diagram like the one shown in Figure \ref{f:fundiag} (left) the speed is assumed to remain constant at its maximum value for all hypocritical states, while above capacity it decreases linearly with density.
-More detailed modelling of the involved phenomena may yield a diagram shape more similar to Figure \ref{f:fundiag} (right), where the speed is shown to decrease even in hypocritical conditions as the road gets more crowded, due e.g. to a certain variance in driving speed which, as more vehicles become involved, yields a higher chance of having a slow vehicle delaying all the others \emph{(hypocritical spacing)}.
+In a simple triangular diagram like the one shown in Figure \ref{f:fundiag} (left) the speed is assumed constant at its maximum value for all subcritical states, while above capacity it decreases linearly with density. More subtle modelling may yield a diagram shape more similar to Figure \ref{f:fundiag} (right), where the speed is shown to decrease even in subcritical conditions as the road gets more crowded due to the natural variance in driving speed which, as more vehicles become involved, yields a higher chance of having a slow vehicle delaying all the others \emph{(subcritical spacing)}.
 
-In both cases it is assumed that as the density increases, the available space becomes insufficient to maintain safe distances between vehicles, causing drivers to slow down \emph{(hypercritical spacing)}.
-
-If a model is to rely on the fundamental diagram to hold for non-stationary traffic as well, it must allow for vehicles to change speed instantly with infinite acceleration, as is the case with GLTM and in general with first-order implementations of KWT.
-
-
+In both cases it is assumed that as density increases, the available space becomes insufficient to maintain safe distances between vehicles, causing drivers to slow down \emph{(hypercritical spacing)}.
 \todo{analysis of shapes given in ref tiddi}
-\todo{higher order traffic phenomena such as the emergence of stop-and-go waves,
-oscillatory congested traffic, or capacity drop (which is caused by the so-called hysteresis
-effect, meaning that the sequence of traffic states follows a different path in the
-fundamental diagram during breakdown to congestion than during recovery from
-congestion (Tampère (2004)), are not considered}
+
+If a model is to rely on the fundamental diagram to hold for non-stationary traffic as well, it must allow vehicles to change speed instantly with infinite acceleration, as is the case with GLTM and in general with first-order implementations of KWT. \\
+Higher order traffic phenomena such as the emergence of stop-and-go waves along the link, or fundamental diagram hysteresis (due to traffic states evolving asimmetrically when leading up to congestion or recovering from it) are knowingly neglected.
+
+\subsubsection{Traffic State Propagation}
+\todo{how do we use KWT and FUN}
+To understand how traffic states propagate on links, consider the cumulative flow $N(x,t)$, i.e. the number of vehicles that have passed location $x$ along a link before time $t$.
+Assuming that vehicle conservation is respected along the link, i.e. that no vehicle is created or destroyed between the tail and the head node, the trajectory of the $n^{\mathrm{th}}$ vehicle to enter the arc can be traced on a time-space diagram as the locus of points for which $N(x,t) = n$ as shown in Figure \ref{f:txtraj}.
+
+\fig{htbp}{PIX/undoguy.png}{f:txtraj}{vehicle trajectories}{width=0.4\textwidth}
+
+The cumulative function $N(x,t)$ is clearly discontinuous in both time and space, but it is possible to consider a smooth approximation that is differentiable in either direction without altering the essence of the phenomenon. Flow and density values at a given location and time can then be expressed as the partial derivatives
+\eq[,]{e:dndt}{\flow(x,t) =\frac{\partial N(x,t)}{\partial t}}
+\eq[,]{e:dndx}{\density(x,t) =\frac{-\partial N(x,t)}{\partial x}}
+the latter requiring a sign change simply because density is defined positive but the cumulative decreases along the positive spatial direction.
+
+\todo{derive wave propagation speed}
+
+\todo{derive conservation}
+
+\todo{fifo and Newell-Luke Minimum Principle}
+
+\todo{shockwaves}
+
 
 \subsubsection{Lane Modelling}
 \todo{compare with balance lane model.}
@@ -112,7 +126,13 @@ I link attraversano un certo numero di intersezioni, alcune delle quali sono amm
 Fra l'inizio e il primo semaforo, fra i semafori, e dopo l'ultimo, i link sono accorpati in sezioni. I KPI vengono calcolati su di essi.
 
 \subsubsection*{Return Corridor Definition}
+The return corridor cannot simply be defined as the sequence of links traversing the same nodes in reverse order: there is no guarantee that for any pair of subsequent nodes representing the tail and head of a given link there should exist another link joining them in the opposite direction.
 
+Furthermore, the two directions of a traffic corridor may well be modelled as completely disjoint sets of arcs, sharing no nodes between them.
+
+The present approach can handle two-way optimisation without loss of generality in this respect: it is sufficient to define the return corridor in the exact same way as the primary direction, and to indicate it as \emph{return} direction along with a weight coefficient \todo{specify semantics and usage}.
+
+If the junctions traversed by the return corridor are handled by the same set of controllers as the main, the problem size remains the same and the extra computation time required to calculate the relevant KPI is practically negligible. If more controllers are involved, they can be ignored (which makes little sense unless they actually cannot be controlled and adjusted remotely) or included in the optimisation, which will increase the solution space size and the time required to explore it.
 
 
 

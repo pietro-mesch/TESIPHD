@@ -221,19 +221,19 @@ certain set of lanes than it is elsewhere.
 With this green share setting policy in place, the problem of minimising the average delay is reduced to a single variable function of the cycle length.\\
 The resulting solution for the cycle time that minimises average delay under probabilistic arrivals is rather complex and was approximated it through an empirical formula, widely known as the Webster optimum cycle time:
 \eq[.]{e:webstercycle}{
-\webstercycle{j} = \frac{\nicefrac{3}{2} \: \tlost{j} + 5}{1-\flowratio_j}
+\webstercycle{j} = \frac{\frac{3}{2} \: \tlost{j} + 5}{1-\flowratio_j}
 }
 
 Notice from equations \todo{ref e:mincycle} and \req{e:webstercycle} how the cycle time invariably grows with the total flow ratio of the junction.
 It is also possible to extend \todo{ref e:mincycle} to get a target saturation level $\saturation_j$
 for the junction:
 \eq[,]{e:satcycle}{
-\cycle{j} \small{(\saturation_j)} = \frac{\tlost{j}}{1-\nicefrac{\flowratio_j}{\saturation_j}}
+\cycle{j} \small{(\saturation_j)} = \frac{\tlost{j}}{1-\frac{\flowratio_j}{\saturation_j}}
 }
 or even a vector $\satvec_{\phaset_j}$ of critical saturation level values each phase, as in
 \eq[.]{e:satphases}{
 \cycle{j} \small{(\vec{\saturation}_{\phaset_j})} = 
-\frac{\tlost{j}}{1-\sum_{p \in \phaset_j} \nicefrac{\flowratio_j}{\saturation_j}}
+\frac{\tlost{j}}{1-\sum_{p \in \phaset_j} \frac{\flowratio_j}{\saturation_j}}
 }
 
 It should be evident that saturation values greater than 1 correspond to \emph{oversaturated}
