@@ -6,8 +6,8 @@
 \usepackage{mzk,mzkvar}
 
 %%% DRAFT WATERMARK
-\usepackage[printwatermark]{xwatermark}
-\newwatermark[allpages,color=black!10,angle=45,scale=3,xpos=-10,ypos=0]{DRAFT}
+%\usepackage[printwatermark]{xwatermark}
+%\newwatermark[allpages,color=black!10,angle=45,scale=3,xpos=-10,ypos=0]{DRAFT}
 
 
 \begin{document}
@@ -32,5 +32,10 @@
 \input{chapters/visualisation}
 
 \input{chapters/risultati}
+
+\nocite{*}
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{plainnat}
+\bibliography{bib/mzk_phd}
 
 \end{document}

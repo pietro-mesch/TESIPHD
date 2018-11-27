@@ -1,4 +1,5 @@
 \contentsline {chapter}{\numberline {1}Signalisation of Urban Networks}{9}{chapter.1}
+\contentsline {subsection}{\numberline {1.0.1}The Urban Network}{9}{subsection.1.0.1}
 \contentsline {section}{\numberline {1.1}Anatomy of a Signal Plan}{9}{section.1.1}
 \contentsline {subsubsection}{Signal Phases}{9}{section*.12}
 \contentsline {subsubsection}{Signal Programs}{12}{section*.14}
@@ -23,34 +24,45 @@
 \contentsline {subsection}{\numberline {2.3.2}Linear Quadratic Optimal Control}{28}{subsection.2.3.2}
 \contentsline {subsection}{\numberline {2.3.3}Traffic Gating}{30}{subsection.2.3.3}
 \contentsline {chapter}{\numberline {3}A Real-Time Forecast-Based Genetic Algorithm}{31}{chapter.3}
-\contentsline {section}{\numberline {3.1}General Link Transmission Model}{32}{section.3.1}
-\contentsline {subsection}{\numberline {3.1.1}GLTM Simulation Output}{32}{subsection.3.1.1}
-\contentsline {section}{\numberline {3.2}Real Time Data Integration}{32}{section.3.2}
-\contentsline {subsection}{\numberline {3.2.1}Corridoio di ottimizzazione}{32}{subsection.3.2.1}
-\contentsline {section}{\numberline {3.3}Genetic Algorithm}{32}{section.3.3}
-\contentsline {subsection}{\numberline {3.3.1}Time Dependent Weighting of Cost Functions}{32}{subsection.3.3.1}
-\contentsline {section}{\numberline {3.4}Initial Population Seeding with Slack Bandwidth}{32}{section.3.4}
-\contentsline {chapter}{\numberline {4}Smart Objectives}{33}{chapter.4}
-\contentsline {section}{\numberline {4.1}The Optimisation Dilemma}{33}{section.4.1}
-\contentsline {subsection}{\numberline {4.1.1}Fundamental Quantities}{33}{subsection.4.1.1}
-\contentsline {subsection}{\numberline {4.1.2}Performance Indicators}{35}{subsection.4.1.2}
-\contentsline {subsubsection}{Minutes per Kilometre Travelled}{35}{section*.39}
-\contentsline {subsection}{\numberline {4.1.3}Dynamic Weighting}{35}{subsection.4.1.3}
-\contentsline {subsection}{\numberline {4.1.4}Cost Function Correlation}{35}{subsection.4.1.4}
-\contentsline {chapter}{\numberline {5}The Benchmark}{37}{chapter.5}
-\contentsline {section}{\numberline {5.1}Traffic Model}{38}{section.5.1}
-\contentsline {section}{\numberline {5.2}Performance Index}{38}{section.5.2}
-\contentsline {subsubsection}{Balance Requirements}{39}{section*.43}
-\contentsline {subsection}{\numberline {5.2.1}Balance Settings}{40}{subsection.5.2.1}
-\contentsline {section}{\numberline {5.3}Setting equal grounds for comparison}{40}{section.5.3}
-\contentsline {subsubsection}{Model setup}{40}{section*.44}
-\contentsline {subsubsection}{Balance Decision Space}{40}{section*.45}
-\contentsline {subsubsection}{Cost Function}{40}{section*.46}
-\contentsline {chapter}{\numberline {6}Visualisation \\ of Process and Results}{41}{chapter.6}
-\contentsline {chapter}{\numberline {7} \leavevmode {\color {red}Risultati} }{43}{chapter.7}
-\contentsline {section}{\numberline {7.1}Preliminary Tests}{43}{section.7.1}
-\contentsline {section}{\numberline {7.2}Test Networks}{43}{section.7.2}
-\contentsline {section}{\numberline {7.3}Overall Cost Function Improvement}{43}{section.7.3}
-\contentsline {section}{\numberline {7.4}Comparison with Balance}{43}{section.7.4}
-\contentsline {section}{\numberline {7.5}Performance in Micro Simulation}{43}{section.7.5}
-\contentsline {section}{\numberline {7.6}Performance}{43}{section.7.6}
+\contentsline {section}{\numberline {3.1}TRE simulation engine and Optima framework}{31}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}General Link Transmission Model}{32}{subsection.3.1.1}
+\contentsline {subsection}{\numberline {3.1.2}Link Model}{33}{subsection.3.1.2}
+\contentsline {subsubsection}{Fundamental Diagram}{33}{section*.36}
+\contentsline {subsubsection}{Lane Modelling}{35}{section*.38}
+\contentsline {subsubsection}{Corridoio di ottimizzazione}{35}{section*.39}
+\contentsline {subsection}{\numberline {3.1.3}Node Model}{35}{subsection.3.1.3}
+\contentsline {subsection}{\numberline {3.1.4}Dynamic Traffic Assignment Algorithm}{35}{subsection.3.1.4}
+\contentsline {subsubsection}{GLTM Input}{36}{section*.42}
+\contentsline {subsubsection}{Real Time Data Integration}{36}{section*.43}
+\contentsline {subsubsection}{GLTM Simulation Output}{36}{section*.44}
+\contentsline {section}{\numberline {3.2}Genetic Algorithm}{36}{section.3.2}
+\contentsline {subsection}{\numberline {3.2.1}Time Dependent Weighting of Cost Functions}{36}{subsection.3.2.1}
+\contentsline {subsection}{\numberline {3.2.2}Initial Population Seeding with Slack Bandwidth}{36}{subsection.3.2.2}
+\contentsline {section}{\numberline {3.3}Online Heuristic Optimisation}{36}{section.3.3}
+\contentsline {chapter}{\numberline {4}Smart Objectives}{37}{chapter.4}
+\contentsline {section}{\numberline {4.1}The Optimisation Dilemma}{37}{section.4.1}
+\contentsline {subsection}{\numberline {4.1.1}Fundamental Quantities}{37}{subsection.4.1.1}
+\contentsline {subsection}{\numberline {4.1.2}Performance Indicators}{39}{subsection.4.1.2}
+\contentsline {subsubsection}{Minutes per Kilometre Travelled}{39}{section*.47}
+\contentsline {subsubsection}{Stop Ratio}{39}{section*.48}
+\contentsline {subsubsection}{Congestion}{39}{section*.49}
+\contentsline {subsection}{\numberline {4.1.3}Dynamic Weighting}{39}{subsection.4.1.3}
+\contentsline {subsection}{\numberline {4.1.4}Cost Function Correlation}{40}{subsection.4.1.4}
+\contentsline {chapter}{\numberline {5}The Benchmark}{41}{chapter.5}
+\contentsline {section}{\numberline {5.1}Traffic Model}{42}{section.5.1}
+\contentsline {section}{\numberline {5.2}Performance Index}{42}{section.5.2}
+\contentsline {subsubsection}{Balance Requirements}{43}{section*.53}
+\contentsline {subsection}{\numberline {5.2.1}Balance Settings}{44}{subsection.5.2.1}
+\contentsline {section}{\numberline {5.3}Setting equal grounds for comparison}{44}{section.5.3}
+\contentsline {subsubsection}{Model setup}{44}{section*.54}
+\contentsline {subsubsection}{Balance Decision Space}{44}{section*.55}
+\contentsline {subsubsection}{Cost Function}{44}{section*.56}
+\contentsline {chapter}{\numberline {6}Visualisation \\ of Process and Results}{45}{chapter.6}
+\contentsline {chapter}{\numberline {7}Risultati}{47}{chapter.7}
+\contentsline {section}{\numberline {7.1}Preliminary Tests}{47}{section.7.1}
+\contentsline {section}{\numberline {7.2}Test Networks}{47}{section.7.2}
+\contentsline {section}{\numberline {7.3}Overall Cost Function Improvement}{47}{section.7.3}
+\contentsline {section}{\numberline {7.4}Comparison with Balance}{47}{section.7.4}
+\contentsline {section}{\numberline {7.5}Performance in Micro Simulation}{48}{section.7.5}
+\contentsline {section}{\numberline {7.6}Performance}{48}{section.7.6}
+\contentsline {chapter}{Bibliography}{48}{section.7.6}

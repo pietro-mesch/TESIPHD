@@ -2,7 +2,9 @@
 \todo{Describe heuristic approaches, and complex offline performance optimisation. Anticipate how the present work will build and improve upon those. TO REVIEW.}
 
 The simple signal setting problems presented so far are quasi-convex, but more realistic traffic models that include and quantify global performance indicators such as total delay introduce an inherent non convexity, better addressed with the aid of heuristic methods.
+
 With the increase in computing power availability, metaheuristics have seen a substantial rise in popularity as means to overcome the inherent limitations of analytical formulations: heuristic approaches to this class of problems involve the generation of a large — yet manageable, compared to the dimensions of the search space — number of candidate timing solutions, the effects of which are then simulated to evaluate their fitness. At each iteration, a variety of methods ranging from Genetic Algorithms to Simulated Annealing and Particle Swarm Optimisation can then be used to modify and combine the most successful solutions into a new set of candidates.
+
 Such methods are particularly suited for solving obscure problems as they require no attempt to establish an explicit correlation between the control variables and the desired outcome. Rather, they rely on the assumption that if any relevant phenomena can be modelled with sufficient accuracy and a performance index can describe the degree of achievement of the optimization objectives, then the system can be made to naturally evolve towards an optimal solution.
 
 \fig{htbp}{pix/heur.png}{f:heuristic}{Conceptual information flow in a heuristic approach to signal optimisation}{width=0.65\textwidth}
