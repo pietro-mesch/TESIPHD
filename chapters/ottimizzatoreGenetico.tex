@@ -12,6 +12,9 @@ In this, it represents an attempt to bring together the best of most signal sett
 
 This chapter presents the approach in detail, beginning with an introduction to the TRE macroscopic simulation engine, touching upon the most relevant features of the underlying model and framework, and finally describing the genetic algorithm implementation.
 
+\todo{Optima! real networks! visum!}
+
+\todo{anticipate sections better}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -120,25 +123,7 @@ the latter requiring a sign change simply because density is defined positive bu
 \subsubsection{Lane Modelling}
 \todo{compare with balance lane model.}
 
-\subsubsection{Corridoio di ottimizzazione}
-Definito come una serie di link.
-I link attraversano un certo numero di intersezioni, alcune delle quali sono amministrate da un semaforo.
-Fra l'inizio e il primo semaforo, fra i semafori, e dopo l'ultimo, i link sono accorpati in sezioni. I KPI vengono calcolati su di essi.
-
-\subsubsection*{Return Corridor Definition}
-The return corridor cannot simply be defined as the sequence of links traversing the same nodes in reverse order: there is no guarantee that for any pair of subsequent nodes representing the tail and head of a given link there should exist another link joining them in the opposite direction.
-
-Furthermore, the two directions of a traffic corridor may well be modelled as completely disjoint sets of arcs, sharing no nodes between them.
-
-The present approach can handle two-way optimisation without loss of generality in this respect: it is sufficient to define the return corridor in the exact same way as the primary direction, and to indicate it as \emph{return} direction along with a weight coefficient \todo{specify semantics and usage}.
-
-If the junctions traversed by the return corridor are handled by the same set of controllers as the main, the problem size remains the same and the extra computation time required to calculate the relevant KPI is practically negligible. If more controllers are involved, they can be ignored (which makes little sense unless they actually cannot be controlled and adjusted remotely) or included in the optimisation, which will increase the solution space size and the time required to explore it.
-
-
-
 \subsection{Node Model}
-
-
 
 \subsection{Dynamic Traffic Assignment Algorithm}
 
@@ -158,7 +143,26 @@ Data una finestra temporale di una certa lunghezza
 \subsubsection{GLTM Simulation Output} \label{s:output}
 \todo{Specify what quantities are ultimately calculated in a TRE simulation and can be considered its output.}
 
+\subsection{Optimisation Corridor}
+The present work aims to optimise signal timings in relation to the performance of what is usually called a \emph{Traffic Corridor} or \emph{Arterial Road}, referring to a stretch of road designed or happening to carry particularly high volumes of traffic. \\
+While the concept is not strictly related to urban traffic, it is in the urban environment that traffic corridors most often suffer significant performance degradation due to congestion, aggravated by the numerous intersections with other busy roads where consistent traffic flows compete for the right of way and must be regulated by traffic lights.
 
+The proposed optimisation method revolves around an \emph{Optimisation Corridor} object that essentially implements the formalisation illustrated in Section \ref{s:corridor}. It consists of an \emph{ordered set of links} connected head-to-tail, and may run through any number of signalised intersections: the problem size is then determined exactly, since the task at hand is simply to optimise signal coordination and each junction has a predetermined program that can only be offset in time.
+
+This definition of corridor blends seamlessly into the Optima network model as well as in TRE result computation, and allows relevant key performance indicators to be calculated from continuous network loading results, i.e. the link \todo{???} just introduced in section \ref{s:output}: the process is fully detailed in Chapter \ref{c:objectives} where performance indicators are defined and discussed.
+
+The corridor object represents the interface between the optimisation and simulation processes, and allows their separation (as may be more clear from Figure \ref{f:trega}), leaving the possibility to exploit the work done in this context e.g. with different optimisation methods. Although for the rest of this dissertation only one corridor will be considered, the application might easily be scaled to multiple corridors or extended to sub-networks: such efforts are beyond the scope of this experiment but their potential is discussed in \ref{s:scalability} alongside other scalability considerations.
+
+Finally, it should be noted that links that are not strictly part of the corridor are \emph{not} factored into the KPI computation. Some may be considered relevant, e.g. the inroads to the corridor; however, it is far from straightforward to \emph{automatically} determine which links should be included based solely on the corridor definition, and in general there is no guarantee that the network model should be constructed in such a way as to render it possible at all. Although \emph{in principle} some consideration for the consequences of choices made on the corridor on the neighbouring roads may help make better decisions, this would require preprocessing of the network and the associated complications are deemed unnecessary given the current task, but will be discussed in Chapter \ref{c:futurework}.
+
+\subsubsection*{Return Corridor Definition}
+The return corridor cannot simply be defined as the sequence of links traversing the same nodes in reverse order: there is no guarantee that for any pair of subsequent nodes representing the tail and head of a given link there should exist another link joining them in the opposite direction.
+
+Furthermore, the two directions of a traffic corridor may well be modelled as completely disjoint sets of arcs, sharing no nodes between them.
+
+The present approach can handle two-way optimisation without loss of generality in this respect: it is sufficient to define the return corridor in the exact same way as the primary direction, and to indicate it as \emph{return} direction along with a weight coefficient \todo{specify semantics and usage}.
+
+If the junctions traversed by the return corridor are handled by the same set of controllers as the main, the problem size remains the same and the extra computation time required to calculate the relevant KPI is practically negligible. If more controllers are involved, they can be ignored (which makes little sense unless they actually cannot be controlled and adjusted remotely) or included in the optimisation, which will increase the solution space size and the time required to explore it.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -183,12 +187,12 @@ Condizioni dei test di TRE:
 \item Gli offset vengono modificati e per ogni individuo si fa un caricamento al secondo su una finestra temporale ristretta, partendo dall'istantanea salvata
 \end{enumerate}
 
-
-
-
-
+\fig{htbp}{PIX/undoguy.png}{f:trega}{ Interaction between the optimiser and TRE}{width=0.4\textwidth}
 
 Funzionamento generale, pregi e limitazioni rispetto all'applicazione come ottimizzatore.
+
+
+
 
 Quale intervallo di risultati si può usare? Data l'incertezza e le approssimazioni, ha senso usare i risultati al secondo?
 
