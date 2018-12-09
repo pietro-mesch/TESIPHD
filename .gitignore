@@ -1,7 +1,6 @@
 *.log
 Bozza.synctex.gz
 Bozza.aux
-Bozza.tex
 Bozza.log
 Bozza.aux
 Bozza.pdf
@@ -10,4 +9,8 @@ Bozza.aux
 Bozza.out
 Bozza.bbl
 Bozza.blg
+Bozza.ilg
+Bozza.idx
+Bozza.ind
+Bozza.toc
 ~$*
