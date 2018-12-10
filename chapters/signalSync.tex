@@ -20,7 +20,7 @@ To this end, a wide variety of methods have been the object of intensive researc
 Analytical methods have brought about a number of popular applications which are still in use despite the fact that they mainly apply to low congestion scenarios; more complex methods, which account for demand flows and their propagation along the arterial, can deal with heavy congestion related phenomena, but invariably require a more detailed network model and rely on computationally demanding simulations rather than a closed-form problem formulation. An overview of the most prominent approaches to the signal coordination problem is given in the following sections.
 
 \subsection{The Traffic Corridor} \label{s:corridor}
-\todo{Introduction}
+The fulcrum of signal coordination is the \emph{traffic corridor} (i.e. an arterial road, as defined in the previous section) selected for its strategic relevance. Since the flow on the corridor is supposedly much higher than on its side roads, it is deemed acceptable to concentrate optimisation efforts on the arterial traffic conditions, as improvements will benefit the largest number of road users.
 
 A traffic corridor $\corridor$ may be defined as an \emph{ordered} set of $n$ \emph{connected} arcs:
 \eq[.]{e:corridordef}{
@@ -41,7 +41,7 @@ This may be formalised as
 \quad \text{such that} \quad \forall j \in \junset_\corridor \quad
 \exists y \in \phaset_j | \{\bstar{y}, \fstar{y}\} \subset \corridor
 }
-where $\{\bstar{y}, \fstar{y}\}$ are the origin and destination lanes of some signalised manoeuvre $y$ that joins two arcs of the corridor.
+where it is simply stated that a corridor node is considered a relevant \emph{signalised junction} if features one \emph{signalised} manoeuvre $y \in \phaset_j$ whose origin and destination lanes $\{\bstar{y}, \fstar{y}\}$ both lie on the corridor (with the exception of the first node of the corridor, which may be included in $\junset_\corridor$ as long as it regulates at least one turn onto the corridor, and the last one if the corridor outflow may be affected by its signal).
 
 Coordination of junctions $\junset_\corridor$ is handled by offsetting their local timing instructions (as described at the end of section \ref{s:anatomy}), i.e. anticipating or delaying all phase changes rigidly without altering the necessary green shares determined on the basis of average demand flows.
 The global offset values (with respect to an arbitrary global time reference) of the junctions of corridor $\corridor$ may be represented by a vector $\offsvec{\corridor}$.

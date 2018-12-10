@@ -1,7 +1,23 @@
 \chapter{Signalisation of Urban Networks}
-\todo{Chapter intro and overview: elements of a signal plan and how they should be designed to serve the purpose.}
-\subsection{The Urban Network} \label{s:urbannetwork}
-\todo{def nodes arcs etc}
+The present work concerns the regulation of urban traffic by means of traffic signals.
+
+The \emph{lights}, which are nowadays a ubiquitous feature of the urban landscape, first appeared in 1868 outside the British House of Commons in Victorian London, where the horse drawn carriage traffic was becoming an insurmountable barrier posing a serious threat to pedestrians.
+Since then, and especially as motor cars were introduced, traffic regulation proved indispensable to administer the right of way among competing traffic flows and safeguard the more vulnerable users of the urban road environment.
+
+This chapter introduces the formal representation of the signalised road network used for all practical purposes in this dissertation. It builds upon the definition of the network itself to describe the way it interacts with its users, modelling the problems that traffic signals need to tackle and the ways in which they might do so. Finally, the most relevant signal planning approaches based on the paradigm just outlined are illustrated, as they form the basis for the adaptive signalisation strategies to which the present work aims to contribute.
+
+\section{The Urban Network} \label{s:urbannetwork}
+In the context of transport modelling and planning, a transportation network is represented as a \emph{directed graph} in the mathematical sense, with the \emph{vertices} representing locations and the \emph{edges} connections that a user may travel between them. The term \emph{connection} is used loosely on purpose here, since in general these need not be \emph{roads} but may be transit lines, footpaths, railways etc. each with complex properties which determine its \emph{cost}, or even accessibility, to a given class of users.
+
+In its extremely simplified acceptation of \emph{road network} which will serve the purposes of the present work, a transportation network may be reduced to an ordered pair $(\nodset,\arcset)$ where
+\begin{itemize}
+\item $\nodset$ is the set of vertices of the graph, called \emph{nodes}, representing junctions and road ends;
+\item $\arcset$ is the set of directed edges between them, called \emph{arcs}, along which the users move.
+\end{itemize}
+
+This allows to encapsulate both the network topology and the properties of individual roads, which determine the way in which the users will interact with them: the choice of a path between two nodes depends on the perceived cost of each alternative as determined by a combination of its properties, e.g. length, toll, number of lanes, pleasantness; the same properties, albeit through conceptually different mechanisms, determines how the users will be able to move along the chosen path.
+
+
 
 \section{Anatomy of a Signal Plan} \label{s:anatomy}
 The following section briefly illustrates the main features of a signal plan devised for urban traffic regulation. This term encompasses all timings and schedules behind the delicate clockwork of traffic signals, from the elements that constitute a single signal program at one of the many junctions of the network, to the succession of network-wide program changes designed to meet the daily evolution of traffic demand and the propagation of vehicle flows.
