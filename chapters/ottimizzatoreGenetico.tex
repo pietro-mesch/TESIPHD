@@ -24,7 +24,7 @@ The proposed optimisation method relies on the macrosimulation engine known as T
 TRE lies at the core of the Optima traffic management software suite, developed in Rome by PTV SISTeMa\footnote{ITS spinoff of Sapienza University, now part of the Porsche group and partner in the present work \todo{???}} and running in traffic control centres around the globe, where it has time and again proven its reliability and forecast accuracy.\\
 This section aims to illustrate its fundamental principles of operation, in order to clarify how they might affect the optimisation and better understand the role of the simulation engine within the architecture.
 
-\subsection{Continuous Dynamic Traffic Assignment as Simulation}
+\subsection{Continuous Dynamic Traffic Assignment}
 The general idea of \emph{Traffic Assignment} is rather intuitive: it is the modelling of the interaction between \emph{supply}, i.e. the roads, infrastructures and public transport options; and the \emph{demand} for mobility, i.e. people that need to travel using a choice of the available resources.
 
 Since supply is limited, its availability and performance are a consequence of the choices made by users, which in turn are affected by the perceived discomfort of travelling across the network in the state it actually is: to predict with any plausibility the way in which traffic will spread across the network, it is necessary to resolve this reciprocal influence between supply and demand.
@@ -107,7 +107,7 @@ states, the descending branch represents congested states.
 
 In a simple triangular diagram like the one shown in Figure \ref{f:fundiag} (left) the speed is assumed constant at its maximum value for all subcritical states, while above capacity it decreases linearly with density. More subtle modelling may yield a diagram shape more similar to Figure \ref{f:fundiag} (right), where the speed is shown to decrease even in subcritical conditions as the road gets more crowded due to the natural variance in driving speed which, as more vehicles become involved, yields a higher chance of having a slow vehicle delaying all the others \emph{(subcritical spacing)}.
 
-In both cases it is assumed that as density increases, the available space becomes insufficient to maintain safe distances between vehicles, causing drivers to slow down \emph{(hypercritical spacing)}.
+ In both cases it is assumed that as density increases, the available space becomes insufficient to maintain safe distances between vehicles, causing drivers to slow down \emph{(hypercritical spacing)}.
 \todo{analysis of shapes given in ref tiddi}
 
 If a model is to rely on the fundamental diagram to hold for non-stationary traffic as well, it must allow vehicles to change speed instantly with infinite acceleration, as is the case with GLTM and in general with first-order implementations of KWT. \\
@@ -135,16 +135,41 @@ the latter requiring a sign change simply because density is defined positive bu
 
 
 \subsubsection{Lane Modelling}
-\todo{compare with balance lane model.}
 
 \subsection{Node Model}
+\todo{illustrate node model}
 
-\subsubsection{GLTM Input}
+\section{GLTM as Flow Simulation}
+The network loading and flow propagation model is central to the optimisation process proposed in this work.
+So far, its position in the Dynamic Traffic Assignment has been clarified, but it may be useful to recapitulate and formalise what its input and output are as a stand-alone \emph{flow simulator} component; before proceeding to Section \ref{s:geneticalgo} where its role in relation to the Genetic Algorithm will be clarified. These are summarised in Figure \ref{f:dnl} and presented in more detail in the following sections.
 
-\subsubsection{Real Time Data Integration}
+\fig{htbp}{PIX/undoguy.png}{f:dnl}{ Dynamic Network Loading Input and Output}{width=0.4\textwidth}
 
-\subsubsection{GLTM Simulation Output} \label{s:output}
+\subsection{Simulation Input}
+The General Link Transmission Model operates on the basis of
+\begin{description}
+\item[splitting rates] resulting from the aggregation of the dynamic route flows, used by the node model to distribute the outflow of an arc to its forward star;
+\item[origin flows] representing the vehicles \emph{injected} at specific network locations at every simulation interval, according to the demand data.
+\end{description}
+
+It is obviously important that the input data cover the entire span of the simulation, if realistic results are to be obtained.
+However, the time resolution of the input data is irrelevant and the algorithm can operate with constant values as well as weighted averages where the time intervals do not correspond; in fact, it is robust even with respect to incomplete input, since it may split flows based on the relative capacity of downstream arcs, and if demand flows are unknown they will simply be assumed to be zero.
+
+
+\subsection{Real Time Data Integration}
+The GLTM implemented in TRE can draw real-time corrections from the OPTIMA framework, which are based on harmonised data coming from a variety of public and private sources (loops, cameras, floating car data etc.) which are integrated into the simulation as:
+\begin{description}
+\item[capacity corrections] when an accident, road closure or other modification to the supply is broadcast by the authorities or inferred automatically, and the fundamental diagram of the relevant arcs is updated;
+\item[speed corrections] when the speed is measured or inferred, and either the fundamental diagram is updated to match the traffic state or a flow correction is applied;
+\item[flow corrections] when a real flow value (often the outflow from an arc) is available and the simulated value overwritten.
+\end{description}
+
+These corrections are all applied in the inner loops of Figure \ref{f:dnl}, during the simulation intervals for which they are relevant. Their effect is then propagated in time and space, increasing the fidelity of the simulation to the real world traffic conditions.
+
+
+\subsection{Simulation Output} \label{s:output}
 \todo{Specify what quantities are ultimately calculated in a TRE simulation and can be considered its output.}
+
 
 \subsection{Optimisation Corridor}
 The present work aims to optimise signal timings in relation to the performance of what is usually called a \emph{Traffic Corridor} or \emph{Arterial Road}, referring to a stretch of road designed or happening to carry particularly high volumes of traffic. \\
@@ -169,14 +194,15 @@ If the junctions traversed by the return corridor are handled by the same set of
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Genetic Algorithm}
+\section{Genetic Algorithm} \label{s:geneticalgo}
 \todo{Describe implementation, adaptations and tuning}
-\subsection{Time Dependent Weighting of Cost Functions}
+
+\subsubsection*{Time Dependent Weighting of Cost Functions}
+
 
 
 \subsection{Initial Population Seeding with Slack Bandwidth}
 \todo{Describe how the slackband is implemented to initialise the population and obtain better solutions faster.}
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
