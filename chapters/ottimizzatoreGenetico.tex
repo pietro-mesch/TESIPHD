@@ -24,14 +24,31 @@ The proposed optimisation method relies on the macrosimulation engine known as T
 TRE lies at the core of the Optima traffic management software suite, developed in Rome by PTV SISTeMa\footnote{ITS spinoff of Sapienza University, now part of the Porsche group and partner in the present work \todo{???}} and running in traffic control centres around the globe, where it has time and again proven its reliability and forecast accuracy.\\
 This section aims to illustrate its fundamental principles of operation, in order to clarify how they might affect the optimisation and better understand the role of the simulation engine within the architecture.
 
-\todo{introduce the idea of DTA as simulation, show route choice/network loading iterations}
+\subsection{Continuous Dynamic Traffic Assignment as Simulation}
+The general idea of \emph{Traffic Assignment} is rather intuitive: it is the modelling of the interaction between \emph{supply}, i.e. the roads, infrastructures and public transport options; and the \emph{demand} for mobility, i.e. people that need to travel using a choice of the available resources.
+
+Since supply is limited, its availability and performance are a consequence of the choices made by users, which in turn are affected by the perceived discomfort of travelling across the network in the state it actually is: to predict with any plausibility the way in which traffic will spread across the network, it is necessary to resolve this reciprocal influence between supply and demand.
+
+Of the many approaches proposed to this end throughout the history of transport research, the most successful are based on the \emph{Selfish User Equilibrium} principle first stated by \cite{wardrop1952}. This follows from the simple and sound behavioural assumption that every user will choose the route and mode of transport which are best for them, and implies that the most reasonably foreseeable traffic scenario is that in which no user would benefit from making a different choice: hence the notion of user \emph{equilibrium}.
+
+Even in the simplest possible \emph{static} case, with steady demand and travel times only dependent on user choices, the equilibrium point must be found by an iterative process as illustrated in Figure \ref{f:dta}. Thus, at each iteration 
+\begin{enumerate}
+\item demand is routed through the network according to the arc costs, \\ and route flows are calculated;
+\item the flows are assigned to the relevant arcs, \\ and costs are updated to account for congestion;
+\item updated costs are checked against convergence criteria and, until these are met, \\ fed back into a new demand routing.
+\end{enumerate} 
 
 \fig{htbp}{PIX/undoguy.png}{f:dta}{\todo{General Dynamic Traffic Assignment} \citep{yperman2007link} p22}{width=0.4\textwidth}
 
-\todo{Traffic is considered to be a continuum, both as far as vehicle movements and trip-maker decisions are concerned}
+In reality, demand is hardly constant throughout the day and congestion occurs as a consequence of the \emph{history} of the system; therefore any real-world application must account for the fact that travel times and user choices evolve \emph{dynamically} over time.
 
-Trip planning and route choice models are extremely relevant to the accuracy of a DTA and to the computational effort involved.
-However, the representation of traffic as it propagates and interacts with the network and signals, and all related phenomena within the scope of the present study, falls upon the Dynamic Network Loading model.\\
+A \emph{Dynamic Traffic Assignment} (DTA) model allows to determine the dynamic interaction of supply and demand to predict the evolution of traffic conditions over any length of time, conceptually without further complication beyond the addition of the temporal dimension.
+
+The user equilibrium condition can still be found via the mechanism illustrated in Figure \ref{f:dta}, working from the knowledge of demand and supply; with the difference that demand and user choices will be time dependent, and flows will propagate in space \emph{and time} so that arc costs become dynamic too. Traffic is considered to be a continuum, both as far as vehicle movements and trip-maker decisions are concerned.
+
+Trip planning and route choice models are extremely relevant to the accuracy of a DTA and to the computational effort involved, but in the general DTA framework they are quite independent of each other and of the supply model.
+
+The representation of traffic as it propagates and interacts with the network and signals, and all related phenomena within the scope of the present study, fall upon the Dynamic Network Loading model.
 The most suitable macroscopic model for the task at hand is the General Link Transmission Model, which will be analysed in further detail over the next few sections.
 
 \subsection{General Link Transmission Model}
@@ -51,9 +68,6 @@ While in truth the work of Yperman already improved on the simplified KWT approa
 
 The features of the supply model described in the next sections, together with the computational efficiency and the possibility to perform a DTA in high temporal resolution, make the General Link Transmission Model an optimal candidate for the present application.
 
-\todo{what does ctm do for delay at junctions?}
-
-
 
 \subsection{Link Model}
 In the GLTM, traffic propagates along links according to kinematic wave theory.
@@ -68,10 +82,10 @@ The traffic state at a specific location $x \in \left[x^0, x^1\right]$ along a l
 As is evident from their dimensions, only two of these quantities can be independent, and if two are known the third may be readily calculated using the relationship
 \eq[.]{e:trafficstates}{\speed = \frac{\flow}{\density}}
 
-\todo{link with next}
+The idea that vehicle density and speed can be completely independent, however mathematically sound, does not seem practically plausible. Kinematic wave theory provides a device for solving this contradiction as illustrated in the following section.
 
 \subsubsection{Fundamental Diagram} \label{s:fundiag}
-Kinematic wave theory also assumes a functional relation between traffic density and flow, known as the \emph{Fundamental Diagram} of traffic flow. It approximates the changes in the average behaviour of drivers as the road gets more crowded, and may take several forms, but it is invariably derived from the properties of the road, e.g. width, slope or parking. As such it is itself, conceptually, a property of the link, although it could also be made to depend on environmental factors and driver behaviour, or be specific to a particular class of vehicles.
+Kinematic wave theory assumes a functional relation between traffic density and flow, known as the \emph{Fundamental Diagram} of traffic flow. It approximates the changes in the average behaviour of drivers as the road gets more crowded, and may take several forms, but invariably follows from the properties of the road, e.g. width, slope or parking. As such it is itself, conceptually, a property of the link, although it could also be made to depend on environmental factors and driver behaviour, or be specific to a particular class of vehicles.
 
 A generic fundamental diagram expresses the relationship between flow and density under \emph{stationary} traffic conditions, i.e. it is derived as an equilibrium condition between flow speed and available space taking the general form
 \eq{e:fundiag_generic}{
@@ -82,8 +96,8 @@ which may be represented on a Density-Flow graph like the ones shown in Figure \
 
 The shape of a fundamental diagram reflects different assumptions about traffic flow dynamics, but there are a few key features that are shared by all formulations:
 \begin{itemize}
-\item when density approaches \emph{zero} the speed approaches the maximum value attainable on the link ($\vzero$) but the flow tends to zero;
-\item maximum flow occurs at the \emph{critical density $\hat{\density}$} also referred to as the link capacity;
+\item when density approaches \emph{zero} the speed approaches the maximum value attainable on the link, i.e. the \emph{free flow} speed $\vzero$, but the flow tends to zero;
+\item maximum flow occurs at the \emph{critical density $\hat{\density}$} also referred to as the link \emph{capacity};
 \item beyond capacity, further increase in vehicular density induces a speed penalty that causes the flow to decrease;
 \item when vehicles reach the \emph{jam density} $\density_{jam}$ they are packed as closely as possible, and come to a standstill;
 \item for any flow state on the $k-q$ curve, the speed is given by the slope of the line connecting it to the origin;
@@ -100,8 +114,8 @@ If a model is to rely on the fundamental diagram to hold for non-stationary traf
 Higher order traffic phenomena such as the emergence of stop-and-go waves along the link, or fundamental diagram hysteresis (due to traffic states evolving asimmetrically when leading up to congestion or recovering from it) are knowingly neglected.
 
 \subsubsection{Traffic State Propagation}
-\todo{how do we use KWT and FUN}
-To understand how traffic states propagate on links, consider the cumulative flow $N(x,t)$, i.e. the number of vehicles that have passed location $x$ along a link before time $t$.
+To understand how traffic states propagate on links, consider the \emph{cumulative flow} $N(x,t)$, \\ i.e. the number of vehicles that have passed location $x$ along a link before time $t$.
+
 Assuming that vehicle conservation is respected along the link, i.e. that no vehicle is created or destroyed between the tail and the head node, the trajectory of the $n^{\mathrm{th}}$ vehicle to enter the arc can be traced on a time-space diagram as the locus of points for which $N(x,t) = n$ as shown in Figure \ref{f:txtraj}.
 
 \fig{htbp}{PIX/undoguy.png}{f:txtraj}{vehicle trajectories}{width=0.4\textwidth}
@@ -124,17 +138,6 @@ the latter requiring a sign change simply because density is defined positive bu
 \todo{compare with balance lane model.}
 
 \subsection{Node Model}
-
-\subsection{Dynamic Traffic Assignment Algorithm}
-
-DTA + DNL iterations
-
-
-\fig{htbp}{PIX/DIAG-dta-scheme_550x320.png}{f:ass}{L'assegnazione di TRE}{width=0.8\textwidth}
-
-Quantificare errori dovuti all'uso di TPRB fisse 
-
-Data una finestra temporale di una certa lunghezza
 
 \subsubsection{GLTM Input}
 
@@ -160,7 +163,7 @@ The return corridor cannot simply be defined as the sequence of links traversing
 
 Furthermore, the two directions of a traffic corridor may well be modelled as completely disjoint sets of arcs, sharing no nodes between them.
 
-The present approach can handle two-way optimisation without loss of generality in this respect: it is sufficient to define the return corridor in the exact same way as the primary direction, and to indicate it as \emph{return} direction along with a weight coefficient \todo{specify semantics and usage}.
+The present approach can handle two-way optimisation without loss of generality in this respect: it is sufficient to define the return corridor in the exact same way as the primary direction, and to indicate it as \emph{return} direction along with a weight coefficient.
 
 If the junctions traversed by the return corridor are handled by the same set of controllers as the main, the problem size remains the same and the extra computation time required to calculate the relevant KPI is practically negligible. If more controllers are involved, they can be ignored (which makes little sense unless they actually cannot be controlled and adjusted remotely) or included in the optimisation, which will increase the solution space size and the time required to explore it.
 
