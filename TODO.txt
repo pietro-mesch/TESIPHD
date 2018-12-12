@@ -1,5 +1,11 @@
+GLTM
+calculation of queues flows etc formule meglio
+Courant-Friedrichs-Lewy (CFL) condition
+
 TRE OPTIMISER
+Considerazioni sul modello, limite GLTM stretcharcs
 Feasibility analysis of times
+
 
 GENETIC ALGO
 
@@ -7,3 +13,17 @@ GENETIC ALGO
 
 BALANCE STUFF
 compare TRE with balance lane model in chapter 3
+
+
+
+RESULTS
+scalability 4:8:16:32 with 
+
+
+#### DANIELE ####
+OPTIMISER CHAPTER
+accurate and robust (intro)
+heuristic not good, fast good
+gating -> predictive? emphasis on lookahead
+remove sistema and porsche
+static assignment description
