@@ -1,0 +1,274 @@
+\chapter{Modelling, Simulation and Optimisation Tools}
+This chapter presents the relevant elements of the real time traffic management framework in which the work was conducted, illustrating the most interesting features in light of their role in the optimisation. An introduction to the basic principles of the Genetic Algorithm completes the inventory of the tools used to bring together the optimisation presented in Chapter \ref{c:optimiser}.
+
+\section{The Optima Framework}
+Illustrate components: model building and calibration, data model, simulation, rolling horizon forecast, visualisation, statistical data, real time data harmoniser, events interface, traffic control, field actuators.
+
+\fig{htbp}{PIX/undoguy.png}{f:optima}{the Optima framework for real time traffic management}{width=0.4\textwidth}
+
+
+\section{TRE simulation engine}
+The proposed optimisation method relies on the macrosimulation engine known as TRE, based on the eponymous Dynamic User Equilibrium assignment algorithm.
+TRE lies at the core of the Optima traffic management software suite, developed in Rome by PTV SISTeMa\footnote{ITS spinoff of Sapienza University, and partner in the present work \todo{???}} and running in traffic control centres around the globe.\\
+This section aims to illustrate its fundamental principles of operation, in order to clarify how they might affect the optimisation and better understand the role of the simulation engine within the architecture.
+
+\subsection{Continuous Dynamic Traffic Assignment}
+The general idea of \emph{Traffic Assignment} is rather intuitive: it is the modelling of the interaction between \emph{supply}, i.e. the roads, infrastructures and public transport options; and the \emph{demand} for mobility, i.e. people that need to travel using a choice of the available resources.
+
+Since supply is limited, its availability and performance are a consequence of the choices made by users, which in turn are affected by the perceived discomfort of travelling across the network in the state it actually is: to predict with any plausibility the way in which traffic will spread across the network, it is necessary to resolve this reciprocal influence between supply and demand.
+
+Of the many approaches proposed to this end throughout the history of transport research, the most successful are based on the \emph{Selfish User Equilibrium} principle first stated by \cite{wardrop1952}. This follows from the simple and sound behavioural assumption that every user will choose the route and mode of transport which are best for them, and implies that the most reasonably foreseeable traffic scenario is that in which no user would benefit from making a different choice: hence the notion of user \emph{equilibrium}.
+
+\fig{htbp}{PIX/undoguy.png}{f:dta}{\todo{General Dynamic Traffic Assignment} \citep{yperman2007link} p22}{width=0.4\textwidth}
+
+Even in the simplest possible \emph{static} case, with steady demand and travel times only dependent on user choices, the equilibrium point must be found by an iterative process as illustrated in Figure \ref{f:dta}. Thus, at each iteration 
+\begin{enumerate}
+\item[1 .] demand is routed through the network according to the arc costs, \\
+route flows are calculated;
+\item[2 .] flows are assigned to the relevant arcs, costs are updated to account for congestion\\ and checked against convergence criteria;
+\item[3a.] until convergence is obtained, costs are fed back into a new demand routing (step 1);
+\item[3b.] when arc costs converge, it means users are confirming the route choices made in the previous iteration: the \emph{user equilibrium} is satisfied, and the last route flows and costs calculated are the best estimate of the outcome from the given demand and supply.
+\end{enumerate} 
+
+In reality, demand is hardly constant throughout the day and congestion occurs as a consequence of the \emph{history} of the system; therefore any real-world application must account for the fact that travel times and user choices evolve \emph{dynamically} over time.
+
+A \emph{Dynamic Traffic Assignment} (DTA) model allows to determine the dynamic interaction of supply and demand to predict the evolution of traffic conditions over any length of time, conceptually without further complication beyond the addition of the temporal dimension.
+
+The user equilibrium condition can still be found via the mechanism illustrated in Figure \ref{f:dta}, working from the knowledge of demand and supply; with the difference that demand and user choices will be time dependent, and flows will propagate in space \emph{and time} so that arc costs become dynamic too. Traffic is considered to be a continuum, both as far as vehicle movements and trip-maker decisions are concerned; the equilibrium is then found between time profiles of arc flows and costs.
+
+Trip planning and route choice models are extremely relevant to the accuracy of a DTA and to the computational effort involved, but in the general DTA framework they are quite independent of each other and of the supply model.
+
+The representation of traffic as it propagates and interacts with the network and signals, and all related phenomena within the scope of the present study, fall upon the Dynamic Network Loading model.
+The most suitable macroscopic model for the task at hand is the General Link Transmission Model, which will be analysed in further detail over the next few sections.
+
+\subsection{General Link Transmission Model}
+The \emph{General Link Transmission Model}, henceforth referred to as GLTM, is a model for continuous dynamic network loading: it can be used to determine time-dependent link flows $\flow_{a,\tau}$ and travel times $\traveltime{a,\tau}$ given the time-dependent route flows.
+
+It is built upon the representation of traffic as a partially compressible one-dimensional fluid flowing through the network according to the principles of \emph{Kinematic Wave Theory} (KWT), as developed independently by \cite{lighthill1955kinematic} and \cite{richards1956shock}.
+
+Its origins can be traced back to the \emph{Cell Transmission Model} first presented in relation to highway traffic by \cite{daganzo1994cell} and shortly after applied to network traffic in \citep{daganzo1995cell}. CTM was the first dynamic traffic representation based on hydrodynamic theory, and borrowed heavily from that field, as is most evident from the cell-based space discretisation of the road network adopted directly from computational fluid dynamics.
+
+The need for cell discretisation was eliminated in the \emph{Link Transmission Model} presented by \cite{yperman2005link}. This innovative approach allowed dynamic network loading of large scale networks using a computationally efficient algorithm that only required calculations at intersection nodes, while solving for traffic propagation along whole links using kinematic wave theory: this allowed to do away with a significant complexity factor while still accurately modelling local flow restrictions and junction delays.
+
+The original LTM, presented in full detail in \cite{yperman2007link}, rather simplified the wave propagation problem relying on the \emph{simplified} kinematic wave theory proposed by \citep{newell1993simplified}, whereby only two possible wave propagation speeds are contemplated: a forwards one for free-flowing traffic, and one for the congested flow states to propagate backwards.
+This is a considerable approximation, as the relation between vehicle density, speed and the resulting flow is rather more complex in reality:
+the instrument provided by kinematic wave theory to express such relations in general is the Density-Flow Fundamental Diagram, illustrated in section \ref{s:fundiag}.
+
+While in truth the work of Yperman already improved on the simplified KWT approach to include any piecewise linear fundamental diagram, the GLTM presented in \cite{gentile2010general} was developed to extend the LTM formulation to any concave fundamental diagram, considerably improving the accuracy in representing delays due to congestion. The GLTM also uses time-varying capacity adjustments at nodes to accurately model conflicts at intersections and the so called \emph{spillback} of traffic states from downstream links to the relevant upstream ones.
+
+The features of the supply model described in the next sections, together with the computational efficiency and the possibility to perform a DTA in high temporal resolution, make the General Link Transmission Model an optimal candidate for the present application.
+
+
+\subsection{Link Model} \label{s:linkmodel}
+In the GLTM, traffic propagates along links according to kinematic wave theory.
+As stated in section \ref{s:urbannetwork}, links are assimilated to weighted arcs of a directed graph, and as such are one-dimensional, one-directional and homogeneous along their length, stretching between locations $x^0$ (the tail node) and $x^1 = x^0 + \length$ (the head node): the actual link shape is inconsequential. As far as the arc model is concerned, there is no need to disambiguate arcs since they exist and are processed independently: arc subscripts can be dropped for ease of reading but are to be implied on all relevant quantities henceforth.
+
+The traffic state at a specific location $x \in \left[x^0, x^1\right]$ along a link is characterised by three macroscopic variables:
+\begin{description}
+\item[flow] $\flow_x$ : vehicles through the link section per unit time;
+\item[density] $\density_x$ : average number of vehicles per unit length;
+\item[speed] $\speed_x$ : average distance covered per unit time.
+\end{description}
+As is evident from their dimensions, only two of these quantities can be independent, and if two are known the third may be readily calculated using the relationship
+\eq[.]{e:trafficstates}{\speed = \frac{\flow}{\density}}
+
+The idea that vehicle density and speed can be completely independent, however mathematically sound, does not seem practically plausible. Kinematic wave theory provides a device for solving this contradiction as illustrated in the following section.
+
+\subsubsection{Fundamental Diagram} \label{s:fundiag}
+Kinematic wave theory assumes a functional relation between traffic density and flow, known as the \emph{Fundamental Diagram} of traffic flow. It approximates the changes in the average behaviour of drivers as the road gets more crowded, and may take several forms, but invariably follows from the properties of the road, e.g. width, slope or parking. As such it is itself, conceptually, a property of the link, although it could also be made to depend on environmental factors and driver behaviour, or be specific to a particular class of vehicles.
+
+A generic fundamental diagram expresses the relationship between flow and density under \emph{stationary} traffic conditions, i.e. it is derived as an equilibrium condition between flow speed and available space taking the general form
+\eq{e:fundiag_generic}{
+q = f(k)
+}
+which may be represented on a Density-Flow graph like the ones shown in Figure \ref{f:fundiag}.
+\fig{htbp}{PIX/undoguy.png}{f:fundiag}{Fundamental Diagram of a link, representing the functional relation between vehicular density and speed, resulting in different flow values for different congestion levels. Triangular form (left) and ??? form (right) are similarly shaped around the critical density value $\hat{\density}$, the jam density $\density_{jam}$ and the free flow speed $\vzero$.}{width=0.4\textwidth}
+
+The shape of a fundamental diagram reflects different assumptions about traffic flow dynamics, but there are a few key features that are shared by all formulations:
+\begin{itemize}
+\item when density approaches \emph{zero} the speed approaches the maximum value attainable on the link, i.e. the \emph{free flow} speed $\vzero$, but the flow tends to zero;
+\item maximum flow occurs at the \emph{critical density $\hat{\density}$} also referred to as the link \emph{capacity};
+\item beyond capacity, further increase in vehicular density induces a speed penalty that causes the flow to decrease;
+\item when vehicles reach the \emph{jam density} $\density_{jam}$ they are packed as closely as possible, and come to a standstill;
+\item for any flow state on the $k-q$ curve, the speed is given by the slope of the line connecting it to the origin;
+\item the rising branch diagram (i.e. to the left of $\hat{\density}$) represents free flowing 
+states, the descending branch represents congested states.
+\end{itemize}
+
+In a simple triangular diagram like the one shown in Figure \ref{f:fundiag} (left) the speed is assumed constant at its maximum value for all subcritical states, while above capacity it decreases linearly with density. More subtle modelling may yield a diagram shape more similar to Figure \ref{f:fundiag} (right), where the speed is shown to decrease even in subcritical conditions as the road gets more crowded due to the natural variance in driving speed which, as more vehicles become involved, yields a higher chance of having a slow vehicle delaying all the others \emph{(subcritical spacing)}.
+
+ In both cases it is assumed that as density increases, the available space becomes insufficient to maintain safe distances between vehicles, causing drivers to slow down \emph{(hypercritical spacing)}.
+\todo{analysis of shapes given in ref tiddi}
+
+If a model is to rely on the fundamental diagram to hold for non-stationary traffic as well, it must allow vehicles to change speed instantly with infinite acceleration, as is the case with GLTM and in general with first-order implementations of KWT. \\
+Higher order traffic phenomena such as the emergence of stop-and-go waves along the link, or fundamental diagram hysteresis (due to traffic states evolving asimmetrically when leading up to congestion or recovering from it) are knowingly neglected.
+
+\subsubsection{Traffic State Propagation}
+To understand how traffic states propagate on links, consider the \emph{cumulative flow} $N(x,t)$, \\ i.e. the number of vehicles that have passed location $x$ along a link before time $t$.
+
+Assuming that vehicle conservation is respected along the link, i.e. that no vehicle is created or destroyed between the tail and the head node, the trajectory of the $n^{\mathrm{th}}$ vehicle to enter the arc can be traced on a time-space diagram as the locus of points for which $N(x,t) = n$ as shown in Figure \ref{f:txtraj}.
+
+\fig{htbp}{PIX/undoguy.png}{f:txtraj}{vehicle trajectories}{width=0.4\textwidth}
+
+The cumulative function $N(x,t)$ is clearly discontinuous in both time and space, but it is possible to consider a smooth approximation that is differentiable in either direction without altering the essence of the phenomenon. Flow and density values at a given location and time can then be expressed as the partial derivatives
+\eq[,]{e:dndt}{\flow(x,t) =\frac{\partial N(x,t)}{\partial t}}
+\eq[,]{e:dndx}{\density(x,t) =\frac{-\partial N(x,t)}{\partial x}}
+the latter requiring a sign change simply because density is defined positive but the cumulative decreases along the positive spatial direction.
+
+\todo{derive wave propagation speed, conservation, Newell Luke MP, shockwaves}
+
+\todo{OR MAYBE cut back on theory refer to literature and stick with the ESSENTIALS}
+
+
+\subsection{Node Model} \label{s:nodemodel}
+\todo{illustrate node model, specifying how IT is in charge of the implementation of signals}
+
+\section{GLTM as Flow Simulation}
+The network loading and flow propagation model is central to the optimisation process proposed in this work.
+So far, its position in the Dynamic Traffic Assignment has been clarified, but it may be useful to recapitulate and formalise what its input and output are as a stand-alone \emph{flow simulator} component; before proceeding to Section \ref{s:geneticalgo} where its role in relation to the Genetic Algorithm will be clarified. These are summarised in Figure \ref{f:dnl} and presented in more detail in the following sections.
+
+\fig{htbp}{PIX/undoguy.png}{f:dnl}{ Dynamic Network Loading Input and Output}{width=0.4\textwidth}
+
+\subsection{Simulation Input}
+The General Link Transmission Model operates on the basis of
+\begin{description}
+\item[splitting rates] resulting from the aggregation of the dynamic route flows, used by the node model to distribute the outflow of an arc to its forward star;
+\item[origin flows] representing the vehicles \emph{injected} at specific network locations at every simulation interval, according to the demand data.
+\end{description}
+
+It is obviously important that the input data cover the entire span of the simulation, if realistic results are to be obtained.
+However, the time resolution of the input data is irrelevant and the algorithm can operate with constant values as well as weighted averages where the time intervals do not correspond; in fact, it is robust even with respect to incomplete input, since it may split flows based on the relative capacity of downstream arcs, and if demand flows are unknown they will simply be assumed to be zero.
+
+
+\subsection{Real Time Data Integration}
+The GLTM implemented in TRE can draw real-time corrections from the OPTIMA framework, which are based on harmonised data coming from a variety of public and private sources (loops, cameras, floating car data etc.) which are integrated into the simulation as:
+\begin{description}
+\item[capacity corrections] when an accident, road closure or other modification to the supply is broadcast by the authorities or inferred automatically, and the fundamental diagram of the relevant arcs is updated;
+\item[speed corrections] when the speed is measured or inferred, and either the fundamental diagram is updated to match the traffic state or a flow correction is applied;
+\item[flow corrections] when a real flow value (often the outflow from an arc) is available and the simulated value overwritten.
+\end{description}
+
+These corrections are all applied in the inner loops of Figure \ref{f:dnl}, during the simulation intervals for which they are relevant. Their effect is then propagated in time and space, increasing the fidelity of the simulation to the real world traffic conditions.
+
+
+\subsection{Simulation Output} \label{s:output}
+Strictly speaking, the results of the Dynamic Network Loading are, for every arc, the cumulative inflow and outflow profiles (namely $F$ and $E$), the cumulate number of spaces available and vehicles that reached the head of each arc (respectively $G$ and $H$) defined in Sections \ref{s:arcmodel} and \ref{s:nodemodel}.
+
+These values refer to \emph{instants} of the simulation span, and as illustrated in Figure \ref{f:dnl}  can be readily used to obtain interval averages of the following quantities:
+\begin{description}
+\item[$\flow_a$ : flow]  onto the arc during each interval in vehicles per unit time;
+
+\item[$\traveltime{a}$ : travel time]  that users entering during each interval will spend on the arc; 
+
+\item[$\queuerelative{a}$ : queue] length given as average share of the arc length;
+
+\item[$\total{a}$ : total vehicles] on the arc during the interval.
+\end{description}
+
+
+\subsection{Optimisation Corridor}
+The present work aims to optimise signal timings in relation to the performance of what is usually called a \emph{Traffic Corridor} or \emph{Arterial Road}, referring to a stretch of road designed or happening to carry particularly high volumes of traffic. \\
+While the concept is not strictly related to urban traffic, it is in the urban environment that traffic corridors most often suffer significant performance degradation due to congestion, aggravated by the numerous intersections with other busy roads where consistent traffic flows compete for the right of way and must be regulated by traffic lights.
+
+The proposed optimisation method revolves around an \emph{Optimisation Corridor} object that essentially implements the formalisation illustrated in Section \ref{s:corridor}. It consists of an \emph{ordered set of links} connected head-to-tail, and may run through any number of signalised intersections: the problem size is then determined exactly, since the task at hand is simply to optimise signal coordination and each junction has a predetermined program that can only be offset in time.
+
+This definition of corridor blends seamlessly into the Optima network model as well as in TRE result computation, and allows relevant key performance indicators to be calculated from continuous network loading results, i.e. the arc profiles just introduced in section \ref{s:output}: the process is fully detailed in Chapter \ref{c:objectives} where performance indicators are discussed.
+
+The corridor object represents the interface between the optimisation and simulation processes, and allows their separation (as may be more clear from Figure \ref{f:trega}), leaving the possibility to exploit the work done in this context e.g. with different optimisation methods. Whatever the optimisation procedure, the corridor defines an additional input and output for the DNL. For a corridor with $n$ arcs and $m$ signalised junctions (see section \ref{s:corridor}):
+\begin{itemize}
+\item the \textbf{input} is a vector of $m$ offset values, which affect the turn capacities used by the Node Model at the relevant junctions, altering the simulated flow propagation;
+\item the \textbf{output} is a vector of performance indices calculated for the $n$ arcs of the corridor, which can be aggregated into global corridor performance indices.
+\end{itemize}
+
+Although for the rest of this dissertation only one corridor will be considered, the application might easily be scaled to multiple corridors or extended to sub-networks: such efforts are beyond the scope of this experiment but their potential is discussed in \ref{s:scalability} alongside other scalability considerations.
+
+Finally, it should be noted that links that are not strictly part of the corridor are \emph{not} factored into the KPI computation. Some may be considered relevant, e.g. the inroads to the corridor; however, it is far from straightforward to \emph{automatically} determine which links should be included based solely on the corridor definition, and in general there is no guarantee that the network model should be constructed in such a way as to render it possible at all. Although \emph{in principle} some consideration for the consequences of choices made on the corridor on the neighbouring roads may help make better decisions, this would require preprocessing of the network and the associated complications are deemed unnecessary given the current task, but will be discussed in Chapter \ref{c:futurework}.
+
+\subsubsection*{Return Corridor Definition}
+The return corridor cannot simply be defined as the sequence of links traversing the same nodes in reverse order: there is no guarantee that for any pair of subsequent nodes representing the tail and head of a given link there should exist another link joining them in the opposite direction (the network is a directed graph).
+
+Furthermore, the two directions of a traffic corridor may well be modelled as completely disjoint sets of arcs, sharing no nodes between them.
+
+The present approach can handle two-way optimisation without loss of generality in this respect: it is sufficient to define the return corridor in the exact same way as the primary direction, and to indicate it as \emph{return} direction along with a weight coefficient, which can be used to scale KPI values to reflect its importance with respect to the main direction.
+
+If the junctions traversed by the return corridor are handled by the same set of controllers as the main, the problem size remains the same and the extra computation time required to calculate the relevant KPI is negligible. \\
+If more controllers are involved, they can be ignored (which makes little sense unless they actually cannot be controlled and adjusted remotely) or included in the optimisation, which will increase the solution space size and the time required to explore it.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Genetic Algorithm} \label{s:geneticalgo}
+\newcommand{\solution}{\mathbf{s}}
+A Genetic Algorithm is an evolutionary computation technique that explores a solution space by mimicking a process of evolution by natural selection. It is particularly suitable for heuristic optimisation approaches as it does not rely on \emph{a priori} knowledge of the problem.
+
+\todo{explain right away how this applies to our case}
+
+Given a generic process or single valued function of $n$ arguments, the algorithm identifies candidate solutions as \emph{individuals}, each characterised by a \emph{chromosome} $\solution$ which is nothing but a vector of $n$ viable input values to the process. The candidate solution chromosomes are then fed through the process or function to determine the fitness $f$ of the corresponding individual:
+\eq{e:gafitness}{
+\omega_i = \phi(\solution_i)\qquad \mathrm{with} \quad 
+\solution_i = \left\lbrace s_i^1, s_i^2, \dots s_i^n\right\rbrace
+}
+where the subscript $i \in I$ identifies an individual member of the population, i.e. a specific vector among the pool of candidate solutions whose components are referred to as \emph{genes}.
+
+The population may initially be randomised or otherwise generated. Through the fundamental operations of \emph{selection, crossover} and \emph{mutation} (detailed in the next few sections) the best individuals are allowed to live on and pass their genes to their successors, which gradually replace the lower ranking individuals.
+
+\fig{htbp}{PIX/undoguy.png}{f:geneticalgorithm}{The Genetic Algorithm: with each cycle, a new \emph{generation} carrying the most successful traits of the previous one supplants the least successful individuals.}{width=0.4\textwidth}
+
+Through iterations of this mechanism, illustrated in Figure \ref{f:geneticalgorithm}, the population undergoes an evolutionary process whereby all individuals become (on average) better suited for the process considered: there is no guarantee that a global optimum will be found, but good-enough solutions for practical applications can be obtained in relatively few generations. 
+
+There is no generalised consensus regarding the optimal population size in relation to the problem size; if anything, researchers agree that no implementation of the Genetic Algorithm can be expected to work equally well with different problem types, and that some trial and error is always required in practice: \citep{eberhart1998comparison} provide an insightful analysis of the matter.
+
+This work is no exception, and a study of the algorithm performance with different configurations is presented in the \nameref{c:results} chapter. The next sections are dedicated to the formalisation of the genetic algorithm operators and will illustrate in more detail some of the design choices made for the current GA implementation.
+
+\subsection{Evolutionary Operators}
+\subsubsection{Selection}
+Selection is the process whereby the survival and breeding chances of an individual are determined based on its fitness. Selection for survival is necessary because some individuals must be eliminated from the pool to make room for the new generation, and is generally applied before the other for obvious reasons, although this is not strictly necessary. Selection for breeding further enforces the inheritance of the \emph{best} genes to the new generations. They are applied in this order in the GA implemented for this work, and will be presented accordingly.
+
+Considering the population $I_g$ at generation $g$, the selection process $\kappa$ determines the subset $I_g^*$ that survives to maturity based on the individual fitness values $\mathbf{f}$
+\eq[,]{e:survival}{I_g^* = \kappa\left(I_g,\mathbf{f}\right)}
+then the the breeding chance of each surviving individual $\mathbf{p}$ may be calculated by an independent process $\beta$
+\eq[]{e:breedingchance}{\mathbf{p}^{\beta} = \beta\left(I_g^*,\mathbf{f}^*\right)}
+where all terms have the same cardinality equal to the number of individuals in $I_g^*$.
+
+In this instance, the selection function $\phi$ takes the form of a dynamic step function allowing an arbitrary percentile of the $k$ fittest individuals to make it to adulthood; the breeding chances are then determined by a linear function of the individual ranking, which can be adjusted via the ratio $p_1 / p_k$, expressing how much more likely the top individual is to breed with respect to the least fit surviving one.
+
+\subsubsection{Crossover}
+The combination of two individuals to generate a new one is inspired by the naturally occurring event of genes \emph{crossing over} between chromosomes during meiosis in sexually reproducing organisms.
+Given two chromosomes with $n$ genes, and assuming only one random crossing-over locus $x$, the crossover operator $\xi$ used to produce a new one may be formalised as follows:
+\eq[,]{e:crossover}{
+\xi \left(\solution_1 , \solution_2 \right) =
+\left\lbrace s_1^1, \dots, s_1^{x-1} \right\rbrace
+\cup 
+\left\lbrace s_2^x, \dots, s_1^n \right\rbrace
+\qquad \mathrm{with} \quad
+x \in [1,n+1]
+}
+meaning that the resulting chromosome inherits the genes from one parent up to a random position, and the rest from the second parent. The same principle may be intuitively extended to multiple random crossover loci.
+
+\subsubsection{Mutation}
+Mutation is the process whereby a random gene on a solution chromosome changes value.
+This introduces variability in the population that is not directly related with fitness: on one side, this is beneficial as it prevents to some degree that a sub-optimal solution should take over the entire population.
+
+\subsection{Other Devices}
+
+\subsection{Initial Population Seeding with Slack Bandwidth}
+The speed of convergence of the Genetic Algorithm is strongly influenced by the initial population.
+Theoretically, an infinitely large random population would contain the global optimum right from the first iteration, but with any manageable number of candidate solutions the chance of having a randomly generated solution performing well becomes very slim.
+
+Depending on the problem size, there is a chance that a single random solution may be rather near an optimum, but in a randomly generated gene pool it will struggle to find a worthy partner, and most crossover operations will result in low fitness individuals with the exception of those which happen to inherit most genes from the successful one (which increases the average population fitness but almost exclusively through loss of diversity). This leads to slow performance improvements over the first iterations, and rather unpredictable results in the long run.
+
+By priming the algorithm with a population of selected individuals that can be reasonably expected to perform well, obtained by some fast and cheap approximation of the problem, it is possible to greatly improve the initial performance; the downside being the risk of \emph{driving} evolution too hard into a local optimum.
+
+Based on the results presented in the \nameref{c:results} chapter, section \ref{s:poppriming}, it was determined that the best results for the problem at hand could be obtained by priming the population with solutions derived from the Slack Bandwidth approach presented in section \ref{s:slackband}.
+
+To maximise the chance of obtaining good solutions right from the first generation while reducing the risk of driving the algorithm into a local optimum, the maximum bandwidth solution was cloned into 50\% of the initial population while applying small random mutations and a constant shift to all values, so that the \emph{relative} offsets (which can reasonably be expected to be nearly correct from the geometric method) could be phased over the entire signal cycle. This introduces a certain degree of diversity in the population, complemented by the remaining 50\% of the initial population generated randomly.
+
+\subsubsection*{Time Dependent Weighting of Cost Functions}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
