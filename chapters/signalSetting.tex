@@ -1,22 +1,26 @@
 \section{Signal Setting}
-Long before microprocessors and sensors made adaptive real-time traffic control an everyday reality, the notion of signal plan optimisation identified with a range of techniques for designing good signal plans based on historical demand flows, which will henceforth be referred to as \emph{offline} signal setting.
+Long before microprocessors and sensors made adaptive real-time traffic control an everyday reality, the notion of signal plan \emph{optimisation} identified with the plan design phase.\\
+The well known techniques used throughout the last century to design good signal plans based on historical demand flows will henceforth be referred to as \emph{offline} signal setting.
 
 It is worth noting that such methods are not only still used for planning, but lie at the core of several adaptive signal setting approaches: once a \emph{signal setting policy} is chosen to determine the best signalisation parameters for given traffic conditions, it makes little difference from the methodological point of view whether the input variables are determined from historical data or fed in real-time by sensors. 
 
-Naturally, the notion of offline planning does not imply that the dynamic interaction between signal setting and driver behaviour can be disregarded: for example, the assumption often made that route choices are fixed and unaffected by signal settings has warranted the formulation of planning strategies which have proven quite patently inadequate in the real world, as first discussed in Dickson (1981). While optimisation of a single junction for given flows may be a relatively simple problem with an analytical solution, devising a plan for an entire network is an entirely different task.
+Naturally, the notion of offline planning does not imply that the dynamic interaction between signal setting and driver behaviour can be disregarded: for example, the assumption often made that route choices are fixed and unaffected by signal settings has warranted the formulation of planning strategies which have proven quite patently inadequate in the real world, as first discussed in \citep{dickson1981note}.
+
+While optimisation of a single junction for given flows may be a relatively simple problem with an analytical solution, devising a plan for an entire network is an entirely different task.
 
 This section introduces the fundamentals of network signalisation design, describing the methods commonly used to determine the foremost features of a signal program, including cycle time, offsets and green share allocation.
 
 \subsection{Performance of Isolated Signalised Junctions} \label{s:performance}
-\todo{only a more specific case of junction}
+Before considering a whole signalised network, it is useful to define the concept of \emph{performance} of a generic junction. To understand the quantities and processes involved, an\emph{isolated} junction may be considered, to allow disregarding the effects of other junctions (such as vehicle platooning) and concentrate on the modelling of congestion phenomena. 
+A signalised junction behaves exactly like any junction where flows merge, diverge and cross, with the exception that the availability of certain manoeuvres is time dependent and the corresponding flows, administered by means of traffic lights, may be periodically forced to zero.
 
-The concept of \emph{performance} of a signalised junction may be defined in several ways, but in general terms it represents a gauge of the interaction between supply and demand with respect to a choice of metrics. As such, it depends on the junction physical layout, on the distribution of vehicle arrivals in time and on the signal that regulates their departure times. 
+The performance of a signalised junction may be defined in several ways, but in general terms it represents a gauge of the interaction between supply and demand with respect to a choice of metrics. As such, it depends on the junction physical layout, on the distribution of vehicle arrivals in time and on the signal that regulates their departure times. 
 
 Several flow models were introduced in scientific literature to reproduce arrival and departure phenomena.
 For all signal planning purposes, traffic flow is usually assimilated to a fluid stream according to the \emph{macroscopic} paradigm, which differs substantially from the microscopic approach where the trajectory of each single vehicle is explicitly considered.
 
 More specifically, vehicle \emph{departures} from a stop line are modelled as a uniform flow. If the \emph{arrival} flows are sufficiently lower than capacity, their inherent random component can be neglected and they are also considered deterministic.
-Conversely, if stochasticity of arrival flows is significant, as it occurs when they approach the relevant arc capacity, or are very low, a random component is added to the simple deterministic model as in \todo{ref Webster, (1956)}.
+Conversely, if stochasticity of arrival flows is significant, as it occurs when they approach the relevant arc capacity, or are very low, a random component is added to the simple deterministic model as in \citep{webster1958traffic}.
 This section will present the basic relationships between signal timing variables and junction performance with reference to the simple deterministic model.
 
 \subsubsection*{Queues and Queue Clearance}
@@ -73,9 +77,8 @@ Assuming constant arrival and departure rates, the total delay experienced at ea
 }
 using \req{e:tclear} for the queue clearance time $\tclear{a}$.
 
-Clearly, the above equation \req{e:avgdelay} assumes no standing queues at the end of a cycle. More complex delay functions can be obtained by considering stochastic fluctuations of arrival flows \todo{ref (Webster, 1958)}. 
-Flows exceeding the arc capacity require the introduction of either simulation models or empirical adaptations of analytical models, such as the coordinate transformation method introduced by  \todo{ref Kimber and Hollis (1979)} and later adopted by the
-popular  \todo{ref HCM traffic manual (2010)}.
+Clearly, the above equation \req{e:avgdelay} assumes no standing queues at the end of a cycle. More complex delay functions can be obtained by considering stochastic fluctuations of arrival flows as stated by \cite{webster1958traffic}. 
+Flows exceeding the arc capacity require the introduction of either simulation models or empirical adaptations of analytical models, such as the coordinate transformation method introduced by \cite{kimber1979traffic} and later adopted by the popular [Special Report 209, 1985] and subsequent revisions known as the Highway Capacity Manual.
 
 \subsubsection*{Critical Flow Ratio and Saturation}
 The saturation flow characterising each lane group depends on various factors, such as
@@ -134,7 +137,7 @@ accelerate and clear the junction. This implies that a non-negligible share of t
 \item at every phase end, sufficient time must be allowed for vehicles to clear the junction before others may safely carry out a conflicting manoeuvre, which represents a \emph{clearance loss}.
 \end{itemize}
 
-The start-up loss may be reduced by helping drivers to react more promptly, e.g. using a pre-green amber light or red count-down timers, which also seem to alleviate the stress of being stuck in a queue \todo{ref}.
+The start-up loss may be reduced by helping drivers to react more promptly, e.g. using a pre-green amber light or red count-down timers, which also seem to alleviate the stress of being stuck in a queue.
 The clearance loss may only be mitigated by an accurate choice of signal phase sequence for given traffic conditions or, wherever possible, by appropriate modification of the junction layout, e.g. implementation of protected turn bays.
 
 The total lost time $\tlost{j}$ then depends on phase design and sequence, which in turn should
@@ -181,11 +184,60 @@ The problem takes the following form:
 \\ \\
 \text{subject to} & \cycle{j} - \tlost{j} = & \displaystyle \sum_{p \in \phaset_j} \gren{p}
 \\ \\
- & \gren{p} \geq & \flowratio_p \: \cycle{j} \quad \forall p \in \phaset_j \\
+ & \gren{p} \geq & \flowratio_p \cdot \cycle{j} \quad \forall p \in \phaset_j \\
 \end{array}
 }
+where the first constraint simply enforces the conservation of cycle time, and the other $|\phaset_j|$ inequalities ensure that phase durations are sufficient to meet demand where possible.
+It is therefore evident that the number of constraints is equal to the number of variables, but since green time constraints are inequalities the problem has as many degrees of freedom as the signal program phases. This is solved by introducing a vector of positive auxiliary variables so that for each phase $p$ of the program
+\eq[.]{e:lagr2}{
+\gren{p} - \flowratio_p \cdot \cycle{j} - \eta_p^2 = 0
+}
+The optimisation can then be solved with the Lagrange method, i.e. finding the stationary points of the linear combination of objective function and equality constraints. To this end, Lagrangian multipliers are introduced as auxiliary variables $\lambda_p$ for the phase constraints and $\mu$ for the cycle total, forming the Lagrangian function
+\eq[.]{e:lagr3}{\mathscr{L} = \avgdelay{j}\left(\grenvec , \cycle{j} \right) +
+\sum_{p \in \phaset_j}\lambda_p \left( \gren{p} - \flowratio_p \cdot \cycle{j} - \eta_p^2 \right) +
+\mu \left( \sum_{p \in \phaset_j} \gren{p} + \tlost{j} - \cycle{j} \right)
+}
+Since by definition all partial derivatives of the Lagrangian function must be zero at stationary points, the following are obtained for each control and auxiliary variable:
+\newcommand{\dld}[1]{\frac{\partial \mathscr{L}}{\partial #1}}
 
-\todo{finish copying in lagrangian approach}
+
+%\eq[;]{e:lag1}{
+%\dld{\cycle{j}} = \frac{\partial\avgdelay{j}}{\cycle{j}} - 
+%\sum_{p \in \phaset_j} \lambda_p \cdot \flowratio_p - \mu = 0
+%}
+%
+%\eq[;]{e:lag2}{
+%\dld{\gren{p}} = \frac{\partial\avgdelay{j}}{\gren{p}} + 
+%\lambda_p + \mu = 0 \qquad \forall p \in \phaset_j
+%}
+%
+%
+%\eq[;]{e:lag3}{
+%\dld{\lambda_p} = \gren{p} - \flowratio_p \cdot \cycle{j} - \eta_p^2 = 0 \qquad \forall p \in \phaset_j}
+%\\
+%\eq[;]{e:lag4}{
+%\dld{\mu} = \sum_{p \in \phaset_j} \gren{p} + \tlost{j} - \cycle{j} = 0}
+%\\
+%\eq[.]{e:lag5}{
+%\dld{\eta_p} = \eta_p \cdot \lambda_p = 0 \qquad \qquad \forall p \in \phaset_j}
+
+
+\begin{eqnarray}
+\begin{aligned}
+\dld{\cycle{j}} & \quad = \quad 
+\frac{\partial\avgdelay{j}}{\cycle{j}} - 
+\sum_{p \in \phaset_j} \lambda_p \cdot \flowratio_p - \mu = 0 & & \mathrm{(a)}\\
+\dld{\gren{p}} & \quad = \quad
+\frac{\partial\avgdelay{j}}{\gren{p}} + 
+\lambda_p + \mu = 0 & \forall p \in \phaset_j \qquad & \mathrm{(b)}\\
+\dld{\lambda_p} & \quad = \quad
+\gren{p} - \flowratio_p \cdot \cycle{j} - \eta_p^2 = 0 & \forall p \in \phaset_j \qquad & \mathrm{(c)}\\
+\dld{\mu} & \quad = \quad
+\sum_{p \in \phaset_j} \gren{p} + \tlost{j} - \cycle{j} = 0 & & \mathrm{(d)}\\
+\dld{\eta_p} & \quad = \quad
+\eta_p \cdot \lambda_p = 0 \qquad \qquad & \forall p \in \phaset_j \qquad & \mathrm{(e)}\\
+\end{aligned}
+\end{eqnarray}
 
 \subsubsection*{Webster Optimal Solution}
 The first and foremost formulation of optimal signal settings to lift the assumption of uniform vehicle arrivals is due to Webster (1958). The approach is based on a queueing system with Poissonian arrivals and a constant service rate equal to the capacity $\gshr{} \satflow$ of the signalised lane group.
@@ -199,8 +251,8 @@ saturation level: the higher the demand for a manoeuvre \emph{with respect to th
 relevant infrastructure, the higher the green share allocated to the corresponding signal phase.
 
 Furthermore, Webster worked under the assumptions that no over-saturation occur and average demand \emph{flows} are stable, i.e. and path choices made by road users are in no way a consequence of
-the signal setting. This assumption was removed by later scholars who tackled the global
-optimisation signal setting who route choice problem \todo{ref (Smith, 1984; Cipriani and Fusco,
+the signal setting. This assumption was removed by later scholars who tackled the problem of global
+signal setting with route choice \todo{ref (Smith, 1984; Cipriani and Fusco,
 2008)}.
 
 Under the equisaturation policy, all phase saturation levels at a given junction are equal
