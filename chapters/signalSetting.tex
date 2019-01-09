@@ -78,7 +78,7 @@ Assuming constant arrival and departure rates, the total delay experienced at ea
 using \req{e:tclear} for the queue clearance time $\tclear{a}$.
 
 Clearly, the above equation \req{e:avgdelay} assumes no standing queues at the end of a cycle. More complex delay functions can be obtained by considering stochastic fluctuations of arrival flows as stated by \cite{webster1958traffic}. 
-Flows exceeding the arc capacity require the introduction of either simulation models or empirical adaptations of analytical models, such as the coordinate transformation method introduced by \cite{kimber1979traffic} and later adopted by the popular [Special Report 209, 1985] and subsequent revisions known as the Highway Capacity Manual.
+Flows exceeding the arc capacity require the introduction of either simulation models or empirical adaptations of analytical models, such as the coordinate transformation method introduced by \cite{kimber1979traffic} and later adopted by the popular \hcm and subsequent revisions known as the Highway Capacity Manual.
 
 \subsubsection*{Critical Flow Ratio and Saturation}
 The saturation flow characterising each lane group depends on various factors, such as
@@ -200,29 +200,7 @@ The optimisation can then be solved with the Lagrange method, i.e. finding the s
 Since by definition all partial derivatives of the Lagrangian function must be zero at stationary points, the following are obtained for each control and auxiliary variable:
 \newcommand{\dld}[1]{\frac{\partial \mathscr{L}}{\partial #1}}
 
-
-%\eq[;]{e:lag1}{
-%\dld{\cycle{j}} = \frac{\partial\avgdelay{j}}{\cycle{j}} - 
-%\sum_{p \in \phaset_j} \lambda_p \cdot \flowratio_p - \mu = 0
-%}
-%
-%\eq[;]{e:lag2}{
-%\dld{\gren{p}} = \frac{\partial\avgdelay{j}}{\gren{p}} + 
-%\lambda_p + \mu = 0 \qquad \forall p \in \phaset_j
-%}
-%
-%
-%\eq[;]{e:lag3}{
-%\dld{\lambda_p} = \gren{p} - \flowratio_p \cdot \cycle{j} - \eta_p^2 = 0 \qquad \forall p \in \phaset_j}
-%\\
-%\eq[;]{e:lag4}{
-%\dld{\mu} = \sum_{p \in \phaset_j} \gren{p} + \tlost{j} - \cycle{j} = 0}
-%\\
-%\eq[.]{e:lag5}{
-%\dld{\eta_p} = \eta_p \cdot \lambda_p = 0 \qquad \qquad \forall p \in \phaset_j}
-
-
-\begin{eqnarray}
+\begin{eqnarray} \label{e:lagr}
 \begin{aligned}
 \dld{\cycle{j}} & \quad = \quad 
 \frac{\partial\avgdelay{j}}{\cycle{j}} - 
@@ -239,6 +217,59 @@ Since by definition all partial derivatives of the Lagrangian function must be z
 \end{aligned}
 \end{eqnarray}
 
+This non-linear system can be readily examined without loss of generality by referring to a simple case of a junction $j$ with only two phases, $p$ and $q$.
+The complementarity conditions $\eta_p \cdot \lambda_p = 0$ and $\eta_q \cdot \lambda_q = 0$ then have four possible solutions, and an optimal solution must be identified by comparing the objective function for all candidate stationary points.
+
+\textbf{Case A - minimum cycle:} $\lambda_p,\lambda_q \neq 0 \: ; \; \eta_p, \eta_q = 0$\\
+Lagrangian multipliers are inconsequential because capacity constraints \req{e:lagr}(c) are active during both phases, and with \req{e:lagr}(d) are sufficient to determine effective greens and cycle time:
+$$
+\begin{cases}
+\gren{p}   =  \flowratio_p \cdot \cycle{j} \\
+\gren{q}   =  \flowratio_q \cdot \cycle{j} \\
+\cycle{j}  =  \tlost{j} + \left(\gren{p} + \gren{q} \right)\\
+\end{cases}
+$$
+has a unique solution, corresponding to the minimum green times that exactly match demand on the critical lane groups of each phase (i.e. all critical lanes operate at full saturation $\saturation_a = 1$) and the subsequent cycle length that allows to serve demand despite the time wasted during phase changes.
+Each phase should get at the very least a green share of the total cycle time equal to its critical flow rate, hence
+\eq[.]{e:mincycle}{
+\cycle{j} = t_j^{Cmin} = \frac{\tlost{j}}{1-\flowratio_j}}
+
+\textbf{Case B - main phase, secondary phase:} $\lambda_p = 0,\, \eta_p \neq 0 \: ; \; \lambda_q \neq 0,\, \eta_q = 0$\\
+Capacity constraint is active only during phase $p$, while the other Lagrangian multiplier is zero. By solving the equation for the active constraint, the minimum green $\gren{p}$ is found; the other can similarly be determined as a function of the cycle time, reducing the objective to a single variable function.
+In the case of deterministic constant arrivals, minimisation of delays yields a unique stationary point in terms of cycle length, which can be found in closed form:
+\eq[,]{e:lagr5}{
+\cycle{j} = t_j^{Cdet} =
+\sqrt{\frac{\rho_q\left(\tlost{j}\right)^2}
+{\rho_p \left(1-\flowratio_p\right)^2 + 2 \rho_q \flowratio_p^2 }}}
+where the $\rho$ coefficients are determined for each phase as
+\eq[.]{e:rho}{
+\rho_p = \frac{1}{2} \cdot 
+\frac{\sum_{a \in \arcset_p} \frac{\flow_a}{1-\flow_a}}
+{\sum_{a \in \bstar{j}} \flow_a}
+}
+This solution assigns minimum green to phase $p$ and is reasonable if the major demand
+flow is handled during phase $q$, while the opposite scenario covers the specular case.
+
+\textbf{Case C - low saturation:} $\eta_p, \eta_q \neq 0 \: ; \; \lambda_p,\lambda_q = 0$\\
+In this case no capacity constraints are active. The problem consists in searching for
+the solution of the following system of three non-linear equations in the three unknowns $\gren{p}$, $\gren{q}$ and $\cycle{j}$:
+\eq[.]{e:lagr6}{
+\begin{cases}
+\frac{\partial \avgdelay{j}}{\partial \gren{p}} + \frac{\partial \avgdelay{j}}{\partial \cycle{j}} = 0
+\vspace{3pt}\\
+\frac{\partial \avgdelay{j}}{\partial \gren{q}} + \frac{\partial \avgdelay{j}}{\partial \cycle{j}} = 0 
+\vspace{3pt}\\
+\gren{p} + \gren{q} - \cycle{j} + \tlost{j} = 0
+\end{cases}}
+
+In this case the analytical solution is not as straightforward, but a solution can be easily found numerically since the delay function is bounded and convex under usual realistic assumptions on vehicle arrivals.
+The explicit formulation of this method rests upon the assumption that the capacity
+condition be respected, i.e. the capacity of the junction be sufficient to serve demand. This
+may be relaxed in practice for heuristic optimisation, but little changes about the fundamental
+fact that no green share allocation will ever enable a junction to operate \emph{above capacity}
+without delay.
+
+
 \subsubsection*{Webster Optimal Solution}
 The first and foremost formulation of optimal signal settings to lift the assumption of uniform vehicle arrivals is due to Webster (1958). The approach is based on a queueing system with Poissonian arrivals and a constant service rate equal to the capacity $\gshr{} \satflow$ of the signalised lane group.
 The average delay given for the steady state case by equation \req{e:avgdelay} was extended to obtain a more complete delay function for random arrivals, with an additional empirical term needed to
@@ -251,10 +282,7 @@ saturation level: the higher the demand for a manoeuvre \emph{with respect to th
 relevant infrastructure, the higher the green share allocated to the corresponding signal phase.
 
 Furthermore, Webster worked under the assumptions that no over-saturation occur and average demand \emph{flows} are stable, i.e. and path choices made by road users are in no way a consequence of
-the signal setting. This assumption was removed by later scholars who tackled the problem of global
-signal setting with route choice \todo{ref (Smith, 1984; Cipriani and Fusco,
-2008)}.
-
+the signal setting.\\
 Under the equisaturation policy, all phase saturation levels at a given junction are equal
 by definition. The \emph{available green time} can simply be allocated proportionally to the critical
 flow ratio of each phase:
@@ -276,8 +304,8 @@ The resulting solution for the cycle time that minimises average delay under pro
 \webstercycle{j} = \frac{\frac{3}{2} \: \tlost{j} + 5}{1-\flowratio_j}
 }
 
-Notice from equations \todo{ref e:mincycle} and \req{e:webstercycle} how the cycle time invariably grows with the total flow ratio of the junction.
-It is also possible to extend \todo{ref e:mincycle} to get a target saturation level $\saturation_j$
+Notice from equations \req{e:mincycle} and \req{e:webstercycle} how the cycle time invariably grows with the total flow ratio of the junction.
+It is also possible to extend \req{e:mincycle} to get a target saturation level $\saturation_j$
 for the junction:
 \eq[,]{e:satcycle}{
 \cycle{j} \small{(\saturation_j)} = \frac{\tlost{j}}{1-\frac{\flowratio_j}{\saturation_j}}
@@ -291,5 +319,5 @@ or even a vector $\satvec_{\phaset_j}$ of critical saturation level values each 
 It should be evident that saturation values greater than 1 correspond to \emph{oversaturated}
 conditions, under which the demand flows are not met with sufficient capacity and queue
 buildup is inevitable: such traffic conditions require radically different timing approaches.
-The rule of thumb mentioned in \todo{ref HCM (2008)} and generally followed in practice is that
+The rule of thumb mentioned in the Highway Capacity Manual \hcm and generally followed in practice is that
 signals should be timed so that lanes operate at saturation levels below 0.85, allowing sufficient margin to deal efficiently with most possible traffic fluctuations, and discharge any queues within a few signal cycles.
