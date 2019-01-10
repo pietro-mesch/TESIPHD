@@ -1,32 +1,168 @@
 \chapter{Smart Signals}
 \todo{This chapter presents adaptive signalisation approaches. TO REVIEW.}.
 
-Over the years, many attempts have been made to render the signalisation system of urban networks capable of reacting autonomously to the traffic conditions, to address the mutable nature of demand. In this context, the term optimisation is used in its broader sense of choice of the best option, whether this is picked out of a set of previously planned solutions, tailored on-the-fly onto the current traffic conditions, or simply the result of a sequence of best possible actions evaluated individually: the main features of each class of very different approaches will be illustrated in the following sections.
+Over the years, many attempts have been made to render the signalisation system of urban networks capable of reacting autonomously to the traffic conditions, to address the mutable nature of transportation demand.
 
-The one thing that all responsive traffic control systems have is the need to perceive the traffic state on the network by means of detectors. The type and quantity of information required for different optimisation approaches may vary, but in the end it always boils down to one, or a combination, of the following quantities:
+In this context, the term \emph{optimisation} is used in its broader sense of \emph{choice of the best option}, whether this is picked out of a set of previously planned solutions, tailored on-the-fly onto the current traffic conditions, or simply the result of a sequence of best possible actions evaluated individually: the most relevant traits of each class of very different approaches will be illustrated in the following sections.
+
+The one thing that all responsive traffic control systems have is the need to perceive the traffic state on the network by means of detectors. The type and amount of information required for different optimisation approaches may vary, but in the end it always boils down to one, or a combination, of the following quantities:
 \begin{description}
-\item[flow]: the number of vehicles crossing a road section in a given amount of time
-\item[occupancy]: the percentage of time the sensor spends occupied by a vehicle
-\item[velocity]: the average speed of the vehicles through a road section
+\item[flow]: the number of vehicles crossing a road section in a given amount of time \units{veh/s}
+\item[occupancy]: the share of time during which a road section is occupied by any vehicle \units{\%}
+\item[velocity]: the average speed of the vehicles through a road section \units{m/s}
 \end{description}
+If an adaptive system is to operate the signals effectively, the above quantities must be known for all relevant arcs of the network (or sub-network) that the system is in charge of. Unless otherwise specified, it is assumed throughout this chapter that all required inputs be available and reliable for each of the described methods.
+
+The means for obtaining and processing traffic data are beyond the scope of this work, and the integration with real-time traffic management software allows this separation of tasks; it also guarantees that reasonably reliable traffic data can be obtained for any arc of the network regardless of the physical presence of a detector on a particular road section.
+
 
 \section{Adaptive Signalisation}
-\todo{
-Why do we need adaptive signals?
+Signalisation of road intersections is necessary because the safety of road users and their fair sharing of the infrastructure cannot be entrusted to their own good sense. The practices used in signal planning aim to produce signal plans that are as efficient as possible, i.e. that minimise the waste of time and infrastructure capacity, under the traffic conditions that can be reasonably expected at each particular junction.
+
+This however, as is evident from the everyday experiences of any driver, implies that often some green time that was allocated for some \emph{potential} flow on a given approach is wasted on an empty street, while on the busiest road vehicles queue fruitlessly at the red light. It may also happen that a road that is not usually busy will temporarily become a main traffic artery because of some special event or accident, rendering the level of priority assigned to it for signal planning completely inadequate.
+
+Adaptive traffic signals represent an attempt to avoid the inevitable inefficiencies of fixed, pre-timed signalisation by responding in real-time to the actual traffic conditions. Their main goals are therefore to:
 \begin{itemize}
-\item responsive to short term fluctuations, can allocate green efficiently
-\item reactive to unexpected flows deviating from statistical forecast
-\item reactive to special events and accidents
+\item adapt to short term fluctuations in the vehicle arrival pattern, in order to allocate green efficiently on a cycle-to-cycle basis;
+\item adapt to unexpected flows deviating from statistical forecast, in order to prioritise approaches according to the real saturation levels;
+\item adapt to special events and accidents, and possibly act preemptively to avoid deterioration of the network performance if the occurrence is expected or can be recognised in advance.
 \end{itemize}
-}
+It should be clear that these objectives, listed here in order of time frame length and complexity, may or may not be met by each class of adaptive signals, but conceptually represent the direction of desired improvements over fixed time signalisation. 
+
+The next few sections present different adaptive signalisation solutions, distinguishing between \emph{actuated} signals that simply respond through a set of rules, and \emph{plan generation} systems, each best suited to address one issue or the other. The specific problems addressed by the approach presented in this work are not dissimilar, as will be detailed in Chapter \ref{c:optimiser}.
 
 \section{Traffic Actuated Signals}
 
-\subsection{Automatic Plan Selection}
-\todo{relevant because allows very careful optimisation of a scenario to devise a general plan that makes sense under even extreme circumstances. copy and review}
 
 \subsection{Traffic Actuated Control}
-\todo{relevant because more efficient and reliable than any offline optimisation but currently hardly ever does much more than increasing throughput. it could benefit from a more network conscious perspective. copy and review}
+The class of traffic control methods referred to as \emph{actuated} generally don’t rely much (if
+at all) on an underlying network model, and seldom deal with the very concept of signal
+program as anything beyond a predetermined sequence of phases.
+
+In essence, an actuated controller put in charge of a junction inherits the task that
+once was a traffic officer’s: by applying a set of rules it attempts to give as much right-of-way
+as possible to congested approaches — for as long as it’s needed — while keeping an eye on other
+flows in check to avoid having any queue standing for too long. Just like their human
+counterparts, actuated signals are extremely effective at maximising the throughput of their
+own junction, thanks to the direct gauge of traffic on every approach and very fast reaction
+times, but may prove disastrous at the wider network level since a poorly designed control
+strategy may introduce self-induced oscillations in the traffic flows, rendering the whole
+system unstable — particularly when flows approach critical values.
+
+Signal actuation depends on real time data acquired at the junction by short range sensors
+that monitor individual approaches: to this end, cameras have recently started replacing street
+level inductive loops, as a single device is often capable of monitoring several approaches.
+The first traffic actuated intersection was tested in the USA in 1930. The controller relied
+on microphones to detect vehicles waiting on the lesser approaches, and drivers had to honk to signal their presence. Since then, the available technologies have improved, but the simple
+fact remains that with cheap electronics and very simple logic (analog friendly, if necessary)
+an actuated controller has long been capable of looking after a junction better than any pretimed
+plan ever will, no matter how well the timings are optimised to fit \emph{expected} flows.
+
+Different levels of automation are generally classified into two categories:
+\begin{description}
+\item[semi-actuated]: the controller monitors the \emph{low flow} secondary approaches to allocate them green time only as required, and otherwise serves the main approaches;
+\item[actuated]: the controller monitors all approaches and continuously updates the duration of each phase to distribute green time optimally.
+\end{description}
+
+\subsubsection*{Principles of Operation}
+Every few seconds, an actuated controller must answer the question: \textit{“should the
+transition to the next phase start right now?”} or some variant thereof (e.g. to include the
+possibility to skip a phase). Actuated junction control is now commonplace around the world:
+any given implementation may rely on different types of sensor and data (e.g. cameras or
+pressure plates, simple counts or occupancy), but could likely be reduced to the basic
+principles (based on common induction loop readings) presented in this section.
+
+Consider a signal phase serving a single approach a to a junction.\\
+The incoming lane is equipped with an induction loop a short way back from the stop line
+(just enough to remain upstream of the back of the queue for most of the time), through which
+the signal controller measures the time interval $t_a^h$ between subsequent vehicle detections,
+commonly referred to as \emph{headway}.
+
+After the phase has started, the signal controller determines its duration on-the-fly, based
+on sensor readings in relation to a few fundamental parameters such as minimum and
+maximum green durations $\gpmin$ and $\gpmax$ and maximum headway $\hat{t}_a^h$. The latter can be considered to represent a minimum flow rate required to extend the phase duration, and does not necessarily concern a single lane group.
+In the scope of this example, since only one phase and one lane group are considered, the lane subscript $a$ will be dropped.
+
+The actuation parameters can be fixed, or determined in real time by taking into account the traffic flow on the relevant manoeuvres, the standing queues before the phase start $\quen{a}$, the number of vehicles queuing for lane groups served by other phases $\quen{b \neq a}$, or all of the above.
+
+Between the minimum and maximum green duration values, the junction signal controller
+continuously checks whether the time elapsed since the last vehicle passage has exceeded the
+maximum headway value for the current phase. If so, the transition to the next phase begins:
+\eq{e:phasetrans}{
+uiui
+}
+where the minimum green value can be obtained similarly to \req{e:tclear} in order to at least ensure discharge of the standing queue, possibly using an estimate of the incoming flow, and the
+maximum may depend on the minimum green of other manoeuvres and residual cycle time.
+After the initial minimum green, the headway threshold can be a dynamic function of flows,
+queues and time since phase start $t$, e.g:
+\eq{e:dynamicthreshold}{
+asdasd
+}
+whereby the maximum headway decays from its initial value $\hat{t}_a^{h0}$, over the time span between the minimum and maximum green, at a rate determined by any positive nondecreasing
+function $\beta$ of the queues accumulated on other approaches $\quen{q \neq p}$.
+
+Note that the independent variable $\tau \in [0,1]$, which means that in case of very high or very
+low queues on other approaches the headway threshold drops to zero either right after the minimum
+green, or not until the end of the maximum green, respectively.
+
+Furthermore, even as queues on other approaches grow between $\gpmin$ and $\gpmax$, the
+maximum threshold remains monotonic nonincreasing as long as $\beta$ is a sensible function of
+the (nondecreasing) queues, as seen in \todo{Figure 9}. The basic principles expressed so far in \req{e:phasetrans} and \req{e:dynamicthreshold} can be shaped into any of the most
+common categories of actuated control illustrated hereafter.
+
+\textit{Volume actuation:} in the simplest case, the green signal duration is bound between fixed
+minimum and maximum design values. It can be extended beyond the minimum value only as
+long as vehicles keep reaching the junction at sufficiently short intervals, as seen in Figure \ref{f:volumeactuation}.
+Each vehicle arrival starts or resets a timer, and the next phase is initiated as soon as the gap
+between subsequent vehicles surpasses the headway threshold $\hat{t}_a^{h}$, which is also constant.
+\fig{htbp}{PIX/undoguy.png}{f:volumeactuation}{ Volume actuation: on the horizontal axis, time since the start of the current phase; on the vertical axis, time elapsed after each vehicle detection (triangular markers). Each vehicle reaching the sensor before the headway threshold resets the timer. Shaded and black markers respectively represent vehicles reaching the sensor after the maximum headway time has been exceeded, and vehicles that must stop at the red light. }{width=0.4\textwidth}
+
+\textit{Volume-density actuation:} follows the same principles of volume actuation but the
+minimum green time is determined by the amount of vehicles initially queuing at the stop
+line. The maximum headway allowed to extend the current phase becomes more and more restrictive as the maximum green duration is approached, as portrayed by any of the lightly-shaded curves in Figure \ref{f:densityvolumeactuation}, each corresponding to a different fixed value of $\beta$.
+
+\textit{Density actuation:} the headway threshold decay rate is governed by the number of vehicles detected on the other approaches through the exponent $\beta$, so that at high saturation levels a drop in arrival rate, which denotes the end of a queue or the rear of a dense vehicle platoon, may trigger the transition to the next phase.
+
+\fig{htbp}{PIX/undoguy.png}{f:densityvolumeactuation}{ Density actuation: symbols and quantities as in Figure \ref{f:volumeactuation}; on the vertical axis, the headway threshold is also shown declining to zero over the green extension period following the shaded lines in the background, which correspond to polynomial curves as in \req{e:dynamicthreshold} with fixed values of $\beta$. The maximum headway curve latches onto increasingly rapid decay curves with each arrival detected on other approaches, marked by the small triangles.}{width=0.4\textwidth}
+
+Although actuated controllers are mostly regarded as autonomous entities, it should be evident that phase duration limits and threshold function parameters associated with each approach can be finely tuned by a centralised system to deal with specific traffic scenarios.
+
+Isolated actuated controllers are relatively undemanding from the infrastructural point of view, but the considerable drawback is that without junction coordination the flexibility in phase duration may come at a heavy cost in terms of arterial progression disruption.
+
+
+\subsection{Automatic Plan Selection}
+Plan selection systems, such as the \emph{Urban Traffic Control System} developed by the Federal Highway Administration, aim to ensure that the most suitable amongst a set of predetermined signal plans is enacted, on the basis of real time information about the traffic conditions.
+
+Automatic plan selection is a straightforward enhancement for both isolated traffic lights and centralised traffic control systems, which could otherwise rely only on daily plan scheduling to use different plans tailored to specific traffic conditions. These plans can be developed offline using any of the techniques mentioned in Chapter \ref{c:basics}, with no concern for execution time or computational cost; stochastic search methods such as the one proposed in this work could well be used to devise plans for different times of day as well as response plans for specific events, with any performance objective of the planner's choosing.
+
+Plan selection is typically performed by comparing real time detector readings with the conditions for which each plan was designed. Readings may be validated using historical data and otherwise filtered to protect the stability of the system against measurement errors and faults. The pre-processed input is then fed into an objective function that computes the degree of suitability for each plan.
+
+Consider for example a bank of signalisation plans $s \in S$, each representing a \emph{solution} designed around a given traffic scenario — the generalisation applies at the network level just as well as for a single intersection, where the concepts of \emph{plan} and \emph{program} are equivalent.
+Each scenario is represented by a snapshot of the traffic conditions: assume this to come in the form of flow and occupation values measured on a subset $\arcset^\oplus \subseteq \arcset$ of detector-equipped arcs of the network.
+
+The core objective function of a plan selection method quantifies the degree of
+\emph{coincidence} between the flow and occupancy values $\bar{\flow}_{a,s}$ and $\bar{o}_{a,s}$ associated with each of the pre-timed solutions with those measured on the corresponding network arcs in real time. A possible form for such a function is e.g.
+\eq[,]{e:planselection}{
+\omega_s = \sum_{a \in \arcset^\oplus} \alpha_a \cdot \left[
+\beta_a^\flow \left(\flow_a - \bar{\flow}_{a,s} \right)^2 +
+\beta_a^o \left(o_a - \bar{o}_{a,s} \right)^2
+\right]}
+where the current flow and occupation values $\flow$ and $o$ refer to each individual arc $a$, as do the location weights $\alpha_a$ (some locations may be strategically more important than others) and the measurement weights $\beta_a$ which reflect the relevance (or accuracy) of each reading at the given location.
+
+Equation \req{e:planselection} can easily be extended to account for additional reading types.
+The most suitable plan is the one that minimises the performance index $\omega_s$ , representing the divergence of the current traffic conditions from its signature traffic snapshot $(\mathbf{\bar{\flow}_s}, \mathbf{\bar{o}_s})$.
+The system may further require the best candidate solution to beat the currently running
+plan by more than a predefined threshold before confirming a plan change: a cautionary
+measure called \emph{Anti-hunting} taken to avoid continuous switching between similar plans,
+particularly in applications where a large number of plans are used to closely follow the
+evolution of demand throughout the day.
+
+Switching between different plans may momentarily disrupt corridor progression, therefore in
+some cases a hybrid transition cycle is synthesised from the outgoing and incoming plans.
+The above principles equally apply to single junctions, areas or entire networks, and require a
+relatively low number of strategically placed detectors, making automated plan selection a
+viable and cost-effective option for many applications.
+ 
 
 \section{Real Time Signal Plan Generation}
 \todo{copy and review}
