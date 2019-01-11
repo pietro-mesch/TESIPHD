@@ -89,15 +89,21 @@ Between the minimum and maximum green duration values, the junction signal contr
 continuously checks whether the time elapsed since the last vehicle passage has exceeded the
 maximum headway value for the current phase. If so, the transition to the next phase begins:
 \eq{e:phasetrans}{
-uiui
+\text{Initiate phase transition } p \rightarrow p+1 \text{ if }
+\begin{cases}
+t \geq \gpmin \\
+t \geq \gpmin \vee t^h \geq \hat{t}_p^h \\
+\end{cases}
 }
 where the minimum green value can be obtained similarly to \req{e:tclear} in order to at least ensure discharge of the standing queue, possibly using an estimate of the incoming flow, and the
 maximum may depend on the minimum green of other manoeuvres and residual cycle time.
 After the initial minimum green, the headway threshold can be a dynamic function of flows,
 queues and time since phase start $t$, e.g:
 \eq{e:dynamicthreshold}{
-asdasd
-}
+\hat{t}_p^h (\tau) = \hat{t}^{h0} \left(
+1-\tau^{\beta \left( \quen{q \neq p} \right)} \right)
+\qquad \text{with} \quad
+\tau = \frac{t-\gpmin}{\gpmax - \gpmin}}
 whereby the maximum headway decays from its initial value $\hat{t}_a^{h0}$, over the time span between the minimum and maximum green, at a rate determined by any positive nondecreasing
 function $\beta$ of the queues accumulated on other approaches $\quen{q \neq p}$.
 
@@ -107,7 +113,7 @@ green, or not until the end of the maximum green, respectively.
 
 Furthermore, even as queues on other approaches grow between $\gpmin$ and $\gpmax$, the
 maximum threshold remains monotonic nonincreasing as long as $\beta$ is a sensible function of
-the (nondecreasing) queues, as seen in \todo{Figure 9}. The basic principles expressed so far in \req{e:phasetrans} and \req{e:dynamicthreshold} can be shaped into any of the most
+the (nondecreasing) queues, as seen in Figure \ref{f:densityvolumeactuation}. The basic principles expressed so far in \req{e:phasetrans} and \req{e:dynamicthreshold} can be shaped into any of the most
 common categories of actuated control illustrated hereafter.
 
 \textit{Volume actuation:} in the simplest case, the green signal duration is bound between fixed
@@ -115,7 +121,7 @@ minimum and maximum design values. It can be extended beyond the minimum value o
 long as vehicles keep reaching the junction at sufficiently short intervals, as seen in Figure \ref{f:volumeactuation}.
 Each vehicle arrival starts or resets a timer, and the next phase is initiated as soon as the gap
 between subsequent vehicles surpasses the headway threshold $\hat{t}_a^{h}$, which is also constant.
-\fig{htbp}{PIX/undoguy.png}{f:volumeactuation}{ Volume actuation: on the horizontal axis, time since the start of the current phase; on the vertical axis, time elapsed after each vehicle detection (triangular markers). Each vehicle reaching the sensor before the headway threshold resets the timer. Shaded and black markers respectively represent vehicles reaching the sensor after the maximum headway time has been exceeded, and vehicles that must stop at the red light. }{width=0.4\textwidth}
+\fig{htbp}{PIX/volume_actuation.png}{f:volumeactuation}{ Volume actuation: on the horizontal axis, time since the start of the current phase; on the vertical axis, time elapsed after each vehicle detection (triangular markers). Each vehicle reaching the sensor before the headway threshold resets the timer. Shaded and black markers respectively represent vehicles reaching the sensor after the maximum headway time has been exceeded, and vehicles that must stop at the red light. }{width=\textwidth}
 
 \textit{Volume-density actuation:} follows the same principles of volume actuation but the
 minimum green time is determined by the amount of vehicles initially queuing at the stop
@@ -123,7 +129,7 @@ line. The maximum headway allowed to extend the current phase becomes more and m
 
 \textit{Density actuation:} the headway threshold decay rate is governed by the number of vehicles detected on the other approaches through the exponent $\beta$, so that at high saturation levels a drop in arrival rate, which denotes the end of a queue or the rear of a dense vehicle platoon, may trigger the transition to the next phase.
 
-\fig{htbp}{PIX/undoguy.png}{f:densityvolumeactuation}{ Density actuation: symbols and quantities as in Figure \ref{f:volumeactuation}; on the vertical axis, the headway threshold is also shown declining to zero over the green extension period following the shaded lines in the background, which correspond to polynomial curves as in \req{e:dynamicthreshold} with fixed values of $\beta$. The maximum headway curve latches onto increasingly rapid decay curves with each arrival detected on other approaches, marked by the small triangles.}{width=0.4\textwidth}
+\fig{htbp}{PIX/volume_density_actuation.png}{f:densityvolumeactuation}{ Density actuation: symbols and quantities as in Figure \ref{f:volumeactuation}; on the vertical axis, the headway threshold is also shown declining to zero over the green extension period following the shaded lines in the background, which correspond to polynomial curves as in \req{e:dynamicthreshold} with fixed values of $\beta$. The maximum headway curve latches onto increasingly rapid decay curves with each arrival detected on other approaches, marked by the small triangles.}{width=\textwidth}
 
 Although actuated controllers are mostly regarded as autonomous entities, it should be evident that phase duration limits and threshold function parameters associated with each approach can be finely tuned by a centralised system to deal with specific traffic scenarios.
 
@@ -165,9 +171,7 @@ viable and cost-effective option for many applications.
  
 
 \section{Real Time Signal Plan Generation}
-\todo{copy and review}
-
-Real time optimisers that perform plan generation are a class of proactive signal control systems that, based on current traffic conditions, seek to develop an optimal plan to apply in the immediate future, either from first principles or by continuous update of an existing pre-timed plan. While each plan is played out, the system gathers information to make the next.
+Real time optimisers that perform plan generation are a class of proactive signal control systems that, based on current traffic conditions, seek to develop an optimal plan to apply in the immediate future, either from first principles or by continuous update of an existing pre-timed plan. While each plan plays out, the system gathers information to make the next.
 
 This mode of operation is often referred to as rolling horizon, and in order for the system to respond effectively (i.e. to capture and react to rapid changes in traffic conditions) the rolling horizon time step should be reasonably short, which imposes austere constraints on the optimisation methods. Some real-time optimisers with a very short rolling horizon step update the signalisation plan at every cycle, so that their behaviour may appear indistinguishable from that of an actuated controller.
 
@@ -175,23 +179,247 @@ It is important however to understand the clear conceptual difference between th
 
 \subsection{Incremental Analytical Optimisation}
 The most prominent member of this category is the \emph{Split Cycle and Offset Optimisation Technique} developed for research purposes in Glasgow, and first applied there in 1975 under the acronym SCOOT by which it is now popular all over the world, counting over a hundred active installations.
-It revolves around a centralised control unit which generates plans based on a real-time traffic snapshot gathered from detectors. The signalisation plans are continuously updated, with a frequency in the order of one to three cycle times, and may concern the entire network or \emph{regions} thereof which are expected to feature homogeneous traffic conditions.\\
-\todo{copy and review}
+
+Continuous optimisation revolves around a centralised control unit which generates plans based on a real-time traffic snapshot gathered from detectors. The signalisation plans are continuously updated, with a frequency in the order of one to three cycle times, and may concern the entire network or \emph{regions} thereof which are expected to feature homogeneous traffic conditions.\\
+
+One of the main advantages is that optimisation requires very little information about the network. All the system needs, for each approach to a controlled junction, is the following:
+\begin{itemize}
+\item \textbf{distance} from each detector (at least one is needed) to the stop line
+\item \textbf{saturation flow} of the detector lane at the junction
+\item total vehicle \textbf{storage capacity}
+\item initial lost time and \textbf{clearance time} for the corresponding signal phase
+\end{itemize}
+
+The SCOOT optimisation method described in \citep{robertson1986research} is based on \emph{Cyclic Flow Profiles:} for each approach to a controlled junction these represent the continuously updated flow profile covering the span of a signal cycle with a resolution of 4 s, obtained from the readings gathered by sensors.
+The centralised control unit integrates CFPs to estimate the number of vehicles arriving at the stop line while the signal is red, which combined with saturation flows yields the queue sizes and clearance times as pictured in Figure \ref{f:scoot}.
+
+The system is therefore all the more effective if detectors are placed far from the stop line — possibly just downstream of the previous junction — to give as early a warning as possible of changes in the expected flow pattern. This also allows the system to detect significant spillback situations, triggering different operation modes aimed at gridlock avoidance.
+
+It may be advisable to trade accuracy for early detection by overlooking minor side streets which may alter the flow rate and progression between two major intersections. However, best results are obtained with more sensors spaced out along each inbound arc.
+With the flow conditions described by this simple traffic model, the optimiser proceeds to calculate cycle times, offsets and green shares based on explicit mathematical formulations (see Section \ref{s:signalsetting}). 
+
+The fitness of the solution found is quantified by a global cost function built on a linear combination of delays and number of stops. The method runs as follows:
+\begin{enumerate}
+\item \textit{Cycle Time Computation:} each region of the network shares a single cycle time; its ideal value determined by an empirical formula similar to Webster's \ref{e:webstercycle} based on the saturation conditions at the critical (i.e. most saturated) intersection;
+
+\item \textit{Green Share Optimisation:} once the cycle time is determined, green shares are updated at every intersection: as soon as it possesses relevant flow information, the optimiser decides whether to anticipate/delay each phase change by up to 4 s, depending on which alternative scores best according to an objective function (aiming to reduce the saturation level of the most saturated approach to the junction);
+
+\item \textit{Offset Optimisation:} at every cycle, the central unit may shift the pre-timed offsets by up to 4s in either direction, if this leads to an improvement in an explicit objective function which accounts for the degree of synchronisation with the \emph{adjacent} junctions, possibly accounting for updated travel times of the relevant arcs.
+\end{enumerate}
 
 \fig{htbp}{PIX/scoot.png}{f:scoot}{
 SCOOT Cyclic Flow Profiles and queue prediction: detector readings are used to update the flow profile, which is integrated to predict the queue forming at the downstream junction during the red phase. The information may prompt the system to anticipate or delay a phase change in order to accommodate the measured demand.}{width=0.8\textwidth}
 
+This type of optimiser has the advantage of low modelling requirements and very fast computation times, combined with the ability to operate quite close to complete saturation —allegedly up to 90\% critical junction saturation.\\
+Even with modest prediction capabilities and no full network model, it has proven capable of dealing reasonably well with moderate flow pattern alterations and unusual route choices such as might be caused by accidents or road works.
+
+It does however rely heavily on the accuracy of detectors, which if insufficient may cause the performance of the system to decline rapidly: the modified timings are in fact set to degrade back to the pre-timed plan if sensor faults are detected.\\
+The small adjustment step sizes are also chosen to increase the robustness of the system to detection faults: unfortunately, this goes to the detriment of its responsiveness, which has been pointed out as the main weakness of SCOOT.
+
 \subsection{Linear Quadratic Optimal Control}
-\todo{copy and review}
+The \emph{Traffic Urban Control} system commonly referred to as TUC was developed in the scope of TABASCO (Telematics Applications in BAvaria SCotland and Others), a late '90s European project aimed at demonstrating the applicability of advanced transport telematics as innovative solutions for traffic management. Initially conceived for green split optimisation, it was extended to deal with cycle and offsets as well, and later enabled to perform on-the-fly Public Transport prioritisation.
+
+It therefore constitutes a direct alternative to the SCOOT system mentioned in the previous section, and was designed to build upon the latter’s ease of applicability while addressing its main issues: most notably its slow response to rapid traffic variations (due to the incremental correction approach), and scarce effectiveness under high saturation conditions. The former was made unnecessary by the verified robustness and stability of the system, while a stronger interdependence of measurements and signal settings across the entire network helped counteract the tendency shown by more localised control policies to accelerate the onset of saturation by blindly favouring high flows.
+
+The system inputs are the average numbers of vehicles on network links (which may be estimated from occupancy readings if video detection is not possible) and public transport information, at least accurate enough to detect the \emph{presence} of public vehicles on a given link. Cycle and offset optimisation are carried out independently and in much the same way as it was described in the previous section.
+
+What characterises the TUC strategy however is its approach to \emph{green split optimisation}, based on a Store-and-Forward traffic model \citep{aboudolas2009store} and simple control theory.
+These are combined to formulate the control problem as a Linear Quadratic optimisation, as illustrated in detail in \citep{diakaki2002multivariable} and summarised here.
+
+The instantaneous network state is represented solely by the number of vehicles on each link. The discrete-time evolution rule of the network dynamic system encapsulates its dependency on the decision variables and on previous instantaneous states, and in matrix form may be written simply as
+\eq[,]{e:tuc1}{
+\mathbf{n_{a,t+1}} = \mathbf{A n_{a,t}} + \mathbf{B \Delta \gamma_{p,t}}
+}
+where $\mathbf{A n_{a,t}}$ is the vector of states containing the number of vehicles on each link and $\mathbf{\Delta \gamma_{p,t}}$ is the
+vector of variations in green share applied to each signal phase, with respect to a baseline
+signal plan assumed to lead to steady state queues under non-saturating conditions.
+
+$\mathbf{A}$ and $\mathbf{B}$ are the state and input matrices: they respectively encapsulate the network topology and the expected impact of signalisation (based on signal staging, turning rates,
+saturation flows) on the movements of traffic volumes across time intervals.
+
+It should be noted that the \emph{expected} demand is taken into no account: this is reasonable as
+TUC aims to react to the \emph{manifest} impact of disturbances on the controlled network rather
+than to their forecast consequences.
+At the core of this approach lies a simple gain matrix — introduced in Equation \req{e:tuc3} —
+rather than accurate modelling of physical phenomena and constraints: its calculation and
+calibration however are most computationally demanding processes.
+
+In order to minimise the risk of oversaturation and queue spillback on all network links,
+the chosen strategy is to attempt to balance the link relative occupancies (with respect to each
+link’s jam storage capacity), as expressed by the following quadratic criterion:
+
+\eq[,]{e:tuc2}{
+\omega^{\scriptscriptstyle{TUC}} = \frac{1}{2} \sum_{t=0}^{\infty}
+\| \mathbf{Q \, n_{a,t}} \|^2 + \| \mathbf{R \, \Delta \gamma_{y,t}} \|^2
+}
+where $\mathbf{Q}$ and $\mathbf{R}$ are non-negative definite diagonal matrices of weights, so that the cost function is compatible with the standard form of a Linear Quadratic Cost.
+
+Matrix $\mathbf{Q}$ contains the inverse storage capacities of links, so that the first term of the sum drives the relative occupancy balancing, while the second term favours smooth changes in the control variables, influencing the magnitude of control reactions through appropriate scaling factors contained in matrix $\mathbf{R}$.
+The infinite time horizon of the sum reflects the necessity to obtain a time-invariant feedback control law in accordance with LQ optimisation theory.
+
+The LQ feedback control law is then obtained by minimisation of the performance
+criterion \req{e:tuc2} subject to \req{e:tuc1}: calculation of the control matrix $\mathbf{L}$ is straightforward, but can only be performed offline by solving the infinite-horizon \emph{Discrete-time Algebraic Riccati Equation} from the network topology and objective function weights described by the matrices $\mathbf{A}$, $\mathbf{B}$, $\mathbf{Q}$, and $\mathbf{R}$. These must be computed and calibrated individually for the specific network topology, capacities, signal staging etc, by simulation or other optimisation methods: this is a lengthy and demanding task to be performed as part of the system setup.
+
+However, after finding the stabilising solution $\mathbf{L}$ to the dynamical system expressed by
+the DARE, things get much simpler, with the control law taking the standard form
+\eq{e:tuc3}{\gamma_{p,t} = \bar{\gamma}_{p} - \mathbf{L \, n_{a,t}}}
+where $\bar{\gamma}_{p}$ is the vector of baseline green shares. Optimal modifications to the green times are linearly dependent on the current network state vector of link occupancy measurements through the matrix $\mathbf{L}$, which provides both the discharge and gating functionalities: intuitively, as the occupancy of a link increases, so does the green share that favours its outflow, while upstream arcs experience a reduction in green time to avoid its oversaturation.\\
+These effects can be accentuated or mitigated by weighing elements of the state vector
+according to specific rules, e.g. to prioritise desaturation of certain links as they approach
+critical saturation levels.
+
+A simple form of \emph{public transport prioritisation} can be integrated into the
+application of the control equation \req{e:tuc3}, by further weighting link occupancy values in
+function of the number of public transport vehicles detected on them.
+
+Since control constraints such as green time upper and lower bounds cannot be directly
+accounted for by the LQ methodology, the green shares output by the regulator are further
+processed on the fly by a simple optimisation algorithm that, in linear time, finds the set of
+feasible green times that least deviate from the optimum. 
+
+Although several software packages are available for solving the DARE for this standard
+LQ control problem using a variety of well documented methods, the calculation of an
+effective control matrix remains a time consuming task, particularly for large networks, and
+must be performed anew every time the controlled network is modified or extended.\\
+This lack of flexibility represents the main drawback of the approach just presented,
+although it has been proven that reasonable variations of traffic parameters such as turning
+rates and link saturation flows have little effect on the control matrix.\\
+On the other hand, the real-time operation of the TUC control strategy only consists of
+the solution of the simple matrix equation \req{e:tuc3} followed by the application of green time
+constraints, which are both extremely fast and undemanding operations, making the quadratic
+regulator a particularly suitable approach for real time applications. Furthermore, the
+feedback controller is perfectly capable of responding appropriately to very specific traffic
+anomalies such as accidents or roadworks, as confirmed by both simulation and empirical
+data gathered from real world installations.
+
+Since the first TUC installation in Glasgow, further applications of optimum control
+theory to the signal setting problem, including open-loop Quadratic Programming and
+Nonlinear Optimum Control based on the same store-and-forward traffic paradigm, have been
+developed and investigated. These aim to improve upon the performance of the simple
+feedback controller by accounting for more detailed network dynamics, factoring in time
+varying demand, or allowing for a larger and more effective set of decision variables:
+encouraging results presented in \citep{diakaki2003extensions} suggest that despite an increased real-time computation complexity, these may be considered strong competitors and potential successors to the Linear Quadratic TUC approach.
 
 \subsection{Traffic Gating}
-\todo{extremely relevant, it is the only approach known so far that attempts to prevent congestion by doing something counter intuitive like delaying flows upstream}
+\newcommand{\tts}[1]{\omega_{#1}^{\scriptscriptstyle{TTS}}}
+\newcommand{\ttd}[1]{\omega_{#1}^{\scriptscriptstyle{TTD}}}
 
-Feedback Traffic Gating \todo{ref (Ekbatani 2012) }is a form of actuated signal control aiming to prevent oversaturation of critical portions of the network by holding back the incoming traffic flows — using deliberately exaggerated red phases — rather than attempting to deal with the flows already trapped in a congested area. In these respects, it constitutes a simple yet innovative method to induce more efficient utilisation of the existing infrastructure, and an answer to the patent performance degradation that currently feasible real-time optimisation solutions face under saturated conditions.
-\todo{copy and review}
+Feedback Traffic Gating as described by \cite{keyvan2012congestion} is a form of actuated signal control aiming to prevent oversaturation of critical portions of the network by holding back the incoming traffic flows — using deliberately exaggerated red phases — rather than attempting to deal with the flows already trapped in a congested area. 
 
-\subsubsection*{\todo{Network Fundamental Diagram Formulation}}
+In these respects, it constitutes a simple yet innovative method to induce more efficient utilisation of the existing infrastructure, and an answer to the patent performance degradation that currently feasible real-time optimisation solutions face under saturated conditions; it is therefore also closely related to the object of this study.
 
-\subsubsection*{\todo{Feedback Controller Design}}
+\fig{htbp}{PIX/gating_intro_simple.png}{f:gating}{
+Traffic Gating: a cordon of gating junctions holds back traffic attempting to access the \emph{Protected Network}. If it is not possible to implement gating at one or more cordon junctions (see $j$ = 2), these may allow some disturbance flows to sneak past the feedback controller. Conversely, part of the gated flow from a cordon junction may not in fact be bound for the PN (see $j$ = 4). The system must account for the delay between control application and effect (due to the physical distance between the gating junctions and the PN, see $j$ = 3) and incomplete or uneven detector placement in the protected network.
+}{width=\textwidth}
+
+Based on the general principle that even from the users’ point of view there is no advantage to getting close to one’s destination sooner, only to be stuck in traffic for longer, the system delays incoming vehicles in order to keep the controlled network near to but \emph{below} its saturation occupancy level, which can be monitored effectively even with a small number of detectors \citep{keyvan2013urban}: this was proven the most effective strategy to maximise \emph{network throughput}, which constitutes a good measure of how efficiently the network is being used.
+
+A feedback controller is used to ensure that the only vehicles pre-emptively delayed are those which not only would, on average, be delayed anyway further down their path, but would \emph{critically} increase congestion — causing themselves  as well as others greater delays were they to access the critical region.
+
+\subsection{Network Fundamental Diagram Formulation}
+Feedback Traffic Gating revolves around the concept of Network Fundamental Diagram
+introduced in \citep{keyvan2012congestion}, profiling throughput as a function of occupancy, as seen in Figure \ref{f:nfd} where the axes of the sample NFD correspond to \emph{Total Time Spent} (in vehicle-hours per hour) and \emph{Total Travelled Distance} (in vehicle kilometres per hour) cumulatively by all users hourly. 
+
+Such relationship may be obtained empirically from observation of the
+area of interest, and allows to identify with certainty the optimal operation point for the
+feedback controller to suit the behaviour of a specific network.
+
+\fig{htbp}{PIX/NFD.png}{f:nfd}{
+An experimental Network Fundamental Diagram: a polynomial fit of the \emph{TTD} curve is obtained from flow and occupancy measurements, identifying an optimum operation point on the \emph{TTS} axis. As long as $\tts{\arcset^\oplus}$ is kept within the optimum operation range, the number of vehicles in the Protected Network is expected to maximise the infrastructure efficiency, resulting in shorter travel times for all users. The dynamics of the system during network loading and unloading can be expected to differ as flows tend to be slower during the relaxation of a more congested state.
+}{width=0.65\textwidth}
+
+An operational NFD is derived from real or simulated occupancy measurements a o
+taken on a set of detector equipped arcs $\arcset^\oplus \subseteq \arcset$ at discrete time intervals $t$ corresponding to signal cycles.
+Occupancy is converted into an estimate $n_{a,t}$ of the number of vehicles on each
+arc during the $t^{th}$ signal cycle, given by
+
+\eq{e:gating1}{
+n_{a,t} = \frac{\length_a \cdot o_{a,t}}{100 \, \length_{veh}}
+}
+
+where $\length_a$ is the length of link $a$, $o_{a,t}$ its occupancy (given as time percentage) during the interval, and $\length_{veh}$ the average vehicle length. Hence, the relevant quantities are obtained by summing over the measurement arcs:
+
+\eq[;]{e:gating2}{
+\tts{t} = \sum_{a \in \arcset^\oplus} \frac{n_{a,t} \cdot \cycle{\junset}}{\cycle{\junset}} =
+\sum_{a \in \arcset^\oplus} n_{a,t}
+}
+
+\eq[.]{e:gating3}{
+\ttd{t} = \sum_{a \in \arcset^\oplus} \frac{\flow_{a,t} \cdot \length_a \cdot \cycle{\junset}}{\cycle{\junset}} =
+\sum_{a \in \arcset^\oplus} \flow_{a,t} \cdot \length_a}
+
+The values thus obtained are sufficiently precise for the purpose of traffic gating, especially if
+detectors are located around the arc midpoints. Although a high number of detector links
+(ideally $\arcset^\oplus = \arcset$) yields a more accurate NFL, \citep{keyvan2013urban} proves that fully functional results can be obtained also from a \emph{reduced} NFL in more likely scenarios where only a costeffective subset of links has detection capabilities, such as would be sufficient for ordinary traffic monitoring, plan-selection schemes, or actuated signal control applications, as portrayed e.g. in Figure \ref{f:gating}.
+
+\subsubsection{Feedback Controller Design}
+\newcommand{\qg}{\flow^{g}}
+\newcommand{\qe}{\flow^{\epsilon}}
+\newcommand{\qin}{\flow^{\scriptscriptstyle{IN}}}
+\newcommand{\qout}{\flow^{\scriptscriptstyle{OUT}}}
+\newcommand{\roin}{\rho^{\scriptscriptstyle{IN}}}
+\newcommand{\npn}{n_{\scriptscriptstyle{PN}}}
+
+The gating control problem is to regulate the \emph{TTS} in the Protected Network via appropriate manipulation of gated inflows, so as to maintain the \emph{TTD} around its optimal maximum value. The task can be accomplished as summarised in Figure \ref{f:gating2} based solely on real-time measurements via a simple and robust feedback regulator, taking advantage of the basic system dynamics described by the NFD.
+
+\fig{htbp}{PIX/gating_controller.png}{f:gating2}{
+Gating Feedback Controller and Protected Network Dynamic Plant.}{width=\textwidth}
+
+The controlled input to the PN system is the gated flow $\qg$, and the main disturbance
+the uncontrolled inflow $\qe$. Referring to Figure \ref{f:gating2}, the inflow $\qin$ in continuous time is 
+\eq{e:fc1}{
+\qin_t = \roin \cdot \qg \left( t- t^{access} \right)
+}
+where $\roin$ is the portion of gated flow entering the PN, and $t^{access}$ the time it takes for vehicles to reach the PN from gating junctions not directly located on its boundary.
+
+Consider the total number $\npn$ d of vehicles in the PN: its rate of change is determined
+form vehicle conservation, which reads
+\eq[.]{e:fc2}{
+\dot{\npn} = \qin + \qe - \qout
+}
+
+However, $\tts{\scriptscriptstyle{PN}} = \npn $ only if all PN links are monitored, which is not generally the case.\\
+Realistically, the \emph{TTS} is smaller than the true number of vehicles by some factor $\rho^{\epsilon 1} \leq 1$.
+Allowing for an additional measurement error $\flow^{\epsilon 1}$ the \emph{TTS} value to be used in the NFD is
+
+\eq[.]{e:fc3}{
+\tts{\scriptscriptstyle{PN}} = \rho^{\epsilon 1} \cdot \npn + \flow^{\epsilon 1}
+}
+
+and finally, if $nfd( \tts{\scriptscriptstyle{PN}} )$ is a nonlinear best fit of the NFD data (see Figure \ref{f:nfd}) and $\flow^{\epsilon 2}$ the error due to the data scatter, the resulting \emph{TTD} is
+
+\eq{e:fc4}{
+\ttd{\scriptscriptstyle{PN}} = nfd \left( \tts{\scriptscriptstyle{PN}} \right) + \flow^{\epsilon 2}
+}
+
+which as seen in Figure \ref{f:gating2} is proportional to the network outflow $\qout$ aside for a scaling factor $\rho^{\epsilon 2}$ analogous to $\rho^{\epsilon 1}$, yielding a time delayed nonlinear first-order model between the initial $\qg$ and the resulting \emph{TTS} which can be linearised around the optimum steady state.
+
+The following proportional-integral controller is then well suited to handle the gated flows:
+
+\eq{e:fc5}{
+\qin_t = \qin_{t-1} - K^P \, \left( \tts{t-1} - \tts{t-2} \right) + 
+K^I \, \left( \bar{\omega}^{\scriptscriptstyle{TTS}}  - \tts{t-1} \right)
+}
+
+where $K^{I}$ and $K^{P}$ are the integral and proportional gains to be fine tuned.\\
+The flow values thus determined have to be shared amongst all gated junctions, after accounting for monitored or estimated disturbance flows, and subjected to minimum/maximum green time constraints.
+
+The resulting system is largely robust to measurement errors, low signal timing resolution,
+and fluctuations in demand. It may be activated at specific times or as the traffic conditions
+approach a critical state, and requires virtually no additional infrastructure with respect to an
+ordinary plan-selection centralised signal setting system. Provided that appropriate gating
+locations can be found, where gate-delayed flows do not risk compromising the mobility of
+vehicles not bound for the PN, the principles just illustrated will undoubtedly form the core of
+future sustainable approaches to relieve urban congestion by delaying or avoiding the extreme
+traffic conditions that frustrate most currently available signal optimisation techniques.
+
+
+
+
+
+
+
+
+
 
 
