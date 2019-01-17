@@ -62,12 +62,11 @@ Proposed extensions of the original method aimed to factor in queue and side flo
 
 At present, offline arterial progression optimisation techniques invariably rely on some formulation of the \emph{bandwidth maximisation problem} (as in the cases illustrated in the next section), which is to say that their common objective is to maximise a \emph{theoretical} traffic throughput, often without much consideration for network performance. This is also true for \emph{online} optimisation tools that evaluate signal plan updates with a similar goal, ignoring the fact that traffic propagation is a rather complex phenomenon which has the utmost relevance upon bandwith degradation: as explained in detail in Chapter \ref{c:optimiser}, one of the foremost aims of this work is to renounce the geometric formalisation of bandwidth as a measure of progression in favour of a simulation based approach, to better reproduce the relation between coordination and queue dynamics, and possibly look past the long standing preconception that to maximise progression identifies with optimal operation conditions for any road under any circumstance.
 
-The next sections illustrate two numerical approaches to the complex problem of two-way bandwidth maximisation: the first is an effective implementation of the classic paradigm of progression optimisation, solved as a linear program with the addition of variable speed limits; the second is a much simpler yet effective geometrical method developed in the context of this work.
+The next sections illustrate two numerical approaches to the complex problem of two-way bandwidth maximisation: the first is an elegant implementation of the classic paradigm of progression optimisation, fully featured in closed form and solved as a linear program with the addition of variable speed limits; the second is a much simpler yet effective geometrical method developed in the context of this work.
 
 \subsubsection*{Mixed Integer Linear Programming Approach}
-\newcommand{\tmod}[1]{{\| #1 \|}_t}
-\newcommand{\intoffs}[1]{t_{#1}^{\scriptscriptstyle{\delta}}}
-\newcommand{\reloffs}[1]{t_{#1}^{\scriptscriptstyle{\Delta}}}
+
+
 One of the most complete and effective implementations of the MILP approach to two-way arterial coordination is presented in \citep{de2015arterial}. The bandwidth maximisation was extended to include \emph{Variable Speed Limits} (VSL) as control variables, allowing for a wider range of high bandwidth solutions. The method is outlined here as an example of the degree of complexity that can be managed by mathematical optimisation.
 
 The concept of VSL has been applied to motorway traffic for quite some time, to enhance traffic fluidity in response to congestion, accidents or adverse weather, but its application to urban traffic presents new challenges, not least the need for effective means of introducing it and getting it across to the drivers: in pilot projects this is quite effectively achieved by variable led panels, mimicking an ordinary speed limit sign, showing the target synchronisation speed. Were such measures to gain popularity, the already promising degree of driver compliance can only be expected to improve.
@@ -109,18 +108,109 @@ The modulo is used to define the \emph{internal offset} given by
 }
 and the \emph{relative offset} $\reloffs{j}$. The latter represents the time coordinate of the mid-green instant of the relevant phase with respect to a \emph{moving} frame of reference travelling along the \emph{main} driving direction, starting in $x_1$ at the zero instant and moving with the specified speeds $v_j$ between nodes.
 
-\todo{AAAAAAAAAAAAAAAAAAAAAAAAAAAHHHHHH}
+Hence, the relative offset at each node after the first can be computed easily from
+the offsets at upstream nodes:
+\eq[.]{e:milp4}{
+\begin{array}{rl}
+\toffs{j} - \reloffs{j} = \toffs{j-1} - \reloffs{j-1} + t_{j-1}
+\quad \Rightarrow & \quad
+\reloffs{j} = \tmod{\reloffs{j-1} + \toffs{j} - \toffs{j-1} - t_{j-1}} \vspace{5pt} \\ 
+\Rightarrow &
+\begin{cases}
+\reloffs{j} = \tmod{\reloffs{1} - \toffs{1} + \toffs{j} - \displaystyle\sum_{i=1}^{j-1} t_i} 
+\vspace{3pt}\\
+\toffs{j} = \tmod{\toffs{1} - \reloffs{1} + \reloffs{j} + \displaystyle\sum_{i=1}^{j-1} t_i}
+\end{cases}
+\end{array}
+}
 
+In order to express the bandwith in both directions in terms of the relative offsets, it is
+also beneficial to map all $\intoffs{j}$ to the time reference of the first junction using
+\eq[,]{e:milp5}{\intoffz{j} =
+\tmod{\intoffs{j} + \sum_{i=1}^{j-1}\left(t_i - \bar{t}_i \right) }}
 
-\fig{htbp}{PIX/bandwidth.png}{f:milp}{
+and considering that the $\intoffs{j}$ are described by the signal program at each intersection, which leads to the vector equation linking the offsets in the two directions
+\eq[.]{e:milp6}{
+\mathbf{\bar{t}^\Delta = t^\Delta - t^\delta} \qquad \text{with} \;
+\begin{cases}
+\mathbf{t^\Delta} = 
+\left( \reloffs{1}, \reloffs{2}, \dots , \reloffs{| \junset_\corridor |} \right) \\
+\mathbf{t^\delta} =
+\left( \intoffz{1}, \intoffz{1}-\intoffz{2}, \dots ,
+\intoffz{1} - \intoffz{| \junset_\corridor |} \right)
+\end{cases}
+}
+
+\fig{htb}{PIX/bandwidth.png}{f:milp}{
 Bandwidth Problem Formulation: the signal coordination parameters are portrayed on a
-time-distance graph. Temporal references are given by integer multiples of the cycle time and by the synchronisation frame of reference, moving along the diagonal trajectories at speeds $v_j$. The green phase in the main direction is drawn on the left of each junction’s temporal line, that of the inverse direction is to its right. Notice the offsets measured between the phase midpoints and the time of arrival of the moving FoR.}{width=\textwidth}
+distance-time (D-T) graph. Temporal references are given by integer multiples of the cycle time and by the synchronisation frame of reference, moving along the diagonal trajectories at speeds $v_j$. The green phase in the main direction is drawn on the left of each junction’s temporal line, that of the inverse direction is to its right. Notice the offsets measured between the phase midpoints and the time of arrival of the moving FoR.}{width=\textwidth}
+
+Finally, it is possible to approach the maximisation of bandwidth as a function of travel
+times and offsets. According to the definition given at the start of this section and considering
+Figure \ref{f:milp}, it is the intersection of all green windows as seen in the moving frame of reference:
+\eq[.]{e:milp7}{
+\bigcap_{j \in \junset_\corridor} 
+\left[
+\reloffs{j} - \frac{\gren{j}}{2} \; , \; \reloffs{j} + \frac{\gren{j}}{2}
+\right]
+}
+
+The bandwidth value in the \emph{main} direction is then calculated from the decision variables as
+\eq{e:hardband}{
+\hardband{\corridor} = \hardband{} \left(\mathbf{\reloffs{}} \right) = 
+\min \left\lbrace \left( \reloffs{i} - \reloffs{j} + \gren{ij} \right) \quad \forall i,j \in \junset_\corridor \right\rbrace
+\qquad \text{with} \;
+\gren{ij} = \frac{\gren{i} + \gren{j}}{2}
+}
+which is the \emph{smallest possible} overlap between \emph{any two} green phases in the moving FoR; the equivalent in the other direction is found using the relevant green times $\bar{\gren{}}$ and the relation given by \req{e:milp6}.
+
+The sum of the bandwidths in the two directions can then be the objective of the linear
+optimiser — bounded by appropriate constraints such as maximum speed values — in conjunction with any function of the decision variables used to favour a certain type of solution: for example, the optimisation presented in \citep{de2015arterial} is driven by an extended utility function aiming to favour low travel times and minimise the speed indication variance across segments so as to ease drivers into complying with apparently arbitrary limits.
+
+Real world statistics are beginning to back up the simulation results that originally validated these studies, proving the following interesting points about modern bandwidth maximisation techniques:
+\begin{itemize}
+\item the best combinations of optimal offsets and VSL drastically reduce the number of stops and energy consumption;
+\item lower and smoother speed limits reduce energy consumption at \emph{no disadvantage }to the total arterial travel time;
+\item VSL brings about larger bandwidth and faster solution of the LP.
+\end{itemize}
+
+It must be noted however that despite the practically negligible computation times associated with the LP methods just mentioned, these remain conceptually unfit for \emph{real time} signal optimisation since they take in no account the flow and speed of the actual traffic, nor they apply outside the safe boundaries of \emph{capacity} conditions (whereby green time is always assumed sufficient to deal with demand).
+
+
 
 \subsubsection{The Slack Band Approach} \label{s:slackband}
 \todo{Illustrate the slack bandwidth generalisation.}
 The idea of \emph{slack} bandwidth is an answer to the very strict definition of bandwidth given at the beginning of section \ref{s:bandmax}, according to which only the band running through all junctions counts for something, implying that:
 \begin{itemize}
-\item if one passing phase is particularly short, coordination between longer green phases may be disregarded \todo{(discuss fringes in MILP approach)};
+\item if one passing phase is particularly short, coordination between longer green phases may be disregarded: because of \req{e:hardband} the bandwidth is throttled to be at most as wide as the shortest phase;
 \item in bi-directional optimisation, maximisation of the return band may prioritise a very narrow band that \emph{just} makes it through all junctions (possibly degrading the main band significantly) over a very wide band divided in two or more chunks.
-\end{itemize} 
-\todo{To avoid this we consider the total band between any pair of junctions: illustrate algorithm.}
+\end{itemize}
+
+To avoid such inconveniences, which are intrinsic in the definition of what will henceforth be referred to as the \emph{canonical} bandwidth $\hardband{\corridor}$, the slack bandwidth paradigm attempts to describe the overall \emph{"progressivity"} of the corridor along its whole length, by considering the sum of the individual green bands leading up to and following \emph{any} of the corridor junctions.
+
+Rather than a length of time (the width of $\hardband{\corridor}$ on a T-D graph) the slack bandwidth has dimensions \units{L \cdot T} (an area on a T-D graph) i.e. it is the product of the time during which a vehicle may enter each section of the corridor and the distance it will travel unhindered as a result. If the times are normalised with respect to the cycle time, the slack band becomes a \emph{probability $\times$ distance} product (just as the canonical bandwidth would represent the overall chance of travelling the whole corridor without stopping).
+
+The formalisation of this idea is much simpler than it may sound at first. 
+Consider a junction $j$ somewhere along corridor $\corridor$: the \emph{forwards slack progression band} $\fslackband{j}$ is the integral of the distance that may be travelled without stopping with respect to the time $t$ at which a vehicle leaves from $j$. The former is obviously a function of the latter, and may be expressed as $l(t)$, hence
+\eq[,]{e:slackint}{
+\fslackband{j} = \int_{\gini{j}}^{\gini{j}+\gren{j}} l(t) \; \mathrm{d}t
+}
+where $\gini{j}$ is the beginning time of the through phase at $j$ and $\gren{j}$ its duration, as before.
+
+The integral in \req{e:slack1} clearly formalises the definition of slack bandwidth illustrated in Figure \ref{f:slackdef}.a but it's not practical to compute, and does not provide an explicit form for $l(t)$.
+
+\fig{htbp}{PIX/undoguy.png}{f:slackdef}{ 
+The \emph{forward slack band} definition on T-D diagrams expressed in \textbf{(a)} as the integral \req{e:slackint} and in \textbf{(b)} as the discrete sum \req{e:slacksum}.}{width=0.8\textwidth}
+
+Consider therefore the interval $G_{ji}$ during which a vehicle that left $j$ may drive through a subsequent junction $i \geqslant j$. If $i = j$, i.e. when the vehicle crosses the reference stop line, $G_{ji}$ is identically $\left[ \gini{j}, \: \gini{j}+\gren{j} \right] $.
+
+
+\eq[.]{e:slacksum}{
+\fslackband{j} = \sum pippapippa
+}
+
+Assuming constant speed along the $j^{th}$ corridor section
+
+instead of \req{e:milp6}
+
+which leads to a variation on \req{e:milp7}
