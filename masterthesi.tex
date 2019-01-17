@@ -306,7 +306,7 @@ The break-away point where the tread elements begin sliding is determined by the
 Friction is considered anisotropic, with $\mu_{sx}$ and $\mu_{sy}$ the friction coefficients in the two directions. %???
 Considering the infinitesimal bristle at position $x$, the concept of \emph{available} static friction force can be described with the elliptic constraint
 
-\eq{eqn:elliptic}{\left(\frac{dF_{ax}(x)}{dF_z(x) \mu_{sx}}\right)^2 + \left(\frac{dF_{ay}(x)}{dF_z(x) \mu_{sy}}\right)^2 \leq 1}
+\eq{eqn:elliptic}{\left(\frac{dF_{ax}(x)}{dF_z(x) \mu_{sx}}\right)^2 + \left(\frac{dF_{ay}(x)}{dF_z(x) \mu_{sy}}\right)^2 \leqslant 1}
 
 illustrated in figure \ref{fig:elliptic}.
 \figura{pix/fric_ellipse.jpg}{width=8cm}{Illustration of the static friction constraint for anisotropic rubber characteristics}{fig:elliptic}
@@ -315,7 +315,7 @@ As a result the magnitude of the maximum force depends on the direction of slip,
 
 By combining with \req{eqn:ades3} and \req{eqn:adesDF} the friction constraint becomes
 
-\eq{eqn:elliptic2}{\sqrt{\left(\frac{c_{px} \sigma_x}{\mu_{sx}}\right)^2 + \left(\frac{c_{py} \sigma_y}{\mu_{sy}}\right)^2}(a-x) \leq q_z(x)}
+\eq{eqn:elliptic2}{\sqrt{\left(\frac{c_{px} \sigma_x}{\mu_{sx}}\right)^2 + \left(\frac{c_{py} \sigma_y}{\mu_{sy}}\right)^2}(a-x) \leqslant q_z(x)}
 
 where $q_z(x)$ is the pressure distribution such that $dF_z(x)=q_z(x)dx$. A common simplification\footnote{proposed for example in \citep{compare74} and evidently not far from reality as shown in \citep{nhtsa}, chapters 5, 6 and 7. ???} is to describe the pressure distribution as a symmetric parabolic function of position within the contact patch
 \eq{eqn:presdist}{q_z(x)=\frac{3F_z}{4a}(1-(\frac{x}{a})^2)}
@@ -340,7 +340,7 @@ allowing to rewrite \req{eqn:xs} as
 
 \eq{eqn:xsPsi}{x_s(\sigma_x,\sigma_y) = (2\Psi(\sigma_x,\sigma_y) - 1)a}
 
-Partial sliding occurs for values of $\Psi(\sigma_x,\sigma_y)$ smaller than unity. For $\Psi \geq 1$ the contact patch is fully sliding and none of the tread elements are in static contact with the road: the adhesion forces become $F_{ax} = F_{ay} = 0$. 
+Partial sliding occurs for values of $\Psi(\sigma_x,\sigma_y)$ smaller than unity. For $\Psi \geqslant 1$ the contact patch is fully sliding and none of the tread elements are in static contact with the road: the adhesion forces become $F_{ax} = F_{ay} = 0$. 
 
 \subsubsection*{Adhesion Force}
 Once the size of the adhesive region is known, it is possible to solve the integrals in \req{eqn:adesF} which yield the total static forces
@@ -579,8 +579,8 @@ Substituting for $\ddot{\delta_{cy}} / v_c $ from the time derivative of \req{eq
 	\frac{1}{C_{cy}v_c} \left[\difp{F'_y}{\sigma'_x} + \left(\dif{F'_y}{\sigma'_y}-D_{cy}v_c\right)\dot{\sigma'_y} + \difp{F'_y}{\gamma'_x}\right] 
 	+ D_{cy}\dot{\sigma_y}}
 
-from which emerges that the system is potentially unstable in slip regions where the slip-force curve has positive slope if the damping is not sufficient. In \citep{pacejka02} it is suggested to simply force $\delta F'_y / \delta \sigma'_y \leq 0$ but as shown in \ref{apx:carcdamp} it was found that the damping value such that $D_{cy}v_{c,min} > \mathrm{sup}(\delta F'_y / \delta \sigma'_y)\,$,where $v_{c,min}$ is the wheel speed threshold \footnote{made necessary for simulation purposes, see \ref{model:wheels}} is well within reasonable values.
-It follows that the system is well posed for all $v_c \geq v_{c,min}$ using physically meaningful parameter. %???
+from which emerges that the system is potentially unstable in slip regions where the slip-force curve has positive slope if the damping is not sufficient. In \citep{pacejka02} it is suggested to simply force $\delta F'_y / \delta \sigma'_y \leqslant 0$ but as shown in \ref{apx:carcdamp} it was found that the damping value such that $D_{cy}v_{c,min} > \mathrm{sup}(\delta F'_y / \delta \sigma'_y)\,$,where $v_{c,min}$ is the wheel speed threshold \footnote{made necessary for simulation purposes, see \ref{model:wheels}} is well within reasonable values.
+It follows that the system is well posed for all $v_c \geqslant v_{c,min}$ using physically meaningful parameter. %???
 
 \subsubsection*{Relaxation Length} \label{introrelax}
 If \req{eqn:cardyn4} is re-written assuming small pure slip and neglecting damping and camber, it gives the simplified relation
@@ -711,12 +711,12 @@ whence follows that
 The effective rolling radius can then be defined as the arbitrary radius for which the arc corresponding to an angular displacement $\phi$ has the same length as the distance travelled by a point in the contact patch over the same displacement:
 \eq{eqn:redef}{x =\overline{C_\ell D_\ell} = \phi R_e }
 It is evident from figure \ref{fig:re1} that 
-\eq{eqn:relims}{R_\ell \leq R_e \leq R \,}
+\eq{eqn:relims}{R_\ell \leqslant R_e \leqslant R \,}
 proof of which is provided by dividing \req{eqn:redef} by both columns of \req{eqn:re1} to obtain the ratio of effective radius to loaded radius and original radius respectively
 \eq{eqn:reratios}{\frac{R_e}{R_\ell} = \frac{x}{x_\ell} \frac{tan(\phi)}{\phi} \qquad \qquad \frac{R_e}{R} = \frac{x}{x_0} \frac{sin(\phi)}{\phi}}
 and noting that the right hand equation yields that
 $$
-R_e < R \qquad \forall x | x \leq \frac{x_0}{sin(\phi)} \phi = R \phi
+R_e < R \qquad \forall x | x \leqslant \frac{x_0}{sin(\phi)} \phi = R \phi
 $$
 which corresponds to the physically obvious assumption that the distance covered by a point in the compressed contact patch is not longer than the arc described by a point on the tire circumference over the same angular displacement: the equivalent of saying that the tire belt does not stretch under  compression.
 In absence of empirical data any arbitrary choice of an $R_e(R_\ell)$ profile is good as long as condition \req{eqn:relims} is satisfied, although in cases such as this where a large tire deflection can be expected, the range thus defined allows a gap between the maximum and minimum estimate of more than 30\% (\cite{GYtirespecs} ) with notable effects on wheel dynamics as described by \req{eqn:VcOmegaRe} and \req{nhtsa}.

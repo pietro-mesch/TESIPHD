@@ -89,8 +89,8 @@ maximum headway value for the current phase. If so, the transition to the next p
 \eq{e:phasetrans}{
 \text{Initiate phase transition } p \rightarrow p+1 \text{ if }
 \begin{cases}
-t \geq \gpmin \\
-t \geq \gpmin \vee t^h \geq \hat{t}_p^h \\
+t \geqslant \gpmin \\
+t \geqslant \gpmin \vee t^h \geqslant \hat{t}_p^h \\
 \end{cases}
 }
 where the minimum green value can be obtained similarly to \req{e:tclear} in order to at least ensure discharge of the standing queue, possibly using an estimate of the incoming flow, and the
@@ -377,7 +377,7 @@ form vehicle conservation, which reads
 }
 
 However, $\tts{\scriptscriptstyle{PN}} = \npn $ only if all PN links are monitored, which is not generally the case.\\
-Realistically, the \emph{TTS} is smaller than the true number of vehicles by some factor $\rho^{\epsilon 1} \leq 1$.
+Realistically, the \emph{TTS} is smaller than the true number of vehicles by some factor $\rho^{\epsilon 1} \leqslant 1$.
 Allowing for an additional measurement error $\flow^{\epsilon 1}$ the \emph{TTS} value to be used in the NFD is
 
 \eq[.]{e:fc3}{

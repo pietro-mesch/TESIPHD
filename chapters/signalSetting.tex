@@ -57,7 +57,7 @@ This in turn leads to the theoretical definition of the \emph{stop ratio}, an es
 \frac{1-\gshr{a}}{\-\flowratio_a}
 }
 which is proportional to the red share of the cycle time and increases as the arrival rate approaches the discharge capacity.
-Quite obviously for values of $\flowratio_a \geq 1$, but also if $\gshr{a} < \flowratio_a$ queues cannot be fully discharged at every cycle, and all vehicles end up stopping: in this case, the queue can grow indefinitely.
+Quite obviously for values of $\flowratio_a \geqslant 1$, but also if $\gshr{a} < \flowratio_a$ queues cannot be fully discharged at every cycle, and all vehicles end up stopping: in this case, the queue can grow indefinitely.
 
 \fig{htbp}{pix/queues.jpg}{f:queues}{
 Geometric determination of stopped vehicles and queue clearance for one approach given the relevant demand flow, saturation flow, cycle and green time.
@@ -184,7 +184,7 @@ The problem takes the following form:
 \\ \\
 \text{subject to} & \cycle{j} - \tlost{j} = & \displaystyle \sum_{p \in \phaset_j} \gren{p}
 \\ \\
- & \gren{p} \geq & \flowratio_p \cdot \cycle{j} \quad \forall p \in \phaset_j \\
+ & \gren{p} \geqslant & \flowratio_p \cdot \cycle{j} \quad \forall p \in \phaset_j \\
 \end{array}
 }
 where the first constraint simply enforces the conservation of cycle time, and the other $|\phaset_j|$ inequalities ensure that phase durations are sufficient to meet demand where possible.
