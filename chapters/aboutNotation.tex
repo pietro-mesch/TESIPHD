@@ -36,11 +36,13 @@ $\arcset_{p} \subseteq \bstar{j} $ & & lane groups open during phase $p$ \\[2pt]
 \subsubsection*{Signal Timing}
 \begin{tabu} to \textwidth {X[3,c] X[1,c] X[6,l]}
 $ \cycle{j} $ & \units{s} & cycle time at junction $j$\\[2pt]
-$ t_p   $ & \units{s} & nominal duration of phase $p$\\[2pt]
-$ \gren{a}   $ & \units{s} & effective green duration for arc $a$\\[3pt]
-$ \displaystyle \gshr{a} = \frac{\gren{a}}{t_j^C} $ & \units{\%} & effective green share of arc $a$\\[2pt]
 $ \tlost{j} $ & \units{s} & time lost per cycle at junction $j$\\[2pt]
-$ \toffs{j} $ & \units{s} & offset of junction $j$ \\[2pt]
+$ \toffs{j} $ & \units{s} & offset of junction $j$ \\[5pt]
+$ t_p   $ & \units{s} & nominal duration of phase $p$\\[2pt]
+$ \gini{a}   $ &  & initial instant of the green phase for arc $a$\\[2pt]
+$ \gren{a}   $ & \units{s} & effective green duration for arc $a$\\[3pt]
+$ \gint{a} = \left[\gini{a} \, , \gini{a}+\gren{a} \right] $ &  & span of the green phase for arc $a$\\[4pt]
+$ \displaystyle \gshr{a} = \frac{\gren{a}}{t_j^C} $ & \units{\%} & effective green share of arc $a$\\[2pt]
 \end{tabu} 
 
 
