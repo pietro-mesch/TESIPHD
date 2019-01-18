@@ -23,11 +23,9 @@ The most relevant components of the Optima Real-Time Framework involved in the a
 \fig{htbp}{PIX/optima_genetic.png}{f:optima}{The Optima framework for real time traffic management. Arrows roughly represent the direction of interactions and data exchange between the different components. The optimiser module is shown on the right, directly attached to the simulation engine TRE which it uses for solution evaluation.}{width=\textwidth}
 
 Besided the simulation engine (presented in detail in Section \ref{s:TRE}) the Optima environment relies on all of these components, articulated around a data model called \emph{Traffic Data Exchange}, to bring together static and dynamic data into a complete transportation system.
+In this framework, each functionality is covered by dedicated software, and all resources are accessible to all components concerned.
 
-In this framework, all resources are accessible to the relevant components, but the separation of responsibilities between them ensures that information is not duplicated \todo{what am I trying to sayyyyyyy???}
-
-\todo{BBAH passata veloce sui componenti per poi passare a TRE. Separation of responsibilities.
-}
+The optmiser itself is relieved from the necessity to incorporate its own traffic model, or to handle and validate sensor data as many currently available signal optimisation systems must do. In fact, it doesn't need to know the model at all, but can take full advantage of it and of the network-wide harmonised traffic data available within the system via the simulation engine that provides the necessary evaluation capabilities. At the other end, it is still the framework that provides the interface with street-level equipment (the actual signal controllers) and ensures that the optimised plans are readily and safely implemented.
 
 \section{TRE simulation engine} \label{s:TRE}
 The proposed optimisation method relies on the macrosimulation engine known as TRE, based on the eponymous Dynamic User Equilibrium assignment algorithm.
@@ -226,9 +224,9 @@ If more controllers are involved, they can be ignored (which makes little sense 
 \newcommand{\solution}{\mathbf{s}}
 A Genetic Algorithm is an evolutionary computation technique that explores a solution space by mimicking a process of evolution by natural selection. It is particularly suitable for heuristic optimisation approaches as it does not rely on \emph{a priori} knowledge of the problem.
 
-\todo{explain right away how this applies to our case}
+The present application for corridor offset optimisation represents a typical use case: it is easy to define the inputs (the offset values at each junction along a corridor) and straightforward to calculate the resulting performance indices (see Chapter \ref{c:objectives}), but the traffic propagation (i.e. \emph{the function}) with its numerous parameters and complex interactions, cannot be inverted or described in closed form to try and approach the optimisation analytically. 
 
-Given a generic process or single valued function of $n$ arguments, the algorithm identifies candidate solutions as \emph{individuals}, each characterised by a \emph{chromosome} $\solution$ which is nothing but a vector of $n$ viable input values to the process. The candidate solution chromosomes are then fed through the process or function to determine the fitness $f$ of the corresponding individual:
+Given a generic process or single valued function of $n$ arguments, the Genetic Algorithm identifies candidate solutions as \emph{individuals}, each characterised by a \emph{chromosome} $\solution$ which is nothing but a vector of $n$ viable input values to the process. The candidate solution chromosomes are then fed through the process or function to determine the fitness $f$ of the corresponding individual:
 \eq{e:gafitness}{
 \omega_i = \phi(\solution_i)\qquad \mathrm{with} \quad 
 \solution_i = \left\lbrace s_i^1, s_i^2, \dots s_i^n\right\rbrace
@@ -276,7 +274,7 @@ This introduces variability in the population that is not directly related with 
 
 To get the best effects while circumventing the downsides, this application uses variable mutation rates, starting out at an empirically determined safe value which is increased proportionally with a measure of the \emph{similarity} amongst the top individuals. In this way, mutations increase with the risk of stagnation and help counteract it, but the replication of successful traits across many similar individuals limit the possibility of weeding them out.
 
-\subsection{Initial Population Seeding with Slack Bandwidth}
+\subsection{Initial Population Seeding with Slack Bandwidth} \label{s:seeding}
 The speed of convergence of the Genetic Algorithm is strongly influenced by the initial population.
 Theoretically, an infinitely large random population would contain the global optimum right from the first iteration, but with any manageable number of candidate solutions the chance of having a randomly generated solution performing well becomes very slim.
 
