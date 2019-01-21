@@ -1,35 +1,57 @@
 \chapter{A Real-Time Forecast-Based Optimiser} \label{c:optimiser}
 
 The foremost aim of this work is to exploit the versatility and speed of advanced macroscopic traffic simulation to bring forth a heuristic approach capable of improving signal plans \emph{in real time}.
-In this, it represents an attempt to bring together the best of most signal setting approaches described so far:
+It represents an attempt to bring together the best of most signal setting approaches introduced in the previous chapters, in that by integration within the real-time traffic management environment outlined in section \ref{s:optima} it aims to be:
 \begin{description}
-\item[adaptive] aiming at real-time operation, it is hoped it might guarantee a degree of adaptivity so far only expected of \todo{adaptive online signal setting approaches described in ref?? using much simpler models}
-\item[accurate] \todo{comprehensive model including real time data and less dependant on single sensors (see balmanual in case it says anything interesting about the stability of optima}
-\item[heuristic] using heuristics avoid the simplifications required to formulate analytical approaches without compromising on accuracy in evaluating the outcomes
-\item[gating] by evaluating forecast traffic conditions over a look-ahead window, it should behave more like a feedback controller, accounting at least for the short-term consequences of its decisions.
-\todo{it should stay away from greedy solutions that may maximise the immediate efficiency of junctions while disregarding even the short-term effects which might include an increase in congestion}
+\item[adaptive] \--- since real-time operation should guarantee a degree of adaptivity so far only expected of actuated signals, besting other plan-generating systems particularly in terms of response times;
+
+\item[accurate] \--- thanks to the detailed network and traffic propagation models provided by the traffic management environment, coupled with solid real-time data, which enable it to operate on more reliable assumptions about traffic and its movements;
+
+\item[impartial] \--- by relying on an objective-driven heuristic search method to avoid the simplifications involved in a strictly analytical approach, behaving like a feedback controller and accounting for the short-term consequences of its decisions, rather than making assumptions about the best way to operate signals optimally;
+
+\item[versatile] \--- because once the principles of operation are proven sound and the system integration is functional, the same can be used to approach more complex optimisation problems, operate on longer time scales or be used as powerful offline planning tools.
 \end{description}
 
 This chapter presents the approach in detail.
+\todo{say genetic algorithm}
+
 \todo{anticipate sections better}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Heuristic Offset Optimisation}
-Describe the task at hand, in terms of inputs and goals of the optimiser strictly.
+The task at hand is to develop an optimiser that can choose the timing \emph{offsets} (see section \ref{s:signaloffset}) between a group of adjacent signalised junctions that regulate traffic progression along a \emph{corridor} as defined in section \ref{s:corridor}.
 
-\fig{htbp}{PIX/undoguy.png}{f:run}{The basic task is to find optimum offset values that minimise a performance index calculated over }{width=0.4\textwidth}
+The problem of arterial \emph{coordination} has been tackled in a variety of ways, of which some are presented in section \ref{s:signalcoordination}: mostly, as the relevant scientific literature testifies, analytical approaches to the problem have been sought which revolve around the concept of \emph{bandwidth} as the driving metric. These stem  from the extremely reasonable assumption that to increase the chance of encountering a \emph{green wave} along a traffic artery should ultimately mean to maximise its throughput; they are also a testimony to the extreme difficulty of encapsulating the complex dynamics of traffic itself into a closed-form analytical formulation that would be nearly as elegant as those that can be built upon the relatively simple paradigm of bandwidth, discussed in detail in section \ref{s:bandmax}.
 
-\subsection{The Look-Ahead Window}
-It could be done static, like everybody else, but we are in real time and we want to include short term effects (long term is still out of reach).
+Although moving \emph{from} the idea of bandwidth maximisation, as illustrated in this chapter, this work aims to do \emph{away} not only with the search for green waves but with the very need to explicitly model the correlation between signal offsets and arterial traffic fluidity. \\
+The idea is to rely on simulation to verify \emph{a posteriori} whether certain timing choices bring about an improvement in performance of the corridor, and to what extent: this allows to concentrate on the \emph{results}, which can be assessed according to any chosen metric and may well arise from less obvious decisions than those which would only seek to maximise the throughput.
 
-The size of the time window is limited by computing power. Resolution cannot be sacrificed or the fundamental events get averaged out.
+The one presented in this work is therefore in essence a \emph{heuristic} approach to arterial coordination, which should be able to operate in a wider range of traffic conditions thanks to the Dynamic Traffic Assignment algorithm described in Chapter \ref{c:tools} to improve articulated and sustainable performance objectives. While the objectives driving the optimisation deserve an in-depth discussion, presented in Chapter \ref{c:objectives}, the next few sections are concerned with the practical aspects of the implementation of the proposed method.
+
+
+\fig{htbp}{PIX/undoguy.png}{f:run}{\todo{ciclo decision/plant/forecast/metrics}}{width=0.4\textwidth}
+
+\subsection{Rolling Look-Ahead Window Optimisation}
+Two of the strongest features of the heuristic optimisation presented are the capability to account for transient traffic phenomena (such as the gradual build-up or dissipation of queues over a number of signal cycles) and of future events which may be known in advance (such as road closures and deviations). In order to fully exploit these advantages, the optimisation is performed by evaluating the evolution of traffic conditions over a \emph{rolling look-ahead window}, i.e. a time span in the order of a few signal cycles that is completely in the future with respect to the real time during which the optimisation occurs.
+
+The boundary conditions at the beginning of the time window are known, ad the optimiser evaluates the corridor performance arising from the predicted demand and tentative signal timings until a satisfactory chioce is found, as illustrated in Figure \ref{f:rollingwindow} and discussed in more detail throughout this chapter.
+\fig{htbp}{PIX/rollingwindow.png}{f:rollingwindow}{\todo{the rolling horizon optimisation}}{width=\textwidth}
+
+On one hand, the look-ahead window allows to account for the short term effects of signal timing choices, protecting the optimisation from \emph{greedy} solutions that may promote a fast progression only to cause graver congestion later; but also including events that may radically change the outcome of a given set of timings: this would call for the look-ahead window to be as long as possible, to include more of these effects.
+
+On the other hand, however, since signal timings are constant over the optimisation window, increasing its length reduces the responsiveness and adaptivity of the system: the point is to find the best timings for very specific traffic conditions as they arise, and it would be counter-productive to allow them to change significantly over the evaluation period, thus confusing results.
+
+Another limiting factor is imposed by the computational requirements of the simulation, which increase more or less linearly with the number of intervals that need to be computed, as should be evident from the outline of the algorithm given in section \ref{s:TRE}: for constant time resolution, a longer look-ahead window takes longer to simulate, and it needs to be simulated in the order of a few hundred times in order to gain significant improvements in performance. Since time resolution cannot be sacrificed, as it is crucial to the correct reproduction of the rapid within-cycle queue dynamics which are one of the main components of corridor performance indicators, this is a particularly stringent limitation.
+
+Sizing of the look-ahead window should strike a good compromise between execution times, responsiveness and control feedback, and values in the order of 10 minutes, or 5-10 signal cycles should be optimal for most applications, if the computing resources available allow it.
+\todo{Rough sizing calculations are presented in the relevant section (\ref{res:windowsizing}) of the \nameref{c:results} chapter, alongside performance results for the validation tests performed.}
 
 \section{TRE as Performance Function}
 Describe the interface with TRE, which is used evaluate solutions while serving as single point of contact with Optima.
 
-\fig{htbp}{PIX/undoguy.png}{f:trega}{ Interaction between the optimiser and TRE}{width=0.4\textwidth}
+\fig{htbp}{PIX/interface.jpg}{f:trega}{ Interaction between the optimiser and TRE}{width=0.4\textwidth}
 
 Condizioni dei test di TRE:
 \begin{enumerate}

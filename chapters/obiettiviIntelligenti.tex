@@ -60,7 +60,7 @@ Referring to the User Time Travelled $\uttravelled{a}$ expressed by \eqref{eq:ut
 \eq[]{eq:timedist}{
 \timedist{\corridor} =
 \sum_{a \in \arcset} 
-\frac{\uttravelled{a}}{\length_a \: \total{\corridor}}
+\frac{\uttravelled{a}}{\; \length_a \quad \total{\corridor} \;} \cdot \frac{1000}{60}
 }
 uses the travel times experienced by all users, normalised with respect to the relevant section lengths and averaged over all vehicles involved with any part of the corridor during the simulation. This gives an overall measure of the fluidity of traffic on the corridor, and has the dimensions of a time per unit length. The choice of units (and name) for this performance indicator is therefore dictated solely by human-readability: it makes sense to count minutes spent in traffic to cover one kilometre, and it is easy to refer to the fact that for an average speed of 60 km/h the value of $\timedist{}$ would be 1.
 

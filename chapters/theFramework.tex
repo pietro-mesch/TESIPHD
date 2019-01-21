@@ -1,8 +1,8 @@
-\chapter{Modelling, Simulation and Optimisation Tools}
+\chapter{Modelling, Simulation and Optimisation Tools} \label{c:tools}
 This chapter presents the relevant elements of the real time traffic management framework in which the work was conducted, illustrating the most interesting features in light of their role in the optimisation. An introduction to the basic principles of the Genetic Algorithm completes the inventory of the tools used to bring together the optimisation presented in Chapter \ref{c:optimiser}.
 
 
-\section{The Optima Framework}
+\section{The Optima Framework} \label{s:optima}
 It is important to understand that much of the value of the present work lies in the fact that it has been carried out in a production environment and that the resulting product is embedded in a real-time traffic management system.
 
 The main advantages of this integration can be summarised by considering the \emph{requirements} for an effective and informed optimisation of a complex real world phenomenon:
@@ -126,7 +126,7 @@ If a model is to rely on the fundamental diagram to hold for non-stationary traf
 Higher order traffic phenomena such as the emergence of stop-and-go waves along the link, or fundamental diagram hysteresis (due to traffic states evolving asimmetrically when leading up to congestion or recovering from it) are knowingly neglected.
 
 \subsubsection{Traffic State Propagation}
-A brief overview of the fundamentals of the simplified KWT is given here inasmuch as it is relevant to the context: for a more detailed discussion of these well-known principles the reader is encouraged to refer to the original works of \todo{yperman and gentile}.
+A brief overview of the fundamentals of the simplified KWT is given here inasmuch as it is relevant to the context: for a more detailed discussion of these well-known principles the reader is encouraged to refer to the original works of \cite{yperman2007link} and \cite{gentile2010general}.
 
 Consider the \emph{cumulative flow} $N(x,t)$,  i.e. the number of vehicles that have passed location $x$ along a link before time $t$. Assuming that vehicle conservation is respected along the link, i.e. that no vehicle is created or destroyed between the tail and the head node, the trajectory of the $n^{\mathrm{th}}$ vehicle to enter the arc can be traced on a time-space diagram as the locus of points for which $N(x,t) = n$ as shown in Figure \ref{f:txtraj}.
 
@@ -273,7 +273,7 @@ where the subscript $i \in I$ identifies an individual member of the population,
 
 The population may initially be randomised or otherwise generated. Through the fundamental operations of \emph{selection, crossover} and \emph{mutation} (detailed in the next few sections) the best individuals are allowed to live on and pass their genes to their successors, which gradually replace the lower ranking individuals.
 
-\fig{htbp}{PIX/undoguy.png}{f:geneticalgorithm}{The Genetic Algorithm: with each cycle, a new \emph{generation} carrying the most successful traits of the previous one supplants the least successful individuals.}{width=0.4\textwidth}
+\fig{htbp}{PIX/genetic_cycle.jpg}{f:geneticalgorithm}{The Genetic Algorithm: with each cycle, a new \emph{generation} carrying the most successful traits of the previous one supplants the least successful individuals.}{width=0.4\textwidth}
 
 Through iterations of this mechanism, illustrated in Figure \ref{f:geneticalgorithm}, the population undergoes an evolutionary process whereby all individuals become (on average) better suited for the process considered: there is no guarantee that a global optimum will be found, but good-enough solutions for practical applications can be obtained in relatively few generations. 
 
