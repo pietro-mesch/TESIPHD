@@ -62,7 +62,7 @@ Trip planning and route choice models are extremely relevant to the accuracy of 
 The representation of traffic as it propagates and interacts with the network and signals, and all related phenomena within the scope of the present study, fall upon the Dynamic Network Loading model.
 The most suitable macroscopic model for the task at hand is the General Link Transmission Model, which will be analysed in further detail over the next few sections.
 
-\subsection{General Link Transmission Model}
+\subsection{General Link Transmission Model} \label{s:gltm}
 The \emph{General Link Transmission Model}, henceforth referred to as GLTM, is a model for continuous dynamic network loading: it can be used to determine time-dependent link flows $\flow_{a,\tau}$ and travel times $\traveltime{a,\tau}$ given the time-dependent route flows.
 
 It is built upon the representation of traffic as a partially compressible one-dimensional fluid flowing through the network according to the principles of \emph{Kinematic Wave Theory} (KWT), as developed independently by \cite{lighthill1955kinematic} and \cite{richards1956shock}.
@@ -183,7 +183,7 @@ In this simple case drivers are assumed not to occupy the intersection if they c
 
 \fig{htbp}{PIX/undoguy.png}{f:label}{ \todo{figura con le tabelle semaforizzazione} }{width=0.4\textwidth}
 
-\section{GLTM as Flow Simulation}
+\section{GLTM as Flow Simulation} \label{s:gltmflowsim}
 The network loading and flow propagation model is central to the optimisation process proposed in this work.
 So far, its position in the Dynamic Traffic Assignment has been clarified, but it may be useful to recapitulate and formalise what its input and output are as a stand-alone \emph{flow simulator} component; before proceeding to Section \ref{s:geneticalgo} where its role in relation to the Genetic Algorithm will be clarified. These are summarised in Figure \ref{f:dnl} and presented in more detail in the following sections.
 

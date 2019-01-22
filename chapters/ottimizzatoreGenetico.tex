@@ -34,37 +34,71 @@ The one presented in this work is therefore in essence a \emph{heuristic} approa
 \fig{htbp}{PIX/undoguy.png}{f:run}{\todo{ciclo decision/plant/forecast/metrics}}{width=0.4\textwidth}
 
 \subsection{Rolling Look-Ahead Window Optimisation}
-Two of the strongest features of the heuristic optimisation presented are the capability to account for transient traffic phenomena (such as the gradual build-up or dissipation of queues over a number of signal cycles) and of future events which may be known in advance (such as road closures and deviations). In order to fully exploit these advantages, the optimisation is performed by evaluating the evolution of traffic conditions over a \emph{rolling look-ahead window}, i.e. a time span in the order of a few signal cycles that is completely in the future with respect to the real time during which the optimisation occurs.
+Two of the strongest features of the heuristic optimisation presented are the capability to account for transient traffic phenomena (such as the gradual build-up or dissipation of queues over a number of signal cycles) and of future events which may be known in advance (such as road closures and deviations). In order to fully exploit these advantages, the optimisation is performed by evaluating traffic conditions as they develop over a \emph{rolling look-ahead window}, i.e. a time span in the order of a few signal cycles that is completely in the future with respect to the real time during which the optimisation occurs.
 
 The boundary conditions at the beginning of the time window are known, ad the optimiser evaluates the corridor performance arising from the predicted demand and tentative signal timings until a satisfactory chioce is found, as illustrated in Figure \ref{f:rollingwindow} and discussed in more detail throughout this chapter.
 \fig{htbp}{PIX/rollingwindow.png}{f:rollingwindow}{\todo{the rolling horizon optimisation}}{width=\textwidth}
 
-On one hand, the look-ahead window allows to account for the short term effects of signal timing choices, protecting the optimisation from \emph{greedy} solutions that may promote a fast progression only to cause graver congestion later; but also including events that may radically change the outcome of a given set of timings: this would call for the look-ahead window to be as long as possible, to include more of these effects.
+On one hand, the look-ahead window allows to account for the short term effects of signal timing choices, protecting the optimisation from \emph{greedy} solutions that may promote a fast progression only to cause graver congestion later; but also to consider events that may radically change the outcome of a given set of timings: these beneficial effects would call for the look-ahead window to be as long as possible, for the optimisation to be best \emph{informed}.
 
 On the other hand, however, since signal timings are constant over the optimisation window, increasing its length reduces the responsiveness and adaptivity of the system: the point is to find the best timings for very specific traffic conditions as they arise, and it would be counter-productive to allow them to change significantly over the evaluation period, thus confusing results.
 
-Another limiting factor is imposed by the computational requirements of the simulation, which increase more or less linearly with the number of intervals that need to be computed, as should be evident from the outline of the algorithm given in section \ref{s:TRE}: for constant time resolution, a longer look-ahead window takes longer to simulate, and it needs to be simulated in the order of a few hundred times in order to gain significant improvements in performance. Since time resolution cannot be sacrificed, as it is crucial to the correct reproduction of the rapid within-cycle queue dynamics which are one of the main components of corridor performance indicators, this is a particularly stringent limitation.
+Another limiting factor is imposed by the computational requirements of the simulation, which increase more or less linearly with the number of intervals that need to be computed, as should be evident from the outline of the algorithm given in section \ref{s:TRE}: for constant time resolution, a longer look-ahead window takes longer to simulate, and it needs to be simulated in the order of a few hundred times for the genetic algorithm to yield significant improvements in performance. 
+
+Time resolution cannot be sacrificed, as it is crucial to the correct reproduction of the rapid within-cycle queue dynamics, which are one of the main components of corridor performance indicators and would get averaged out by longer simulation intervals. For the intended real-time operation, the one on execution times is a particularly stringent limitation.
 
 Sizing of the look-ahead window should strike a good compromise between execution times, responsiveness and control feedback, and values in the order of 10 minutes, or 5-10 signal cycles should be optimal for most applications, if the computing resources available allow it.
 \todo{Rough sizing calculations are presented in the relevant section (\ref{res:windowsizing}) of the \nameref{c:results} chapter, alongside performance results for the validation tests performed.}
 
 \section{TRE as Performance Function}
-Describe the interface with TRE, which is used evaluate solutions while serving as single point of contact with Optima.
+The Dynamic Traffic Assignment algorithm known as TRE (described in more detail in section \ref{s:TRE}) is used in this integration to provide the optimiser with the solution evaluation capabilities it requires for its own stochastic search algorithm.
+
+It should be clear by now that the task of optimising offsets \emph{per se} does not require knowledge of the entire network, of demand profiles or of the events that may modify one or the other: the optimisation loop strictly entails solution generation and evaluation.
+
+TRE can then serve as a \emph{single point of contact} between the traffic management system and the offset optimiser, to which it delivers all the precious information available in the only form that is really useful, i.e. that of accurate predictions about the outcome of a choice of signal offsets. This is illustrated in Figure \ref{f:trega}.
 
 \fig{htbp}{PIX/interface.jpg}{f:trega}{ Interaction between the optimiser and TRE}{width=0.4\textwidth}
 
-Condizioni dei test di TRE:
-\begin{enumerate}
-\item TRE fa un equilibrio e produce TPRB per tutto il giorno: gli intervalli sono ben più lunghi di un ciclo di semaforo quindi le svolte sono mediate e dipendono solo da domanda e green share
-\item TRE salva l'istantanea dei flussi per cominciare le simulazioni di ottimizzazione a rete carica
-\item Gli offset vengono modificati e per ogni individuo si fa un caricamento al secondo su una finestra temporale ristretta, partendo dall'istantanea salvata
-\end{enumerate}
+To be more precise, it should be specified that in order to perform the rolling real-time optimisation illustrated in Figure \ref{f:rollingwindow} TRE must carry out a few operations beyond the simple traffic propagation that directly yields the fitness values for the offset solutions.
+It may be useful to exemplify the optimiser operation in relation to a single corridor and examine the different phases of the rolling optimisation cycle, which can be summarised as follows.
+\begin{description}
+\item[Step 0 - start:] when the optimiser is first launched, the only parameter it requires beyond its own algorithm configuration is the index of the corridor to be optimised. TRE starts with its own configuration, loads the model and returns to the optimiser what little corridor data it requires: number of junctions and cycle length at the very least, plus the slack-band starting offsets (refer to section \ref{s:slackband}) for GA population priming if desired (which can be calculated in seconds as a property of the corridor).
+\item[Step 1 - DTA:] TRE performs a full dynamic user equilibrium assignment from the current time $t_0$, covering a span of \emph{two} optimisation windows $[t_0,t_1]\cup[t_1, t_2]$ into the future, and saves:
+\begin{itemize}
+\item the flows onto and out of the cordon (access and egress) links of the corridor,
+\item the turn rates (averaged over the entire period) that determine the splitting of flows at each intersection all along the corridor
+\item the vehicles present on each arc at the beginning of the next window, i.e. $t_1$
+\end{itemize}
+obviously starting itself with a \emph{loaded} network if arc occupancy data is available for the initial instant of the DTA span.
+\item[Step 2 - DNL:] using the split rates just calculated, TRE propagates flows very rapidly over the \emph{optimisation window} $[t_1,t_2]$ for each set of offsets proposed by the optimiser, returning the desired performance indices: this is not an equilibrium assignment, and is performed \emph{only} on the corridor and cordon links.
+\item[Step 3 - finalisation:] when the optimisation objectives are satisfied or the current time window is almost elapsed, optimised offsets are sent to the data model to be included as \emph{future events} by subsequent simulations, and handled as appropriate by Optima for their implementation on the field.
+\item[Step 4 - rolling forward:] with the new offsets finalised and the state of the network known, TRE can go back to Step 1 and perform a new DTA, so that the \emph{next} window $[t_2,t_3]$ can be optimised while the one just finalised $[t_1,t_2]$ plays out in the real world.
+\end{description}
+
+In this way, TRE can rapidly evaluate hundreds of solutions using the most up-to-date supply and demand information. Details on the most crucial steps 2 and 3 are given in the next sections.
 
 \subsection{Network Wide DTA}
-Spans the next time window for the entire network calculating average splitting rates (more than reasonable) which will be used by DNL, flow snapshot and cordon link flows.
+The Dynamic Traffic Assignment provides the basis in terms of origin flows and split rates for the evaluation of candidate solutions, and must be performed on the whole network to fully exploit the advantages of real time traffic forecast. It is the single most time-consuming task required for the optimisation of each time window, as it involves the iterative algorithm described in section \ref{s:TRE} that searches for the User Equilibrium condition.
+
+The latter is considered satisfied when the user route choices (depending on the arc costs, including their travel times) are in equilibrium with the arc costs (determined by the collective route choices of the users). 
+
+The simulation engine can decouple the route choice model intervals from the flow propagation model to greatly reduce execution times, so while the latter must be numerous and short due to resolution requirements and inherent limitations of the \emph{General Link Transmission Model} (see section \ref{s:gltm}), the route choices can be averaged over the whole time window. This is a more than reasonable assumption, and in fact reflects rather well the fact that over a relatively short time window (in the order of 10 minutes) the ratio of vehicles getting on and off a corridor with respect to the total flows can be expected not to change significantly.
+
+The results of the DTA Equilibrium step of the optimisation are therefore:
+\begin{itemize}
+\item \textbf{initial conditions} in the form of vehicles already on corridor and cordon arcs at the initial instant of the optimisation window;
+\item \textbf{flow profiles} that enter the corridor's cordon arcs, with a fine ($\thicksim 1$ s) time resolution over the entire window;
+\item \textbf{split rates} for all diversion nodes in the corridor, constant over the simulation window.
+\end{itemize} 
+which are the input for the Dynamic Network Loading.
+
 
 \subsection{Solution Evaluation with DNL}
-Solutions are implemented and KPI calculated.
+The Dynamic Network Loading algorithm handles the propagation in space and time of traffic flows, across the network and the optimisation window respectively. As detailed in section \ref{s:gltmflowsim}, it is also responsible of implementing the effects of time-dependent phenomena such as the capacity reductions administered by \emph{traffic signals}, producing a detailed forecast of the evolution of traffic which includes congestion, queue formation and spillback.
+
+In order to evaluate the effects of a choice of signal offsets, DNL can be performed for each candidate solution proposed by the genetic algorithm, covering all relevant arcs (a subset of the network that only includes the optimisation corridor and its cordon arcs) for the entire span of the optimisation window with a fine time resolution, in order to capture transient traffic phenomena.
+
+The result are cumulative profiles of the vehicles entering and leaving each arc, which are easily processed to obtain queue lengths and travel times and hence Key Performance Indicators for the corridor operating under the given signal timings. These are returned as the \emph{fitness value} used by the genetic algorithm to rank tentative offset solutions.
 
 \subsection{Calling Method and Data Exchange}
 The data that needs to be passed between processes is very very little:
