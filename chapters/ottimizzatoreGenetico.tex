@@ -100,6 +100,20 @@ In order to evaluate the effects of a choice of signal offsets, DNL can be perfo
 
 The result are cumulative profiles of the vehicles entering and leaving each arc, which are easily processed to obtain queue lengths and travel times and hence Key Performance Indicators for the corridor operating under the given signal timings. These are returned as the \emph{fitness value} used by the genetic algorithm to rank tentative offset solutions.
 
+\section{Performance and Scalability}
+Computational efficiency is of the utmost importance in a real-time environment.
+As already mentioned, the aim of this optimiser is to operate in \emph{rolling horizon}, meaning that each optimisation must be carried out in a limited time, while the results of the previous are implemented. This means that, beyond all considerations about optimisation window sizing, the likely limiting factor will be the lower bound imposed by the time it takes for the optimiser to reach performance improvements that justify the effort: this will be already in the order of a few signal cycles; if resources are in excess and there is no reason to allow the genetic algorithm a longer time to optimise, the window length may then be increased slightly to enhance the look-ahead capability.
+
+Fortunately, as detailed in the previous sections, the single most time consuming task is the initial network-wide equilibrium assignment (DTA phase) which must be performed only once; furthermore, the following circumstances alleviate its computational cost:
+\begin{itemize}
+\item the route choice part of the algorithm is extremely time consuming and scales badly with the problem size, but it is performed over very large time intervals, and therefore once or twice at most per optimisation;
+\item both the route choice and the dynamic network loading can be \emph{significantly} sped up, as attested in our \citep{attanasi2015real}, by parallelisation: of the \emph{single-source shortest path} searches that contribute to the former's demand routing, and of the flow propagation through different nodes and links within each DNL time step.
+\end{itemize} 
+
+Solution evaluation then relies on several short DNL performed on a comparatively \emph{minuscule} network
+
+The next few sections will go into more detail about the communication between the different components concurring to the corridor offset optimisation, showing how physical separation of the tasks between different machines is not only possible, but can lead to significant performance improvements that should open up several venues for broadening the scope of this initial proof-of-concept application.
+
 \subsection{Calling Method and Data Exchange}
 The data that needs to be passed between processes is very very little:
 \begin{itemize}
@@ -110,11 +124,11 @@ The data that needs to be passed between processes is very very little:
 \end{itemize}
 and can be packaged to minimise connections.
 
-\section{Performance and Scalability}
-Identify the performance bottlenecks and the most time consuming tasks.
+\subsection{Task Parallelisation}
+DTA cannot be broken down for several machines but fully exploits the computing power of one.
 
-Cite our article on parallel DTA and stress how the time hungry stuff is done only once.
-Quick performance calculations to show we're well in the ballpark.
+DNL on a single corridor is too small for parallelisation to make sense, but multiple threads could efficiently handle 
+
 
 Explain how parallel machines running TRE on the same model can be used to
 \begin{itemize}
