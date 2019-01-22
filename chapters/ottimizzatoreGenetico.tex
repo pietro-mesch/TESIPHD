@@ -130,7 +130,8 @@ Fortunately, with reference to the rolling optimisation described in section \re
 \item[Step 3:] the final offsets ($n \times 2 \text{ bytes}$) are sent to TDE.
 \item[Step 4:] the optimiser sends the new time window and if necessary receives a new set of slackband offsets if these are calculated (by TRE) using updated travel times rather than freeflow speeds. 
 \end{itemize}
-The above rough estimates suggest that the optimiser can easily be de-localised with respect to the machine running TRE, which potentially allows to increase the number of simulators as discussed in the next section.
+\todo{make into a table, reads better}
+The above rough estimates suggest that the optimiser can easily be de-localised with respect to the machine running TRE, which in turn potentially allows to increase the number of simulator instances running in parallel to process the optimisation tasks faster, as discussed in the next section.
 
 \subsection{Task Parallelisation}
 DTA cannot be broken down for several machines but fully exploits the computing power of one.
