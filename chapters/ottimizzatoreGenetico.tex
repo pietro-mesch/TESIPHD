@@ -1,6 +1,6 @@
 \chapter{A Real-Time Forecast-Based Optimiser} \label{c:optimiser}
 
-The foremost aim of this work is to exploit the versatility and speed of advanced macroscopic traffic simulation to bring forth a heuristic approach capable of improving signal plans \emph{in real time}.
+The foremost aim of this work is to exploit the versatility and speed of advanced macroscopic traffic simulation to bring forth a heuristic approach capable of improving signal plans \emph{in real time} using live reliable data and dynamic traffic forecast.\\
 It represents an attempt to bring together the best of most signal setting approaches introduced in the previous chapters, in that by integration within the real-time traffic management environment outlined in section \ref{s:optima} it aims to be:
 \begin{description}
 \item[adaptive] \--- since real-time operation should guarantee a degree of adaptivity so far only expected of actuated signals, besting other plan-generating systems particularly in terms of response times;
@@ -14,11 +14,11 @@ It represents an attempt to bring together the best of most signal setting appro
 \item[scalable] \--- by relying on task distribution and parallel computing.
 \end{description}
 
-This chapter presents the approach in detail.
-\todo{say genetic algorithm}
+The proposed \emph{active signal control} approach uses a Genetic Algorithm coupled with a superior macro-simulation traffic forecast engine to generate and select candidate signal timings, gradually guiding their evolution towards a global optimum that yields the best network performance on the affected area.
 
-\todo{anticipate sections better}
+Previous chapters introduced the different components that allow the real-time optimisation, from the Dynamic Traffic Assignment engine to the Genetic Algorithm itself, detailing their inner workings and the importance of their contribution. The most relevant known signal optimisation approaches, a study of which drove the design of this unprecedented alternative, were also presented.
 
+This chapter illustrates the approach in detail, describing how the different components come together and communicate to provide signal timings for optimal arterial traffic control.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -38,19 +38,21 @@ The one presented in this work is therefore in essence a \emph{heuristic} approa
 \subsection{Rolling Look-Ahead Window Optimisation}
 Two of the strongest features of the heuristic optimisation presented are the capability to account for transient traffic phenomena (such as the gradual build-up or dissipation of queues over a number of signal cycles) and of future events which may be known in advance (such as road closures and deviations). In order to fully exploit these advantages, the optimisation is performed by evaluating traffic conditions as they develop over a \emph{rolling look-ahead window}, i.e. a time span in the order of a few signal cycles that is completely in the future with respect to the real time during which the optimisation occurs.
 
-The boundary conditions at the beginning of the time window are known, ad the optimiser evaluates the corridor performance arising from the predicted demand and tentative signal timings until a satisfactory chioce is found, as illustrated in Figure \ref{f:rollingwindow} and discussed in more detail throughout this chapter.
-\fig{htbp}{PIX/rollingwindow.png}{f:rollingwindow}{\todo{the rolling horizon optimisation}}{width=\textwidth}
+The boundary conditions at the beginning of the time window are known, and the optimiser evaluates the corridor performance arising from the predicted demand and tentative signal timings until a satisfactory choice is found, as illustrated in Figure \ref{f:rollingwindow} and discussed in more detail throughout this chapter.
+\fig{htbp}{PIX/rollingwindow.png}{f:rollingwindow}{
+Rolling Optimisation is performed in real-time on a time window in the near future, while the previous (now current) time window plays out and results of the corresponding optimisation are implemented on the street-level equipment. }{width=\textwidth}
 
-On one hand, the look-ahead window allows to account for the short term effects of signal timing choices, protecting the optimisation from \emph{greedy} solutions that may promote a fast progression only to cause graver congestion later; but also to consider events that may radically change the outcome of a given set of timings: these beneficial effects would call for the look-ahead window to be as long as possible, for the optimisation to be best \emph{informed}.
+On one hand, the look-ahead window allows to account for the short term effects of signal timing choices, protecting the optimisation from \emph{greedy} solutions that may promote a fast progression only to cause graver congestion down the line; but also to consider events that may radically change the outcome of a given set of timings.\\
+These beneficial effects would call for the look-ahead window to be as long as possible, for the optimisation to be best \emph{informed}.
 
 On the other hand, however, since signal timings are constant over the optimisation window, increasing its length reduces the responsiveness and adaptivity of the system: the point is to find the best timings for very specific traffic conditions as they arise, and it would be counter-productive to allow them to change significantly over the evaluation period, thus confusing results.
 
-Another limiting factor is imposed by the computational requirements of the simulation, which increase more or less linearly with the number of intervals that need to be computed, as should be evident from the outline of the algorithm given in section \ref{s:TRE}: for constant time resolution, a longer look-ahead window takes longer to simulate, and it needs to be simulated in the order of a few hundred times for the genetic algorithm to yield significant improvements in performance. 
+Another limiting factor is imposed by the computational requirements of the simulation, which grow more or less linearly with the number of intervals that need to be computed, as should be evident from the outline of the algorithm given in section \ref{s:TRE}: for constant time resolution, a longer look-ahead window takes longer to simulate, and it needs to be simulated in the order of a few hundred times for the genetic algorithm to yield significant improvements in performance. 
 
 Time resolution cannot be sacrificed, as it is crucial to the correct reproduction of the rapid within-cycle queue dynamics, which are one of the main components of corridor performance indicators and would get averaged out by longer simulation intervals. For the intended real-time operation, the one on execution times is a particularly stringent limitation.
 
 Sizing of the look-ahead window should strike a good compromise between execution times, responsiveness and control feedback, and values in the order of 10 minutes, or 5-10 signal cycles should be optimal for most applications, if the computing resources available allow it.
-\todo{Rough sizing calculations are presented in the relevant section (\ref{res:windowsizing}) of the \nameref{c:results} chapter, alongside performance results for the validation tests performed.}
+Rough sizing calculations are presented in the relevant section (\ref{res:windowsizing}) of the \nameref{c:results} chapter, alongside performance results for the validation tests performed.
 
 \section{TRE as Performance Function} \label{s:rollingtre}
 The Dynamic Traffic Assignment algorithm known as TRE (described in more detail in section \ref{s:TRE}) is used in this integration to provide the optimiser with the solution evaluation capabilities it requires for its own stochastic search algorithm.
@@ -84,7 +86,7 @@ The Dynamic Traffic Assignment provides the basis in terms of origin flows and s
 
 The latter is considered satisfied when the user route choices (depending on the arc costs, including their travel times) are in equilibrium with the arc costs (determined by the collective route choices of the users). 
 
-The simulation engine can decouple the route choice model intervals from the flow propagation model to greatly reduce execution times, so while the latter must be numerous and short due to resolution requirements and inherent limitations of the \emph{General Link Transmission Model} (see section \ref{s:gltm}), the route choices can be averaged over the whole time window. This is a more than reasonable assumption, and in fact reflects rather well the fact that over a relatively short time window (in the order of 10 minutes) the ratio of vehicles getting on and off a corridor with respect to the total flows can be expected not to change significantly.
+The simulation engine can decouple the route choice model intervals from the flow propagation model to greatly reduce execution times, so while the latter must be numerous and short due to resolution requirements and inherent limitations of the \emph{General Link Transmission Model} (see section \ref{s:gltm}), the route choices can be averaged over the whole time window. This is a more than reasonable assumption, and in fact reflects rather well the fact that over a relatively short time window (in the order of 10 minutes) the ratio of vehicles getting on and off the corridor at each junction with respect to the total flows can be expected not to change significantly.
 
 The results of the DTA Equilibrium step of the optimisation are therefore:
 \begin{itemize}
@@ -109,10 +111,10 @@ As already mentioned, the aim of this optimiser is to operate in \emph{rolling h
 Fortunately, as detailed in the previous sections, the single most time consuming task is the initial network-wide equilibrium assignment (DTA phase) which must be performed only once; furthermore, the following circumstances alleviate its computational cost:
 \begin{itemize}
 \item the route choice part of the algorithm is extremely time consuming and scales badly with the problem size, but it is performed over very large time intervals, and therefore once or twice at most per optimisation;
-\item both the route choice and the dynamic network loading can be \emph{significantly} sped up, as attested in our \citep{attanasi2015real}, by parallelisation: of the \emph{single-source shortest path} searches that contribute to the former's demand routing, and of the flow propagation through different nodes and links within each DNL time step.
+\item both the route choice and the dynamic network loading can be \emph{significantly} sped up by parallelisation of the route choice and network loading algorithms: as attested in our \citep{attanasi2015real} and further discussed in section \ref{s:parallel}.
 \end{itemize} 
 
-Solution evaluation then relies on several short DNL performed on a comparatively \emph{minuscule} network
+Solution evaluation then relies on several short DNL performed on a comparatively \emph{minuscule} network, and a single TRE instance is already capable of effectively optimising a 10' window in rolling horizon on an ordinary computer.
 
 The next few sections will go into more detail about the communication between the different components concurring to the corridor offset optimisation, showing how physical separation of tasks between different machines is not only possible, but can lead to significant performance improvements that should open up several venues for broadening the scope of this initial proof-of-concept application.
 
@@ -121,29 +123,44 @@ The Optima traffic management environment (section \ref{s:optima}) is, in genera
 
 This is an advantage, as it allows to distribute tasks across different inexpensive machines, but the cost of communications can quickly become prohibitive if the payloads are too large or if they need to be sent too often: even over the fastest networks available, data travels several orders of magnitude slower than it can be shared between processes on the same machine, and the connection overhead on TCP connections means that any time-critical repeated action should \emph{not} entail creating a new connection.
 
-Fortunately, with reference to the rolling optimisation described in section \ref{s:rollingtre} of this chapter and a peek-ahead to Figure \ref{f:parallel} it is plain that the amount of data exchanged between the different components concurring to the optimisation is more than manageable, and can be summarised as follows for each optimisation phase (message headers not considered).
-\begin{itemize}
-\item[Step 0a:] TRE loads the network \emph{once}, from the TDE database, which is usually \emph{on the same machine}: no data sent;
-\item[Step 0b:] the optimiser sends a single integer corridor index plus the time window boundaries to start TRE, receiving the number of junctions, the cycle length, and the number of junctions $n = |\corridor|$ plus $n$ geometric offsets for population priming: message size $ < 1 kB$.
-\item[Step 1:] TRE reads real time data for the DTA, no data sent.
-\item[Step 2:] at each Genetic Algorithm generation, if the latter and TRE are on different machines, they will exchange a batch of candidate solutions ($\textit{population size} \times n \times 2 \text{ bytes} \simeq 10 \text{ kB}$) for as many performance indices ($< 1 \text{ kB}$)
-\item[Step 3:] the final offsets ($n \times 2 \text{ bytes}$) are sent to TDE.
-\item[Step 4:] the optimiser sends the new time window and if necessary receives a new set of slackband offsets if these are calculated (by TRE) using updated travel times rather than freeflow speeds. 
-\end{itemize}
-\todo{make into a table, reads better}
+Fortunately, with reference to the rolling optimisation described in section \ref{s:rollingtre} of this chapter and a peek-ahead to Figure \ref{f:parallel} it is plain that the amount of data exchanged between the different components concurring to the optimisation is more than manageable, and are summarised in Table \ref{t:data} for each optimisation phase (message headers not considered).
+
+\tabella{p{2cm} p{8cm} p{3cm}}{t:data}{DATA TRAFFIC DURING OPTIMISATION}{
+ & Data Exchange & Payload Size \\ 
+\hline
+Step 0a: & TRE loads the network from the TDE database: this may be lengthy but it is only done \emph{once} on startup and doesn't weigh on optimisation & N/A \\
+Step 0b: & the optimiser sends a single integer corridor index plus the time window boundaries to start TRE, receiving the cycle length, the number of junctions $n = |\corridor|$ plus $n$ geometric offsets for population priming & $ < 1 kB$ \\
+\hline
+Step 1: & TRE reads real time data for the DTA then writes relevant results, once per window & \todo{???} \\
+\hline
+Step 2: &  at each Genetic Algorithm generation, if the latter and TRE are on different machines, they exchange a batch of candidate solutions for as many performance indices &
+$\textit{population size} \times (n+1) \times 2 \text{ bytes} \simeq 10 \text{ kB}$\\
+\hline
+Step 3: & the final offsets are sent to TDE & $n \times 2 \text{ bytes}$ \\
+\hline
+Step 4: & the optimiser sends the new time window start time and if necessary receives a new set of slackband offsets & $ 8+ n \times 2$ bytes\\
+}
+
 The above rough estimates suggest that the optimiser can easily be de-localised with respect to the machine running TRE, which in turn potentially allows to increase the number of simulator instances running in parallel to process the optimisation tasks faster, as discussed in the next section.
 
-\subsection{Task Parallelisation}
-DTA cannot be broken down for several machines but fully exploits the computing power of one.
+\subsection{Task Parallelisation} \label{s:parallel}
+Although the DTA phase of the optimisation process cannot be broken down or distributed across different TRE instances to speed it up, the TRE algorithm can fully exploit the computing power of a single machine thanks to multi-threading: in our article \citep{attanasi2015real} it is shown how \emph{near-linear} performance gains can be obtained by increasing the number of threads (i.e. DTA execution times are almost inversely proportional to the number of cores). Greater returns are obtained for larger, more complex networks, which benefit the most from running on more and more threads; results from the original article for up to 16 threads on large real-world networks are presented in Appendix \ref{a:parallel}.
 
-DNL on a single corridor is too small for parallelisation to make sense, but multiple threads could efficiently handle 
-
-
-Explain how parallel machines running TRE on the same model can be used to
+The performance benefits are obtained by distributing the fundamental tasks that make up the DTA algorithm across all available processor cores: 
 \begin{itemize}
-\item run multiple corridors
-\item evaluate more solutions in parallel complex problem space e.g. offsets+shares
-\item break up a slower problem like area optimisation
+\item during the \textbf{route choice phase}, parallel threads handle the \emph{serial} A* single-source Dynamic Shortest Path searches that must be performed for each network zone for O-D demand routing (which is \emph{much} faster than a \emph{parallel} A* search);
+\item during the \textbf{network loading phase}, threads perform node model calculations in parallel then proceed to propagate flow states on the same node's backward and forward star links.
 \end{itemize}
 
+Under these premises, and bearing in mind the necessary data exchanges summarised in Table \ref{t:data}, a few task parallelisation options appear feasible for future up-scaling of the application, as seen in Figure \ref{f:parallel}. It should be noted that from the \emph{optimiser} point of view the only relevant parameter is the problem \emph{size} i.e. the number of variables and the search space they span, while the \emph{type} of problem and the size of the area of interest affect the load on the simulator.
+
 \fig{htbp}{PIX/undoguy.png}{f:parallel}{Parallelisation Options}{width=0.4\textwidth}
+
+Depending on the problem type, and in all cases exploiting the extant possibility of running different TRE instances on different machines, the options to reduce the time required for optimisation are summarised as follows.
+\begin{description}
+\item[Serial DNL Batching:] this is the simplest case, involving the least data transfers and additional machines; best suited to all cases where the DNL is simple enough ($ < 1000$ links) that it would not benefit from parallelisation. The possibility to evaluate \emph{batches} of candidate solutions in parallel using \emph{serial} DNL on different single-thread TRE instances may be used to improve the performance of an analogous optimisation to the one presented here, or to tackle a slightly more complicated application such as could be a corridor optimiser that can also determine phase green shares.
+\item[Parallel TRE Cluster:]  if the DNL complexity is such that it \emph{would} significantly benefit from multi-threading \--- e.g. for performance evaluation over large network portions \--- a cluster of independent machines running multi-thread TRE would add to the benefits of the simpler solution (evaluation batching) the possibility to exploit all processor cores, to evaluate \emph{each} solution in a fraction of the time.
+\end{description}
+Notice that for reasonably sized problems and sub-networks, ordinary inexpensive four-core processors would already be more than enough to reap all the available benefits of parallel evaluations or multi-thread DNL. In any case, as evident from Figure \ref{f:parallel}, the DTA should be performed on a single machine (the best performing, if there is one) to obtain corridor flows and initial conditions for all consumer TRE instances tasked with solution evaluation. 
+
+These parallel computing solutions could be easily implemented with a relatively small development effort, but could further increase the performance of this solution far beyond that of the already viable case presented in this work.

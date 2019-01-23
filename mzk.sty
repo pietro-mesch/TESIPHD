@@ -23,12 +23,25 @@
 \usepackage[square,longnamesfirst,comma]{natbib}
 \usepackage[unicode, hidelinks]{hyperref}
 
+%appendix
+%\usepackage[toc,page]{appendix}
+
 %paragraph and spacing
 \usepackage{parskip}
 \setlength{\parskip}{7pt plus3pt minus3pt}
 
 %tables
 \usepackage{tabu}
+\newcommand{\tabella}[4]{
+\begin{table}[ht]
+\caption{#3} \label{#2}
+\begin{center}
+{\tabulinesep=1.3mm
+\begin{tabu}{#1} 
+#4
+\end{tabu}}
+\end{center}
+\end{table}}
 
 %figures
 \newcommand{\fig}[5]{
