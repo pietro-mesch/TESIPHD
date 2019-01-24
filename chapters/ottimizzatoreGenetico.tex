@@ -128,8 +128,8 @@ Fortunately, with reference to the rolling optimisation described in section \re
 \tabella{p{2cm} p{8cm} p{3cm}}{t:data}{DATA TRAFFIC DURING OPTIMISATION}{
  & Data Exchange & Payload Size \\ 
 \hline
-Step 0a: & TRE loads the network from the TDE database: this may be lengthy but it is only done \emph{once} on startup and doesn't weigh on optimisation & N/A \\
-Step 0b: & the optimiser sends a single integer corridor index plus the time window boundaries to start TRE, receiving the cycle length, the number of junctions $n = |\corridor|$ plus $n$ geometric offsets for population priming & $ < 1 kB$ \\
+Startup: & TRE loads the network from the TDE database: this may be lengthy but it is only done \emph{once} on startup and doesn't weigh on optimisation & N/A \\
+Step 0: & the optimiser sends a single integer corridor index plus the time window boundaries to start TRE, receiving the cycle length, the number of junctions $n = |\corridor|$ plus $n$ geometric offsets for population priming & $ < 1 kB$ \\
 \hline
 Step 1: & TRE reads real time data for the DTA then writes relevant results, once per window & \todo{???} \\
 \hline
@@ -154,13 +154,13 @@ The performance benefits are obtained by distributing the fundamental tasks that
 
 Under these premises, and bearing in mind the necessary data exchanges summarised in Table \ref{t:data}, a few task parallelisation options appear feasible for future up-scaling of the application, as seen in Figure \ref{f:parallel}. It should be noted that from the \emph{optimiser} point of view the only relevant parameter is the problem \emph{size} i.e. the number of variables and the search space they span, while the \emph{type} of problem and the size of the area of interest affect the load on the simulator.
 
-\fig{htbp}{PIX/undoguy.png}{f:parallel}{Parallelisation Options}{width=0.4\textwidth}
+\fig{htbp}{PIX/parallel.png}{f:parallel}{Parallelisation Options: several single-thread TRE instances running on the same machine can speed up solution evaluation by distributing the load without competing for processor cores; by increasing the number of machines TRE can \emph{also} deal with more demanding DNL in a short time by fully exploiting multi-threading.}{width=\textwidth}
 
 Depending on the problem type, and in all cases exploiting the extant possibility of running different TRE instances on different machines, the options to reduce the time required for optimisation are summarised as follows.
 \begin{description}
-\item[Serial DNL Batching:] this is the simplest case, involving the least data transfers and additional machines; best suited to all cases where the DNL is simple enough ($ < 1000$ links) that it would not benefit from parallelisation. The possibility to evaluate \emph{batches} of candidate solutions in parallel using \emph{serial} DNL on different single-thread TRE instances may be used to improve the performance of an analogous optimisation to the one presented here, or to tackle a slightly more complicated application such as could be a corridor optimiser that can also determine phase green shares.
+\item[Distributed Serial DNL:] this is the simplest case, involving the least data transfers and additional machines; best suited to all cases where the DNL is simple enough ($ < 1000$ links) that it would not benefit from parallelisation. The possibility to evaluate \emph{batches} of candidate solutions in parallel using \emph{serial} DNL on different single-thread TRE instances may be used to improve the performance of an analogous optimisation to the one presented here, or to tackle a slightly more complicated application such as could be a corridor optimiser that can also determine phase green shares.
 \item[Parallel TRE Cluster:]  if the DNL complexity is such that it \emph{would} significantly benefit from multi-threading \--- e.g. for performance evaluation over large network portions \--- a cluster of independent machines running multi-thread TRE would add to the benefits of the simpler solution (evaluation batching) the possibility to exploit all processor cores, to evaluate \emph{each} solution in a fraction of the time.
 \end{description}
-Notice that for reasonably sized problems and sub-networks, ordinary inexpensive four-core processors would already be more than enough to reap all the available benefits of parallel evaluations or multi-thread DNL. In any case, as evident from Figure \ref{f:parallel}, the DTA should be performed on a single machine (the best performing, if there is one) to obtain corridor flows and initial conditions for all consumer TRE instances tasked with solution evaluation. 
+Notice that for reasonably sized problems and sub-networks, ordinary inexpensive four-core processors would already be more than enough to reap all the available benefits of parallel evaluations or multi-thread DNL. In any case, the DTA should be performed on a single machine (the best performing, if there is one) to obtain corridor flows and initial conditions for all consumer TRE instances tasked with solution evaluation. 
 
 These parallel computing solutions could be easily implemented with a relatively small development effort, but could further increase the performance of this solution far beyond that of the already viable case presented in this work.
