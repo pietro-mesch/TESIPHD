@@ -131,7 +131,7 @@ Fortunately, with reference to the rolling optimisation described in section \re
 Startup: & TRE loads the network from the TDE database: this may be lengthy but it is only done \emph{once} on startup and doesn't weigh on optimisation & N/A \\
 Step 0: & the optimiser sends a single integer corridor index plus the time window boundaries to start TRE, receiving the cycle length, the number of junctions $n = |\corridor|$ plus $n$ geometric offsets for population priming & $ < 1 kB$ \\
 \hline
-Step 1: & TRE reads real time data for the DTA then writes relevant results, once per window & \todo{???} \\
+Step 1: & TRE reads real time data for the DTA then writes relevant results, once per window & $\sim 1-3$ Mb \\
 \hline
 Step 2: &  at each Genetic Algorithm generation, if the latter and TRE are on different machines, they exchange a batch of candidate solutions for as many performance indices &
 $\textit{population size} \times (n+1) \times 2 \text{ bytes} \simeq 10 \text{ kB}$\\
