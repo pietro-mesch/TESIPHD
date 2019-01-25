@@ -181,8 +181,6 @@ where all symbols have their usual meanings as introduced over this section and 
 In this simple case drivers are assumed not to occupy the intersection if they cannot cross it due to the presence of a queue on their destination link, waiting until the necessary space becomes available. In fact, node model implemented in TRE is also capable of addressing the deterioration of performances due to misuse of the intersection capacity and modelling vehicles sneaking out of queues (in an exception to the FIFO rule and \req{e:turn}) if \emph{their} destination is not blocked, as introduced in all due detail in \citep{tiddi2012models}.
 
 
-\fig{htbp}{PIX/undoguy.png}{f:label}{ \todo{figura con le tabelle semaforizzazione} }{width=0.4\textwidth}
-
 \section{GLTM as Flow Simulation} \label{s:gltmflowsim}
 The network loading and flow propagation model is central to the optimisation process proposed in this work.
 So far, its position in the Dynamic Traffic Assignment has been clarified, but it may be useful to recapitulate and formalise what its input and output are as a stand-alone \emph{flow simulator} component; before proceeding to Section \ref{s:geneticalgo} where its role in relation to the Genetic Algorithm will be clarified. These are summarised in Figure \ref{f:dnl} and presented in more detail in the following sections.
@@ -209,6 +207,8 @@ The GLTM implemented in TRE can draw real-time corrections from the OPTIMA frame
 \item[speed corrections] when the speed is measured or inferred, and either the fundamental diagram is updated to match the traffic state or a flow correction is applied;
 \item[flow corrections] when a real flow value (often the outflow from an arc) is available and the simulated value overwritten.
 \end{description}
+
+\fig{htbp}{PIX/undoguy.png}{f:label}{Signals are modelled as time varying capacity reductions influencing the flow propagation. The central database contains all static signal plans and dynamic timing information, as well as all the necessary mapping of signal groups onto junction lane groups described in Chapter \ref{c:basics}.}{width=0.4\textwidth}
 
 These corrections are all applied in the inner loops of Figure \ref{f:dnl}, during the simulation intervals for which they are relevant. Their effect is then propagated in time and space, increasing the fidelity of the simulation to the real world traffic conditions.
 

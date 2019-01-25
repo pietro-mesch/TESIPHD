@@ -1,18 +1,46 @@
 \chapter{Smart Objectives} \label{c:objectives}
-\todo{Definizione degli obiettivi dell'ottimizzazione classica e di quella sostenibile.}
+The very idea of optimisation cannot transcend the definition of its objectives: in fact, any search for an \emph{optimum} in any context first requires a clear answer to the question:
+\begin{center}
+what \emph{ is } good?
+\end{center}
+
+This chapter presents a few fundamental questions that must \emph{lead up} to the definition of the optimisation objectives, to point out what might have gone wrong in the past and illustrate how simulation-based optimisation might suit future developments in traffic optimisation.
+
+Finally, the network performance indicators used in this study are presented and discussed in relation to the model outputs described in Chapter \ref{c:tools}.
 
 \section{The Optimisation Dilemma}
-\todo{Present the Big Question: are we really optimising? Are adaptive signals doing us any good?
-\begin{itemize}
-\item Signal optimisation sounds good but basically \emph{identifies} with increasing the supply, increasing throughput, increasing flows.
-\item Not only this is of \emph{extremely} dubious benefit to our cities, health and safety, but even in the short term it seems like there hasn't been too much thought whether it really is beneficial to traffic to maximise e.g. bandwidth if this only means piling up earlier and more heavily a few junctions down the road.
-\item It is true that it is extremely hard to model these effects explicitly, which is why we wish to attempt a heuristic approach that may help investigate the consequences of different choices, and maybe reverse-engineer a more structured logic.
-\item For the present work it is necessary to put aside the cold hard fact that the only way to alleviate traffic is to discourage people from relying on private transport.
-\item The plan is to try and see if at least we can be sure we are actually \emph{reducing} the short term discomfort and external costs of driving.
-\end{itemize}
-}
+When it comes to making choices about the development of the spaces we live in, and compromising between opposing interests, any responsible policy maker will be afflicted by the nagging doubt: \emph{will this actually be good for us in the long run?} Our recent history is full of sad examples of daft resource allocation driven only by someone's good will to improve our lot.
+Dishonesty and deceit notwithstanding, the task of determining far-sighted policies truly in the best interest of the majority of people (let alone of the only habitable planet we know of) is a colossal one, and riddled with contradictions to boot.
 
-\todo{Refer to the model outputs as described in section \ref{s:output}}
+Although the difficulty of \emph{identifying good} permeates almost every aspect of the human experience, it can be examined in this context with a most fitting example. The development of transport systems, hand in hand with the evolution of the very idea we hold of \emph{human mobility} (i.e. how far and fast we think we should be able to travel), has seen a vertiginous acceleration over the last century, propelled by technological progress and economic growth. It serves as a stark example of what, with the best yet sorely misguided intentions, we can end up doing to ourselves: ancient cities are eroded and clogged by grinding traffic, more modern ones \emph{sprawl} for miles in a highway-fed flight for space \todo{cite}.
+
+The century of the car has taught us to make better, wider roads, to grant \emph{everyone} the right to faster and more efficient private transport, for the best of all... and left us with health and safety hazards beyond reason; inhospitable cities where \emph{human beings} have to contend their living space with (mostly stationary) cars, as public service is dismantled, distances grow and walking ceases to be an option. Most ironically, the very cars to whom we handed over our cities, have nowhere to go, and tax our waking time with dreadful walking-pace commuting and prowling for parking.
+
+It is only natural then, when talking about signal optimisation, to be aware of not one but several \emph{elephants in the room}:
+\begin{itemize}
+\item signal optimisation is sound in principle, as it represents a way to maximise \emph{efficiency} of the already existing infrastructure, minimising the \emph{waste} of time: unfortunately, considering the fact that demand for private transport always closely matches the supply \todo{cite}, and that it is in direct competition (undercutting revenues and subtracting space) with its more sustainable alternatives \todo{cite}, any improvements to the supply tend to be quickly saturated, turning as a matter of fact into an overall \emph{loss};
+\item not only to ease private traffic is of dubious benefit to our cities, health and safety; there isn't even a clear picture to understand whether the approaches followed thus far (e.g. bandwidth maximisation) are really beneficial to traffic fluidity in the short term, or if the worshipped \emph{green waves} lead to \emph{worse} traffic conditions in the more critical areas of urban networks.
+\end{itemize}
+
+It is true that it is extremely hard to model these effects explicitly, which is why this work aims to contribute to the affirmation of heuristic approaches that may help investigate the consequences of different choices, and maybe reverse-engineer better traffic control policies. It is also why, rather than tackling the rather more daunting challenge of \emph{re-defining good}, this proof-of-concept revolves around rather familiar performance indicators such as average progression speed and queue length.
+
+It is of \emph{fundamental} importance, however, to understand that at least conceptually this approach does not make \emph{assumptions} about what the best design policies should be, but focusses on the \emph{results}.
+
+Putting aside the cold hard fact that the only way to alleviate traffic is to \emph{reduce it} (as many cities around the world are finally doing, with \emph{well quantifiable} economic and psychological gains \todo{cite}, the plan is to try and see if at least we can be sure to actually \emph{reduce} the short term discomfort and externalities by increasing the efficiency of the existing roads with low-cost, non invasive infrastructure upgrades.
+
+If the technology should prove effective, the object of its future developments might then well be to use simulation to enable \emph{long term} traffic control policies and define the objectives of optimisation in terms of modal shift to cycling and public transport, and in general tie them to the regaining of public spaces.
+
+\section{Optimisation Objective Functions}
+
+This section presents the objective functions used during this study to drive the Genetic Algorithm and obtain the results presented in Chapter \ref{c:results}.
+
+They reflect very intuitive and down-to-earth objectives not dissimilar to the aims of classical optimisation techniques based on the analytical (and rather simplified) representations of congestion phenomena illustrated in Chapter \ref{c:basics}:
+\begin{itemize}
+\item \emph{minutes per kilometre travelled}, as a user-centred measure of discomfort;
+\item \emph{stop ratio}, the minimisation of which is the presumed outcome of bandwidth maximisation;
+\item \emph{relative queue length} as a measure of spillback and risk of gridlock.
+\end{itemize}
+These however are obtained directly from aggregation of the network performance model results (defined in section \ref{s:output}) thanks to existing and purpose-developed KPI calculation features of the simulation engine, as illustrated in the sections to follow.
 
 \subsection{Fundamental Quantities}
 The following quantities are calculated on the corridor over the entire simulation, and represent the reference quantities for calculation of key performance indicators.
@@ -65,25 +93,11 @@ Referring to the User Time Travelled $\uttravelled{a}$ expressed by \eqref{eq:ut
 uses the travel times experienced by all users, normalised with respect to the relevant section lengths and averaged over all vehicles involved with any part of the corridor during the simulation. This gives an overall measure of the fluidity of traffic on the corridor, and has the dimensions of a time per unit length. The choice of units (and name) for this performance indicator is therefore dictated solely by human-readability: it makes sense to count minutes spent in traffic to cover one kilometre, and it is easy to refer to the fact that for an average speed of 60 km/h the value of $\timedist{}$ would be 1.
 
 \subsubsection{Stop Ratio}
+The objective that most closely resembles the \emph{ideal} outcome of bandwidth maximisation is the stop ratio. While in section \ref{s:performance} this was modelled under the assumption of \emph{uniform arrivals} it is evident that for arterial progression optimisation it is necessary to consider the within-cycle dynamics of vehicle arrivals to account for the platooning effect of signals.
 
+This is often done by propagating the cyclic flow profiles rigidly all the way to the next junction, and integrating them into the queue if they reach it when the signal is red, as illustrated in Figure \ref{f:scoot}. In this case the flow propagation performed by TRE is not only more realistic, but also accounts for the queue growth and spillback, which may cause a vehicle to stop well before the stop line.
 
-\subsubsection{Congestion}
-
-
-
-\subsection{Dynamic Weighting}
-
-\todo{Tutto da riscrivere}
-
-Formalizzazione delle funzioni di costo:
-l'indice di coda (integrale tempo in coda per veicoli)/tempo passato nel corridoio fa
-$$
-\frac{\sum_{a \in C} \sum_{t \in T}{queu_{at}}}{\sum_{a \in C} \sum_{t \in T}{n_{at}}}
-$$
-
-non è reattivo soprattutto se gli archi sono lunghi perché il tempo in coda è comunque poco rispetto al totale
-
-
+\todo{formula a minchia con QUEU per cui vatte a vede larticolo}
 Numero di fermate non è male, calcolato come integrale dell'aumento della QUEU in ogni intervallo, corretto aggiungendo l'eventuale deflusso se la coda alla fine dell'intervallo non si è azzerata.
 Questo comporta degli errori (da quantificare esattamente?) negli intervalli in cui la coda comincia o finisce.
 $$
@@ -93,6 +107,8 @@ $$
 Il tutto è da normalizzare rispetto al numero di veicoli entrati su qualsiasi arco.
 
 
+\subsubsection{Congestion}
+
 Altro obiettivo utile sarebbe guardare la congestione degli archi.
 Prendendo la congestione media si auto-pesano di più gli archi corti, il che avrebbe senso.
 Come indicatore della congestione, dal GLTM prendiamo la lunghezza della coda peggiore nell'intervallo rispetto all'arco $QUEL\in[0,1]$ quindi come funzione di costo
@@ -100,7 +116,14 @@ Come indicatore della congestione, dal GLTM prendiamo la lunghezza della coda pe
 Q_{a}^{MAX} = \sup\{QUEL_{a,t}|t\in T\}
 }
 
-Prendendo invece la lunghezza totale della coda?
 
+\subsection{Dynamic Weighting}
+In order to magnify the short-term effects of signal timings on the traffic conditions, and isolate them from the \emph{initial} situation in which they are enacted, it is possible to further shape the cost function by using time-dependent weights. This allows, for example, to give \emph{more relevance} to the traffic conditions towards the end of the interval, favouring solutions that bring about a \emph{negative} trend in the performance indicators (such as a progressive dissipation of the queues on a short arc) over solutions that lead to steady-state conditions, whence they may be indistinguishable if the results were simply time-averaged.
 
-\subsection{Cost Function Correlation}
+A generic scalar cost function $\omega$ of the decision variable $x$
+\eq{e:dynw1}{\omega(x) = \int_{t \in \simspan} \omega(x,t)}
+may be shaped using a generic function of time $\Theta(t)$ as in
+\eq{e:dynw2}{\omega^{*}(x) = \int_{t \in \simspan} \Theta(t) \cdot \omega(x,t) }
+which may take any form, e.g. it could be a step function to cut off a portion of the initial values, or a linear function of ${t}/{|\simspan|}$.
+
+An analysis and comparison of the results obtained using each of the metrics just introduced is presented in the \nameref{c:results} chapter.
