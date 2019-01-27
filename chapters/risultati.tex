@@ -1,42 +1,47 @@
 
 \chapter{Results} \label{c:results}
-\todo{Tutto da scrivere:
-\begin{description}
-\item[Domanda stabile subcritica]
-\item[Domanda stabile supercritica]
-\item[Riduzione di capacità alla fine del corridoio] per vedere se tiene le code a monte o fa andare tutti a morire in fondo.
-\end{description}}
 
-\section{Algorithm Parameters}
-This section presents results of the preliminary studies aimed at determining an optimal choice of parameters for the Genetic Algorithm.
-\todo{Genetic Algorithm parameters, population priming, dynamic weighting effects}
 
-\subsection{Population Size}
+\section{Corridor Performance Optimisation}
+These tests are performed on randomly generated 8 junction corridors with side flows
 
-\subsection{Population Priming} \label{s:poppriming}
+The test scenario covers the optimisation phase: models represent the corridor sub-networks, as would be produced for optimisation. Traffic flow profiles entering the cordon arcs and hence the corridor, as well as turn rates are assumed pre-calculated in the DTA phase, as detailed in section \ref{s:rollingtre}.
 
-Slack Bandwidth section \ref{s:slackband} show it is much better than reg band for similar "progression" objectives (travel times) for a two-way band max problem with weights proportional to flows. \todo{rant about how novel this is.}
+\todo{Demonstrate capability to improve over the SlackBand solution.}
 
-Show effect of initial population mix on convergence.
+\subsection{Stable Subcritical Demand}
 
-\section{Test Networks}
+Under \emph{sub-critical} traffic conditions, i.e. where no corridor link is subjected to demand flows over 80\% capacity \todo{simbol}
+
+\fig{htbp}{PIX/undoguy.png}{f:subcrit}{\todo{ comparison of kpi curves, show very good improvements} }{width=0.4\textwidth}
+
+The solutions match the geometrical solution
+
+\fig{htbp}{PIX/undoguy.png}{f:similar}{ \todo{The solutions match the geometrical solution} }{width=0.4\textwidth}
+
+\subsection{Stable Supercritical Demand}
+Under \emph{super-critical} traffic conditions, i.e. where several arcs operate above their saturation capacity and queues \emph{are bound to form} at at least one junction along the corridor.
+
+cold start
+\fig{htbp}{PIX/undoguy.png}{f:cold start}{ \todo{cold start graph} }{width=0.4\textwidth}
+
+rolling
+
+\fig{htbp}{PIX/undoguy.png}{f:rolling start}{ \todo{rolling start graph} }{width=0.4\textwidth}
+
+
+\subsection{Anti-Spillback Gating}
+\todo{Network with a short arc that will spill back if people are allowed on it too fast. Junction just before it must not be blocked as a lot of people exit there}.
 
 \subsubsection*{Eight Junction corridor with side flows} \label{s:sync8}
 \todo{Describe the features of sync8 and why it is representative of the problem.}
 
+\todo{CUT?}
 
 
-\section{Overall Cost Function Improvement}
-\todo{Demonstrate capability to improve over the SlackBand solution.}
-
-\section{Comparison with Balance}
-Run hour long rolling optimisation and present in detail the evolution of traffic conditions.\todo{Maybe not bc balance won't cooperate.}
+\section{Computational Performance}
 
 
-\section{Performance in Micro Simulation}
-\todo{Confirm effectiveness of solutions in a microsimulator, since in TRE they obviously work.}
-
-\section{Performance}
 
 \subsection{Look-Ahead Window Size} \label{res:windowsizing}
 
@@ -45,5 +50,36 @@ Different corridor lengths.
 
 \todo{can be used for planning!}
 
-\section{Conclusions and Future Work}
 
+
+\section{Bi-directional Slack Bandwidth}
+slackband section \ref{s:slackband}.
+
+\todo{Demonstrate how the two way corridor actually performs much better with the slack band solution:
+\begin{itemize}
+\item plan network
+\item recycle band optimiser (from home)
+\item draw picture \ref{f:slackvhard}
+\item make graph
+\end{itemize}
+}
+
+\fig{htbp}{PIX/undoguy.png}{f:slackvhardres}{ Bar graph with 70-30\% main:return optimised slackband vs maxband , SsShMain, QsQhMain ... TsThReturn}{width=0.4\textwidth}
+
+Slack Bandwidth section \ref{s:slackband} show it is much better than reg band for similar "progression" objectives (travel times) for a two-way band max problem with weights proportional to flows. \todo{rant about how novel this is.}
+
+\section{Algorithm Parameters}
+
+This section presents results of the preliminary studies aimed at determining an optimal choice of parameters for the Genetic Algorithm.
+\todo{Genetic Algorithm parameters, population priming, dynamic weighting effects}
+
+\subsection{Population Size}
+\fig{htbp}{PIX/undoguy.png}{f:popsize}{ Effect of population size on one problem }{width=0.4\textwidth}
+
+
+Might serve as a general rule of thumb for practical application.
+\fig{htbp}{PIX/undoguy.png}{f:popreq}{ Optimum population size vs number of junctions }{width=0.4\textwidth}
+
+\subsection{Population Priming} \label{s:poppriming}
+
+\fig{htbp}{PIX/undoguy.png}{f:label}{ Show effect of initial population mix on convergence. }{width=0.4\textwidth}

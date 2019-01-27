@@ -104,8 +104,8 @@ A generic fundamental diagram expresses the relationship between flow and densit
 \eq{e:fundiag_generic}{
 q = f(k)
 }
-which may be represented on a Density-Flow graph like the ones shown in Figure \ref{f:fundiag}.
-\fig{htbp}{PIX/undoguy.png}{f:fundiag}{Fundamental Diagram of a link, representing the functional relation between vehicular density and speed, resulting in different flow values for different congestion levels. Triangular form (left) and ??? form (right) are similarly shaped around the critical density value $\hat{\density}$, the jam density $\density_{jam}$ and the free flow speed $\vzero$.}{width=0.4\textwidth}
+which may be represented on a Density-Flow graph like the one shown in Figure \ref{f:fundiag}.
+\fig{htbp}{PIX/fundiag.jpg}{f:fundiag}{Fundamental Diagram of a link, representing the functional relation between vehicular density and speed, resulting in different flow values for different congestion levels. The curve is shaped mainly by the critical density value $\hat{\density}$, the jam density $\density_{jam}$ and the free flow speed $\vzero$.}{width=0.7\textwidth}
 
 The shape of a fundamental diagram reflects different assumptions about traffic flow dynamics, but there are a few key features that are shared by all formulations:
 \begin{itemize}
@@ -130,7 +130,7 @@ A brief overview of the fundamentals of the simplified KWT is given here inasmuc
 
 Consider the \emph{cumulative flow} $N(x,t)$,  i.e. the number of vehicles that have passed location $x$ along a link before time $t$. Assuming that vehicle conservation is respected along the link, i.e. that no vehicle is created or destroyed between the tail and the head node, the trajectory of the $n^{\mathrm{th}}$ vehicle to enter the arc can be traced on a time-space diagram as the locus of points for which $N(x,t) = n$ as shown in Figure \ref{f:txtraj}.
 
-\fig{htbp}{PIX/undoguy.png}{f:txtraj}{vehicle trajectories}{width=0.4\textwidth}
+\fig{htbp}{PIX/vtraj.jpg}{f:txtraj}{Vehicle trajectories and a kinematic wave front trajectory on a time-distance diagram: the inclination is determined respectively by the vehicle speed and the forward propagation speed. Notice these two are not necessarily the same since the kinematic wave represents the propagation in space of a flow \emph{state}, and not a specific vehicle: the exception would be the "first" vehicle on an empty arc (referring to the origin of the subcritical branch in Figure \ref{f:fundiag}) which would carry its own flow state.}{width=0.65\textwidth}
 
 The cumulative function $N(x,t)$ is clearly discontinuous in both time and space, but it is possible to consider a smooth approximation that is differentiable in either direction without altering the essence of the phenomenon. Flow and density values at a given location and time can then be expressed as the partial derivatives
 \eq[,]{e:dndt}{\flow(x,t) =\frac{\partial N(x,t)}{\partial t}}
@@ -208,10 +208,9 @@ The GLTM implemented in TRE can draw real-time corrections from the OPTIMA frame
 \item[flow corrections] when a real flow value (often the outflow from an arc) is available and the simulated value overwritten.
 \end{description}
 
-\fig{htbp}{PIX/undoguy.png}{f:label}{Signals are modelled as time varying capacity reductions influencing the flow propagation. The central database contains all static signal plans and dynamic timing information, as well as all the necessary mapping of signal groups onto junction lane groups described in Chapter \ref{c:basics}.}{width=0.4\textwidth}
-
 These corrections are all applied in the inner loops of Figure \ref{f:dnl}, during the simulation intervals for which they are relevant. Their effect is then propagated in time and space, increasing the fidelity of the simulation to the real world traffic conditions.
 
+\fig{htb}{PIX/tables.jpg}{f:label}{Signals are modelled as time varying capacity reductions influencing the flow propagation. The central database contains all static signal plans and dynamic timing information, as well as all the necessary mapping of signal groups onto junction lane groups described in Chapter \ref{c:basics}. The image shows the tables and relations that form the signal data model, their slightly cryptic four-letter-names a legacy of the coding style of the early developers of Optima.}{width=0.55\textwidth}
 
 \subsection{Simulation Output} \label{s:output}
 Strictly speaking, the results of the Dynamic Network Loading are, for every arc, the cumulative inflow and outflow profiles (namely $F$ and $E$), the cumulate number of spaces available and vehicles that reached the head of each arc (respectively $G$ and $H$) defined in Sections \ref{s:linkmodel} and \ref{s:nodemodel}.
