@@ -48,7 +48,7 @@ The following quantities are calculated on the corridor over the entire simulati
 
 The subscript $T$ is often dropped for readability, but is \emph{implied} for all quantities aggregated at the simulation span level and presented in the following section. 
 
-\subsubsection*{Section and Corridor Total}
+\subsubsection{Section and Corridor Total}
 The \emph{section total} is defined as the integral of the inflow to a given section of the corridor $a \in \corridor$, obtained piecewise in this case, as the total number of vehicles entered during each interval of the simulation window:
 \eq[.]{eq:stotal}{
 \total{a} \; = \sum_{\tau \in \simspan} \flow_{a,\tau} \simintd
@@ -66,6 +66,18 @@ This reflects the fact that the corridor is being used \emph{more} if vehicles t
 
 The total inflow index $\total{\corridor}$ covers an important role as a \emph{checksum}, since it ensures that any improvements in other cumulative indices are not really due to the corridor accepting fewer vehicles because of a deterioration in the traffic conditions.
 
+\subsubsection{Geometrical Hypercritical Queue Length}
+The General Link Transmission Model provides a convenient and plausibly accurate linear approximation of the queue length, which is obtained at every simulation interval from the comparison of cumulative profiles on each arc (see section \ref{s:cum}). In particular, the difference between the vehicles that reached the head of link $a$ and those that were able to leave it before time $t$ can be noted as the \emph{vertical queue}
+\eq[,]{e:verticalqueue}{\quen{a,t} = \hcum{a,t} - \ecum{a,t}}
+and used in conjunction with the link \emph{receiving capacity} determined in turn by the difference between the spaces that reached the link tail and those already consumed by vehicles entered before the current instant, i.e. $\gcum{a,t} - \fcum{a,t}$. As shown in Figure \ref{f:quel} 
+
+\todo{quel}
+\fig{htbp}{PIX/undoguy.png}{f:quel}{ quel calculation }{width=0.4\textwidth}
+
+
+
+$\queuerelative{a}$
+
 \subsubsection*{User Time Spent and User Time Travelled}
 The most direct way to calculate how much time is spent by users on the corridor during the simulation window is to integrate the total number of vehicles present on any section over all time intervals. The total and section \emph{User Time Spent} can be expressed as
 \eq{eq:utspent}{
@@ -79,6 +91,8 @@ Disregarding the initial vehicles $\nveh{\corridor}$ and only considering flows 
 \eq[.]{eq:uttravelled}{
 \uttravelled{a} = \sum_{\tau \in \simspan} \traveltime{a,\tau} \; \flow_{a,\tau} \; \simintd
 }
+
+
 
 \subsection{Performance Indicators}
 
