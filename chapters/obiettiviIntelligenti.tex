@@ -69,13 +69,16 @@ The total inflow index $\total{\corridor}$ covers an important role as a \emph{c
 \subsubsection{Geometrical Hypercritical Queue Length}
 The General Link Transmission Model provides a convenient and plausibly accurate linear approximation of the queue length, which is obtained at every simulation interval from the comparison of cumulative profiles on each arc (see section \ref{s:cum}). In particular, the difference between the vehicles that reached the head of link $a$ and those that were able to leave it before time $t$ can be noted as the \emph{vertical queue}
 \eq[,]{e:verticalqueue}{\quen{a,t} = \hcum{a,t} - \ecum{a,t}}
-and used in conjunction with the link \emph{receiving capacity} determined in turn by the difference between the spaces that reached the link tail and those already consumed by vehicles entered before the current instant, i.e. $\gcum{a,t} - \fcum{a,t}$. As shown in Figure \ref{f:quel} 
+which would theoretically have \emph{zero} length by definition.
+To obtain an estimate of the real queue length, $\quen{a,t}$ is considered in conjunction with the link \emph{receiving capacity}, determined in turn by the difference between the spaces that reached the link tail and those already consumed by vehicles entered before the current instant, i.e. $\gcum{a,t} - \fcum{a,t}$. 
+
+As shown in Figure \ref{f:quel}, they yield an estimate of the 
 
 \todo{quel}
 \fig{htbp}{PIX/undoguy.png}{f:quel}{ quel calculation }{width=0.4\textwidth}
 
-
-
+introduced in \citep{gentile2010general} and further detailed in \citep{tiddi2012models}.
+ 
 $\queuerelative{a}$
 
 \subsubsection*{User Time Spent and User Time Travelled}
