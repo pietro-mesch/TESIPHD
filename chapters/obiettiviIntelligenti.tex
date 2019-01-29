@@ -39,7 +39,7 @@ They reflect very intuitive and down-to-earth objectives not dissimilar to the a
 \begin{itemize}
 \item \emph{minutes per kilometre travelled}, as a user-centred measure of discomfort;
 \item \emph{stop ratio}, the minimisation of which is the presumed outcome of bandwidth maximisation;
-\item \emph{relative queue length} as a measure of spillback and risk of gridlock.
+\item \emph{relative queue length} as a measure of congestion, spillback and risk of gridlock.
 \end{itemize}
 These however are obtained directly from aggregation of the network performance model results (defined in section \ref{s:output}) thanks to existing and purpose-developed KPI calculation features of the simulation engine, as illustrated in the sections to follow.
 
@@ -66,20 +66,22 @@ This reflects the fact that the corridor is being used \emph{more} if vehicles t
 
 The total inflow index $\total{\corridor}$ covers an important role as a \emph{checksum}, since it ensures that any improvements in other cumulative indices are not really due to the corridor accepting fewer vehicles because of a deterioration in the traffic conditions.
 
-\subsubsection{Geometrical Hypercritical Queue Length}
-The General Link Transmission Model provides a convenient and plausibly accurate linear approximation of the queue length, which is obtained at every simulation interval from the comparison of cumulative profiles on each arc (see section \ref{s:cum}). In particular, the difference between the vehicles that reached the head of link $a$ and those that were able to leave it before time $t$ can be noted as the \emph{vertical queue}
-\eq[,]{e:verticalqueue}{\quen{a,t} = \hcum{a,t} - \ecum{a,t}}
-which would theoretically have \emph{zero} length by definition.
-To obtain an estimate of the real queue length, $\quen{a,t}$ is considered in conjunction with the link \emph{receiving capacity}, determined in turn by the difference between the spaces that reached the link tail and those already consumed by vehicles entered before the current instant, i.e. $\gcum{a,t} - \fcum{a,t}$. 
+\subsubsection{Geometrical Hypercritical Queue Length} \label{s:quel}
+The General Link Transmission Model provides a convenient and plausibly accurate linear approximation of the queue length, which is obtained at every simulation interval from the comparison of cumulative profiles on each arc (see section \ref{s:cum}). In particular, the difference between the vehicles that reached $\head{a}$ (i.e. the head of link $a$) and those that were able to leave it before time $t$ can be noted as the \emph{vertical queue}
+\eq[,]{e:verticalqueue}{\quen{\head{a},t} = \hcum{a,t} - \ecum{a,t}}
+which is simply a vehicle count and would theoretically have \emph{zero} length by definition.
 
-As shown in Figure \ref{f:quel}, they yield an estimate of the 
+To obtain an estimate of the real queue length, \req{e:verticalqueue} is considered in conjunction with the link \emph{receiving capacity}, determined in turn by the difference between the spaces that reached the link tail and those already consumed by vehicles entered before the current instant, i.e. $\gcum{a,t} - \fcum{a,t}$. 
 
-\todo{quel}
 \fig{htbp}{PIX/undoguy.png}{f:quel}{ quel calculation }{width=0.4\textwidth}
 
-introduced in \citep{gentile2010general} and further detailed in \citep{tiddi2012models}.
- 
-$\queuerelative{a}$
+As shown in Figure \ref{f:quel}, they yield an estimate of the queue length as the \emph{position} along the link at time $t$ of the shock wave separating the oncoming subcritical flow from the prevailing hypercritical flow state propagating backwards from the exit section, found at the section where the hypocritical and hypercritical cumulative flows are equal. It is then assumed that vehicular density is constant in each of the two regions, and that the \emph{back of the queue} (which is not necessarily at a standstill) corresponds to the shock wave position:
+
+\eq[.]{e:quelength}{\quel{a,t} =
+\dfrac{\length_a}{\dfrac{\hcum{a,t}-\ecum{a,t}}{\gcum{a,t} - \fcum{a,t}} + 1}}
+
+This approximation provides substantially more realism in the representation of queue propagation (blocking back) and dissipation compared to other existing macroscopic DTA models, as detailed in the original work by \cite{yperman2007link}, and serves the purposes of this application much better than the vertical queue paradigm used in many of its commercial alternatives.
+
 
 \subsubsection*{User Time Spent and User Time Travelled}
 The most direct way to calculate how much time is spent by users on the corridor during the simulation window is to integrate the total number of vehicles present on any section over all time intervals. The total and section \emph{User Time Spent} can be expressed as
@@ -99,41 +101,58 @@ Disregarding the initial vehicles $\nveh{\corridor}$ and only considering flows 
 
 \subsection{Performance Indicators}
 
+The performance indicators used to test the functionality of the present optimiser implementation are described in the following sections. An analysis of the optimiser behaviour under the single-purpose drive of each of them is presented in section \ref{r:kpi} of the \nameref{c:results}. This provided a good understanding of their applicability and allowed to isolate their effects, while it was not deemed necessary to explore composite performance functions at this stage; although it is understood that any aggregation (e.g. a linear combination with weights) of the presented performance indices, or indeed of the model output in general may be used to fine-tune the optimiser response and address any specific scenario.
+
 \subsubsection{Minutes per Kilometre Travelled}
 From the user point of view, it makes sense to evaluate the performance of the corridor by considering the time required to travel the desired distance.
 
 Referring to the User Time Travelled $\uttravelled{a}$ expressed by \eqref{eq:uttravelled} the \emph{Minutes per Kilometre} cost function
 \eq[]{eq:timedist}{
-\timedist{\corridor} =
-\sum_{a \in \arcset} 
-\frac{\uttravelled{a}}{\; \length_a \quad \total{\corridor} \;} \cdot \frac{1000}{60}
+\timedist{\corridor} = 
+\sum_{a \in \corridor} \frac{\uttravelled{a}}{\; \length_a \quad \total{\corridor} \;} 
+\cdot \frac{1000}{60}
 }
 uses the travel times experienced by all users, normalised with respect to the relevant section lengths and averaged over all vehicles involved with any part of the corridor during the simulation. This gives an overall measure of the fluidity of traffic on the corridor, and has the dimensions of a time per unit length. The choice of units (and name) for this performance indicator is therefore dictated solely by human-readability: it makes sense to count minutes spent in traffic to cover one kilometre, and it is easy to refer to the fact that for an average speed of 60 km/h the value of $\timedist{}$ would be 1.
 
+\subsubsection{Congestion}
+To measure the state of congestion along the corridor on the whole, the queue length $\quel{}$ expressed by \req{e:quelength} is normalised with respect to the arc length, i.e.
+\eq[.]{e:quel}{\queuerelative{a,t}=\dfrac{\quel{a,t}}{\length_a}}
+This yields a useful measure of the severity of a queue in relation to the risk of \emph{gridlock} it entails: the network may perform reasonably well even under critical flow conditions, but a queue \emph{spilling back} to block egress from a junction will lead to the collapse of that junction and start blocking significantly the entire node backwards star.
+
+To drive the optimisation by this metric means focussing on queue control: in particular, if the aim is to minimise the entity of all queues with respect to the capacity of the links they affect, the following metric may be defined
+\eq{e:quer1}{\queuerelative{\corridor} = \dfrac{1}{|\simspan|} \sum_{t \in \simspan}
+\; \sum_{a \in \corridor} \dfrac{\queuerelative{a,t}}{|\corridor|}}
+to try and equalise the congestion levels on all arcs, favouring a gating behaviour whereby queues are allowed to build up more on longer arcs.
+
+This however proved rather unstable, as it was still possible for a short arc to be the \emph{only} one experiencing severe spillback and for the effect to be averaged out by all other relatively free flowing corridor sections. The inner normalised sum in \req{e:quer1} was therefore swapped for a maximum function to focus on the \emph{worst} congestion occurring along the corridor at each simulation interval
+\eq{e:quer2}{\queuerelative{\corridor} = \dfrac{1}{|\simspan|} \sum_{t \in \simspan}
+\; \max\left( \left\lbrace \queuerelative{a,t} , \; a \in \corridor \right\rbrace \right)}
+thus implicitly enforcing queue equalisation without incurring loss of detail. This proved much more effective and was selected as the best definition of $\queuerelative{\corridor}$ for optimisation.
+
 \subsubsection{Stop Ratio}
-The objective that most closely resembles the \emph{ideal} outcome of bandwidth maximisation is the stop ratio. While in section \ref{s:performance} this was modelled under the assumption of \emph{uniform arrivals} it is evident that for arterial progression optimisation it is necessary to consider the within-cycle dynamics of vehicle arrivals to account for the platooning effect of signals.
+The objective that most closely resembles the \emph{ideal} outcome of bandwidth maximisation is stop ratio reduction. While in section \ref{s:performance} this was modelled under the assumption of \emph{uniform arrivals} it is evident that for arterial progression optimisation it is necessary to consider the within-cycle dynamics of vehicle arrivals to account for the platooning effect of signals.
 
 This is often done by propagating the cyclic flow profiles rigidly all the way to the next junction, and integrating them into the queue if they reach it when the signal is red, as illustrated in Figure \ref{f:scoot}. In this case the flow propagation performed by TRE is not only more realistic, but also accounts for the queue growth and spillback, which may cause a vehicle to stop well before the stop line.
 
-\todo{formula a minchia con QUEU per cui vatte a vede larticolo}
-Numero di fermate non è male, calcolato come integrale dell'aumento della QUEU in ogni intervallo, corretto aggiungendo l'eventuale deflusso se la coda alla fine dell'intervallo non si è azzerata.
-Questo comporta degli errori (da quantificare esattamente?) negli intervalli in cui la coda comincia o finisce.
-$$
-\sum_{a \in C} \sum_{t \in T} QUEU_{a,t} - QUEU_{a,t-1} + OFLW_{a,t} \Delta t
-$$
+Using the practical queue length approximation described in section \ref{s:quel} it is easy to obtain an estimate of the number of vehicles in the \emph{hypercritical queue} as a proportional share of the vehicles on the link which are not \emph{also} in the vertical queue. Dropping the time subscript for readability, the total number of vehicles in the \emph{hypercritical} queue at each interval is easily expressed as
+\eq{e:quen}{\quen{a} = \left( \nveh{a} - \quen{\head{a}} \right) \cdot \quel{a} + \quen{\head{a}}}
+which of course includes both the vehicles in the vertical queue and those within $\quel{}$ from the link exit section.
 
-Il tutto è da normalizzare rispetto al numero di veicoli entrati su qualsiasi arco.
+If the definition of \emph{stop} is extended, to include any event in which a vehicle joins the back of the queue, then the stops occurring during an interval $ \tau = [ t_0, t_1 ] $ are given by any increase in the number of queued vehicles corrected to account for those that in the meanwhile leave the vertical queue, thusly:
+\eq[.]{e:stops1}{\stops{\tau} = 
+\begin{cases}
+\quen{a,t_1} - \quen{a,t_0} + \eflo{a,\tau} \cdot \simintd & 
+\text{for } \quen{a,t_1} > 0 \;\text{ and }\;   \quen{a,t_1} > \quen{a,t_0}\\
+\qquad \qquad 0 
+& \text{for } \quen{a,t_1} = 0 \;\text{ or }\; \quad  \quen{a,t_1} < \quen{a,t_0}\\
+\end{cases}}
+where the different cases are used to exclude a \emph{negative} stop count during the interval (not meaningful) and to avoid counting stops if there is definitely no queue and vehicles are flowing freely.
 
-
-\subsubsection{Congestion}
-
-Altro obiettivo utile sarebbe guardare la congestione degli archi.
-Prendendo la congestione media si auto-pesano di più gli archi corti, il che avrebbe senso.
-Come indicatore della congestione, dal GLTM prendiamo la lunghezza della coda peggiore nell'intervallo rispetto all'arco $QUEL\in[0,1]$ quindi come funzione di costo
-\eq{e:maxqueue}{
-Q_{a}^{MAX} = \sup\{QUEL_{a,t}|t\in T\}
+This can be integrated over the entire simulation window and for all arc sections to determine the \emph{total number of stops}. Naturally, the number of vehicles that \emph{may} stop depend on the number of vehicles that do access the corridor in the first place: it will suffice to normalise with respect to the \emph{corridor total} expressed by \req{eq:ctotal} to obtain the \emph{stop ratio} performance indicator:
+\eq[.]{e:stops2}{
+\stops{\corridor} = \dfrac{1}{\total{\corridor}} \sum_{\tau \in \simspan}
+\sum_{a \in \corridor} \stops{a,\tau}
 }
-
 
 \subsection{Dynamic Weighting}
 In order to magnify the short-term effects of signal timings on the traffic conditions, and isolate them from the \emph{initial} situation in which they are enacted, it is possible to further shape the cost function by using time-dependent weights. This allows, for example, to give \emph{more relevance} to the traffic conditions towards the end of the interval, favouring solutions that bring about a \emph{negative} trend in the performance indicators (such as a progressive dissipation of the queues on a short arc) over solutions that lead to steady-state conditions, whence they may be indistinguishable if the results were simply time-averaged.
