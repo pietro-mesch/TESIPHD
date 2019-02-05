@@ -1,46 +1,53 @@
 
 \chapter{Results} \label{c:results}
 
+This chapter collects results of the most relevant tests performed on the application, ranging from an assessment of the overall effectiveness of the optimiser to feature tests to ensure each component performs as intended. A brief analysis of computational performance is also given, alongside an estimation of the time requirements in correlation to the problem size. Finally, the choice of parameters for the Genetic Algorithm is discussed.
 
 \section{Corridor Performance Optimisation} \label{r:kpi}
-These tests are performed on randomly generated 8 junction corridors with side flows
+Several tests were performed on randomly generated 8 junction corridors, with sections of variable length between the controlled junctions and varying demand flows accessing the corridor and leaving it at each intersection.
 
-The test scenario covers the optimisation phase: models represent the corridor sub-networks, as would be produced for optimisation. Traffic flow profiles entering the cordon arcs and hence the corridor, as well as turn rates are assumed pre-calculated in the DTA phase, as detailed in section \ref{s:rollingtre}.
+The test scenario covers the optimisation phase: models represent the corridor sub-networks, as would be produced for optimisation. Traffic flow profiles entering the cordon arcs and hence the corridor, as well as turn rates, are assumed pre-calculated in the DTA phase as detailed in section \ref{s:rollingtre}.
 
-\todo{Demonstrate capability to improve over the SlackBand solution.}
+This section considers several optimisation runs performed on the same representative 8-junction corridor, since the process is not deterministic and it is important to assess the consistency of results as well as their quality. The evolution of solution fitness as driven by each of the corridor performance functions is shown relative to the initial value, which invariably corresponds to one of the slack bandwidth \emph{geometrical} solution variants used to prime the GA population as described in section \ref{s:poppriming}.
+
+The results presented demonstrate how the proposed method can significantly improve the corridor performance in relation to all of the proposed metrics, although each of them is more or less susceptible to optimisation under different traffic conditions, and that where side flows and congestion 
 
 \subsection{Stable Subcritical Demand}
 
-Under \emph{sub-critical} traffic conditions, i.e. where no corridor link is subjected to demand flows over 80\% capacity \todo{simbol}
+To assess performance under \emph{sub-critical} traffic conditions, several optimisation runs are performed while ensuring that no corridor link is subjected to demand flows that exceed its capacity after the reduction imposed by the effective green time (fixed for the present application), i.e. $\saturation_{a} = \frac{\flowratio_a}{\gamma_a} < 1 \; \forall a \in \corridor$.\\
+Performance improvements over the simple geometrical solution are shown in Figure \ref{f:subcrit}.
 
 \fig{htbp}{PIX/undoguy.png}{f:subcrit}{\todo{ comparison of kpi curves, show very good improvements} }{width=0.4\textwidth}
 
-The solutions match the geometrical solution
-
+It is also interesting to note that if the traffic conditions are close to the theoretical premises of the simple bandwidth maximisation approach (i.e. if congestion does not significantly affect travel times and side flows are almost negligible with respect to the main corridor flow) the solutions found by the optimiser never stray far from the geometrical solution, as shown in Figure \ref{f:similar}. This is an important empirical confirmation 
+of the system's stability and coherence with its theoretical background. \todo{as side flows increase}
 \fig{htbp}{PIX/undoguy.png}{f:similar}{ \todo{The solutions match the geometrical solution} }{width=0.4\textwidth}
 
 \subsection{Stable Supercritical Demand}
-Under \emph{super-critical} traffic conditions, i.e. where several arcs operate above their saturation capacity and queues \emph{are bound to form} at at least one junction along the corridor.
+The foremost advantage of simulation-based heuristic optimisation is the possibility to search for better signal timings even if the traffic conditions are so distant from the ideal bandwidth maximisation scenario that making sensible \emph{a priori} assumption about platoon arrival and queue discharge times becomes practically impossible.
 
-cold start
-\fig{htbp}{PIX/RES/cold_super.png}{f:cold start}{ \todo{cold start graph} }{width=0.7\textwidth}
+The proposed optimiser was therefore extensively tested under \emph{super-critical} traffic conditions, with relevant side flows entering the corridor during the main red phase and several arcs operating above their saturation capacity ($\saturation \simeq 1.3 \pm 0.1$). Under these conditions, queues are \emph{bound} to form on all such arcs considerably affecting travel times, and a relevant fraction of the vehicles is not travelling through all junctions in sequence: simple geometrical solutions aligning the through phases are of little help.
 
-rolling
+The first scenario considered reproduces the optimisation of a time window during which high demand volumes rapidly enter an otherwise tranquil network, and aims to assess the capacity of the optimiser to keep corridor performance indicators in check. Figure \ref{f:coldstart} confirms that compared to the geometrical solutions that would serve the uncongested scenario, optimised plans can considerably reduce the number of stops and the growth of queues on short arcs. The average travel time is less sensitive to the optimisation, \todo{but for a good reason}.
 
-\fig{htbp}{PIX/undoguy.png}{f:rolling start}{ \todo{rolling start graph} }{width=0.4\textwidth}
+\fig{htb}{PIX/RES/cold_super.png}{f:coldstart}{ \todo{cold start graph} }{width=0.7\textwidth}
+
+It also appears that queue management is somewhat more susceptible to early convergence into locally optimal solutions, as shown by the evident fork in the relevant values across the sample of optimisation runs.
+
+The second test scenario envisions an already heavily congested  corridor with standing queues on most arcs, as the optimiser would inevitably face either during normal operation at peak hours or upon being switched back on after a down time. It is plain to see from Figure \ref{f:rollingstart} that while the standing queues mean that little can be done to avoid further stops until they eventually dissipate, their length can be managed rather effectively and consistently, with improvements between 6\% and 8\% shown across all tests. The same can be said of the average travel time, which being the inverse of the average speed across the subcritical and hypercritical portions of each arc is heavily correlated with the queue length, as discussed in section \ref{s:quel}.
+
+\fig{htb}{PIX/RES/roll_super.png}{f:rollingstart}{ \todo{rolling start graph} }{width=0.9\textwidth}
+
+
 
 
 \subsection{Anti-Spillback Gating}
 \todo{Network with a short arc that will spill back if people are allowed on it too fast. Junction just before it must not be blocked as a lot of people exit there}.
 
-\subsubsection*{Eight Junction corridor with side flows} \label{s:sync8}
-\todo{Describe the features of sync8 and why it is representative of the problem.}
-
-\todo{CUT?}
-
 
 \section{Computational Performance}
 
+The average supply computation time is 220 ms, i.e. approximately four evaluations per second.
 
 
 \subsection{Look-Ahead Window Size} \label{res:windowsizing}
@@ -69,17 +76,24 @@ slackband section \ref{s:slackband}.
 Slack Bandwidth section \ref{s:slackband} show it is much better than reg band for similar "progression" objectives (travel times) for a two-way band max problem with weights proportional to flows. \todo{rant about how novel this is.}
 
 \section{Algorithm Parameters}
-
 This section presents results of the preliminary studies aimed at determining an optimal choice of parameters for the Genetic Algorithm.
-\todo{Genetic Algorithm parameters, population priming, dynamic weighting effects}
-
-\subsection{Population Size}
-\fig{htbp}{PIX/undoguy.png}{f:popsize}{ Effect of population size on one problem }{width=0.4\textwidth}
-
-
-Might serve as a general rule of thumb for practical application.
-\fig{htbp}{PIX/undoguy.png}{f:popreq}{ Optimum population size vs number of junctions }{width=0.4\textwidth}
 
 \subsection{Population Priming} \label{s:poppriming}
+Stochastic search methods are extremely sensitive to the choice of initial conditions. To speed up convergence and obtain better results, the present application initialises the genetic algorithm population using a geometrical solution (illustrated in section \ref{s:slackband}) that aims to align the green phases on the corridor so as to maximise the chance of driving through the longest possible distance without encountering a red light.
+
+As discussed in section \ref{s:seeding}, it is necessary to ensure that the more \emph{informed} starting point does not imply a much narrower-sighted search of the solution space, ultimately leading to early convergence and sub-optimal results. The problem is clearly \emph{not} independent of the population size, and intelligent priming becomes at the same time more useful \emph{and} more risky for smaller and smaller populations (which are preferrable from the computational point of view).
+
+The choice of \emph{partial} population priming with slack band solutions made for the present application is the consequence of the results shown in Figure \ref{f:priming}, whereby it is evident that for a reasonably sized population \todo{see section \ref{r:popsize}} the best results are obtained by \todo{???}.
 
 \fig{htbp}{PIX/undoguy.png}{f:priming}{ Show effect of initial population mix on convergence. }{width=0.4\textwidth}
+
+
+
+\subsection{Population Size} \label{r:popsize}
+The correlation between optimal population size and problem size (i.e. number of controlled junctions) was analysed by running randomly generated corridors with 2 to \todo{10} junctions through the optimiser, and varying the population size. 
+The results, classified by corridor length, were then examined to determine the point \todo{at which more pop, more time, not better} taken to be the \emph{most desirable} population size for that corridor class.
+
+Results shown in Figure \ref{f:popreq} might serve as a general rule of thumb for practical application sizing, considering that if resources are scarce it is still possible to settle for slightly undersized populations and obtain good results, while conversely if the problems are small enough it may still be desirable to invest in a larger population to increase (however marginally) the stability and quality of the solutions.
+
+
+\fig{htbp}{PIX/undoguy.png}{f:popreq}{ Optimum population size vs number of junctions }{width=0.4\textwidth}
