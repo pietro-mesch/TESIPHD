@@ -19,9 +19,6 @@ where $\gini{j}$ is the beginning time of the through phase at $j$ and $\gren{j}
 
 The integral in \req{e:slackint} clearly formalises the definition of slack bandwidth illustrated in Figure \ref{f:slackdef}.a but it's not practical to compute, and does not provide an explicit form for $l(t)$.
 
-\fig{htbp}{PIX/undoguy.png}{f:slackdef}{ 
-The \emph{forward slack band} definition on T-D diagrams expressed in \textbf{(a)} as the integral \req{e:slackint} and in \textbf{(b)} as the discrete sum \req{e:slacksum}.}{width=0.8\textwidth}
-
 Consider therefore the interval $\gint{ji}$ during which a vehicle that \emph{left} $j$ during $\gint{j}$ may drive through a \emph{subsequent} junction $i \geqslant j$. As the vehicles progress along the corridor, only the ones that reach each junction $i$ during the corresponding through phase $\gint{i}$ can proceed without stopping.
 
 Now, the interval over which vehicles that left $i$ during $\gint{i}$ reach $i+1$ can be expressed as 
@@ -38,6 +35,9 @@ Finally, using $|\gint{}|$ to indicate the length of a passing interval, the for
 }
 considering that at the reference junction the passing interval \emph{is} the green phase $\gint{j\, i=j} = \gint{j}$.
 
+\fig{htb}{PIX/slackband.png}{f:slackdef}{ 
+The \emph{forward slack band} definition on T-D diagrams expressed in \textbf{(a)} as the integral \req{e:slackint} and in \textbf{(b)} as the discrete sum \req{e:slacksum}.}{width=\textwidth}
+
 Plainly following the specular process back to the beginning of the corridor, it is possible to calculate the \emph{backwards slack progression band} $\bslackband{j}$, to quantify the chances of a vehicle reaching junction $j$ unhindered by red lights. It is also plain that the subsequent applications of \req{e:slacknarrowing} may well yield an empty intersection before the end or the beginning of the corridor are reached: this is not an issue, as the value of this \emph{something-is-better-than-nothing} approach lies exactly in the ability to consider \emph{any} length that can be travelled without stopping. Some computation time can be saved by checking for this condition and stopping the recursive process \req{e:slacksum} as soon as all vehicles that left $j$ have stopped at $i$ (or, going the other way, as soon as none of the vehicles leaving $i$ will reach $j$ without stopping).
 
 The \emph{total} slack band for a given corridor is the normalised sum of the forwards and backwards bands calculated at each junction:
@@ -53,6 +53,8 @@ $\slackband{\corridor} = \hardband{\corridor} \cdot \length_\corridor$ (this req
 $\hardband{\corridor} \cdot \length_\corridor$ as it factors in all fringes and partial bandwidths that \req{e:milp7} necessarily excludes, which is the main point of this metric.
 \end{itemize}
 
-\fig{htbp}{PIX/undoguy.png}{f:slackvhard}{A comparison of the results obtained by optimising the canonical progression bandwidth (left) and the slack band metric (right). Bands crossing the T-D diagram from the bottom-left to the top-right are travelling in the main direction, the others in the secondary direction.\\Darker bands on the slack band diagram are in common between a higher number of junctions, the darkest corresponding to the canonical bandwidth and all others to the fringes and partial green waves that the new metric allows to weigh in.}{width=0.4\textwidth}
+\fig{htbp}{PIX/slackvshard.png}{f:slackvhard}{A comparison of the results obtained by optimising the canonical progression bandwidth (left) and the slack band metric (right) on T-D diagrams.\\
+Bands crossing from the top-left to the bottom-right are travelling in the main direction, the others are in the secondary direction, going through the junctions in reverse order.
+Darker bands on the slack band diagram are in common between a higher number of junctions, the darkest corresponding to the canonical bandwidth and all others to the fringes and partial green waves that the new metric allows to weigh in.}{width=0.7\textwidth}
 
 With given offsets and signal programs, the computation of this metric is almost instantaneous for any conceivable real-world traffic arterial, allowing to find an optimal solution in seconds using a stochastic search method as described in section \ref{s:seeding}. Its effectiveness confirmed by the results presented in \todo{ReF}, this method was used to find ideal initial conditions for the real-time traffic coordination module presented in this work.
