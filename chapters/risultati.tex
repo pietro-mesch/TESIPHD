@@ -1,50 +1,59 @@
 
 \chapter{Results} \label{c:results}
 
-This chapter collects results of the most relevant tests performed on the application, ranging from an assessment of the overall effectiveness of the optimiser to feature tests to ensure each component performs as intended. A brief analysis of computational performance is also given, alongside an estimation of the time requirements in correlation to the problem size. Finally, the choice of parameters for the Genetic Algorithm is discussed.
+This chapter collects results of the most relevant tests performed on the application. 
+
+First, an assessment of the overall effectiveness of the optimiser is presented. A brief analysis of computational performance is also given, alongside an estimation of the time requirements in correlation to the problem size. Finally, the choice of parameters for the Genetic Algorithm is discussed.
 
 \section{Corridor Performance Optimisation} \label{r:kpi}
 Several tests were performed on randomly generated 8 junction corridors, with sections of variable length between the controlled junctions and varying demand flows accessing the corridor and leaving it at each intersection.
 
-The test scenario covers the optimisation phase: models represent the corridor sub-networks, as would be produced for optimisation. Traffic flow profiles entering the cordon arcs and hence the corridor, as well as turn rates, are assumed pre-calculated in the DTA phase as detailed in section \ref{s:rollingtre}.
+The tests presented in this section are concerned with the optimisation phase: models represent the corridor sub-networks, as would be produced for the rapid execution of the DNL algorithm. Traffic flow profiles entering the cordon arcs and hence the corridor, as well as turn rates, are assumed pre-calculated in the DTA phase as detailed in section \ref{s:rollingtre}.
 
 This section considers several optimisation runs performed on the same representative 8-junction corridor, since the process is not deterministic and it is important to assess the consistency of results as well as their quality. The evolution of solution fitness as driven by each of the corridor performance functions is shown relative to the initial value, which invariably corresponds to one of the slack bandwidth \emph{geometrical} solution variants used to prime the GA population as described in section \ref{s:poppriming}.
 
-The results presented demonstrate how the proposed method can significantly improve the corridor performance in relation to all of the proposed metrics, although each of them is more or less susceptible to optimisation under different traffic conditions, and that where side flows and congestion 
+The results presented demonstrate how the proposed method can significantly improve the corridor performance in relation to all of the proposed metrics, although each of them is more or less susceptible to optimisation under different traffic conditions.
 
+\pagebreak
 \subsection{Stable Subcritical Demand}
 
-To assess performance under \emph{sub-critical} traffic conditions, several optimisation runs are performed while ensuring that no corridor link is subjected to demand flows that exceed its capacity after the reduction imposed by the effective green time (fixed for the present application), i.e. $\saturation_{a} = \frac{\flowratio_a}{\gamma_a} < 1 \; \forall a \in \corridor$.\\
+To assess performance under \emph{sub-critical} traffic conditions, several optimisation runs are performed while ensuring that no corridor link is subjected to demand flows that exceed its capacity after the reduction imposed by the effective green time, which is taken to be constant for the present application, i.e. $\saturation_{a} = \frac{\flowratio_a}{\gamma_a} < 1 \; \forall a \in \corridor$.
 
 Performance improvements over the simple geometrical solution are shown in Figure \ref{f:subcrit}. 
 
-\fig{htbp}{PIX/RES/cold_subcrit.png}{f:subcrit}{Evolution of cost function values for subcritical flows and high side flows between 10\% and 30\% : foreground solid lines represent the average trend of the corresponding lighter sets in the background.}{width=0.8\textwidth}
+\fig{h}{PIX/RES/cold_subcrit.png}{f:subcrit}{Evolution of cost function values for subcritical flows and high side flows between 10\% and 30\% : foreground solid lines represent the average trend of the corresponding lighter sets in the background.}{width=0.75\textwidth}
 
-It is also interesting to note that if the traffic conditions are close to the theoretical premises of the simple bandwidth maximisation approach (i.e. if congestion does not significantly affect travel times and side flows are almost negligible with respect to the main corridor flow) the solutions found by the optimiser never stray far from the geometrical solution, as shown in Figure \ref{f:similar}. This is an important empirical confirmation 
-of the system's stability and coherence with its theoretical background. \todo{as side flows increase}
+It is also interesting to note that if the traffic conditions are close to the theoretical premises of the simple bandwidth maximisation approach (i.e. if congestion does not significantly affect travel times and side flows are almost negligible with respect to the main corridor flow) the solutions found by the optimiser, even with a \emph{completely random} initial population, never stray far from the geometrical solution, as shown in Figure \ref{f:similar}, and are \emph{identical} in case of no relevant side flows.
 
-\fig{htbp}{PIX/undoguy.png}{f:similar}{ \todo{The solutions match the geometrical solution} }{width=0.4\textwidth}
+\fig{htbp}{PIX/RES/shapes_thinner.png}{f:similar}{Comparison of the average trajectory of a \emph{green wave front} under sub-critical conditions and side flows of varying entity in relation to the total flow through each junction. The trajectory is the path a hypothetical vehicle would have to follow to drive through the start of every green phase along the corridor, obtained from the average results of ten runs for each scenario starting from random solutions (vertical bars show the standard deviation). With increasing side flows, offsets are adjusted to meet the side-flow platoons, and the main green wave must move more slowly, as visible from the steeper segments on the T-D diagram.}{width=0.8\textwidth}
+
+This is an important empirical confirmation of the system's stability and coherence with its theoretical background. As side flows increase, the optimal solutions diverge further and further from the simple spatio-temporal alignment of the green phases. This is only to be expected: vehicles that enter from cordon links reach the next junction ahead of those travelling along the corridor; as their number grows they start swaying the cost function significantly, so that the genetic algorithm will favour synchronisation patterns that minimise their discomfort.
+
+The onset of the green phase at each junction is hence anticipated to meet the platoon coming from the side road, so that it may incur as little stops as possible and leave little or no queue behind for the main flows to run into. The effect is visible in Figure \ref{f:similar} where the green wave trajectories (which can never travel faster than free-flow speed) are shown to slow down to meet the onset of the next green phase.
+
 
 \subsection{Stable Supercritical Demand}
 The foremost advantage of simulation-based heuristic optimisation is the possibility to search for better signal timings even if the traffic conditions are so distant from the ideal bandwidth maximisation scenario that making sensible \emph{a priori} assumption about platoon arrival and queue discharge times becomes practically impossible.
 
-The proposed optimiser was therefore extensively tested under \emph{super-critical} traffic conditions, with relevant side flows entering the corridor during the main red phase and several arcs operating above their saturation capacity ($\saturation \simeq 1.3 \pm 0.1$). Under these conditions, queues are \emph{bound} to form on all such arcs considerably affecting travel times, and a relevant fraction of the vehicles is not travelling through all junctions in sequence: simple geometrical solutions aligning the through phases are of little help.
+The proposed optimiser was therefore extensively tested under \emph{super-critical} traffic conditions, with relevant side flows entering the corridor during the main red phase and several arcs operating above their saturation capacity ($\saturation \simeq 1.3 \pm 0.1$). Under these conditions, queues are \emph{bound} to form on all such arcs (considerably affecting travel times) and a relevant fraction of the vehicles is not travelling through all junctions in sequence: simple geometrical solutions become completely inadequate.
 
 The first scenario considered reproduces the optimisation of a time window during which high demand volumes rapidly enter an otherwise tranquil network, and aims to assess the capacity of the optimiser to keep corridor performance indicators in check. Figure \ref{f:coldstart} confirms that compared to the geometrical solutions that would serve the uncongested scenario, optimised plans can considerably reduce the number of stops and the growth of queues on short arcs. 
 
 \fig{htb}{PIX/RES/cold_super.png}{f:coldstart}{ \todo{cold start graph} }{width=0.7\textwidth}
 
-It appears that queue management is somewhat more susceptible to early convergence into locally optimal solutions, as shown by the evident fork in the relevant values across the sample of optimisation runs. The average travel time is less sensitive to the optimisation, \todo{but for a good reason}.
+It appears that queue management is most susceptible to early convergence into locally optimal solutions, as shown by the evident fork in the relevant values across the sample of optimisation runs, which for the test scenario presented in Figure \ref{f:coldstart} represents a 66\% difference in gains over the starting solution between the worst and best cases; in every instance, however, gains are relevant and above 15\% of the initial cost. 
+
+The average travel time may \emph{seem} less sensitive to the optimisation, due to the relatively small improvement in the relevant cost function. However, if the metric is inverted for readability as shown on the left-hand side of Figure \ref{f:speedimpro}, it is plain that the effect is due to the average speed being high to begin with: in fact, the optimiser is able to improve the performance with respect to the maximum bandwidth solution by a respectable 3 km/h, almost as well as in the case of sub-critical demand.
 
 \fig{htbp}{PIX/RES/speed_impro2.png}{f:speedimpro}{ \todo{speeeddssss} }{width=\textwidth}
 
-The second test scenario envisions an already heavily congested  corridor with standing queues on most arcs, as the optimiser would inevitably face either during normal operation at peak hours or upon being switched back on after a down time. It is plain to see from Figure \ref{f:rollingstart} that while the standing queues mean that little can be done to avoid further stops until they eventually dissipate, their length can be managed rather effectively and consistently, with improvements between 6\% and 8\% shown across all tests. The same can be said of the average travel time, which being the inverse of the average speed across the subcritical and hypercritical portions of each arc is heavily correlated with the queue length, as discussed in section \ref{s:quel}.
+The second test scenario envisions an already heavily congested  corridor with standing queues on most arcs, as the optimiser would inevitably face either during normal operation at peak hours or upon being switched back on after a down time. 
+
+It is plain to see from Figure \ref{f:rollingstart} that while the standing queues mean that little can be done to avoid further stops, the \emph{queue length} can be managed rather effectively and consistently, with improvements between 6\% and 8\% shown across all tests. The same gains are obtained with respect to travel times, which being the inverse of the average speed across the subcritical and hypercritical portions of each arc are directly correlated with the queue length, as discussed in section \ref{s:quel}.
+
+Predictably, these large relative improvements are not as striking in terms of speed, which would be low in any case due to congestion as shown by the right-hand side of Figure \ref{f:speedimpro}. Nevertheless, they represent a positive reduction in the time lost by users in peak-hour traffic, e.g. for the test corresponding to Figure \ref{f:rollingstart} users travelling the whole corridor would shave about two minutes off a seventeen minute trip in the best case scenario.
 
 \fig{htb}{PIX/RES/roll_super.png}{f:rollingstart}{ \todo{rolling start graph} }{width=0.9\textwidth}
-
-
-%\subsection{Anti-Spillback Gating}
-%\todo{Network with a short arc that will spill back if people are allowed on it too fast. %Junction just before it must not be blocked as a lot of people exit there}.
 
 
 \section{Computational Performance}
@@ -87,7 +96,7 @@ As discussed in section \ref{s:seeding}, it is necessary to ensure that the more
 
 The choice of \emph{partial} population priming with slack band solutions made for the present application is the consequence of the results shown in Figure \ref{f:priming}, whereby it is evident that for a reasonably sized population \todo{see section \ref{r:popsize}} the best results are obtained by \todo{???}.
 
-\fig{htbp}{PIX/undoguy.png}{f:priming}{ Show effect of initial population mix on convergence. }{width=0.4\textwidth}
+\fig{htbp}{PIX/RES/priming.png}{f:priming}{ Show effect of initial population mix on convergence. }{width=\textwidth}
 
 
 
