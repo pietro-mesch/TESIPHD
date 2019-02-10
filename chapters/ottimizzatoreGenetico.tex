@@ -52,7 +52,7 @@ Another limiting factor is imposed by the computational requirements of the simu
 Time resolution cannot be sacrificed, as it is crucial to the correct reproduction of the rapid within-cycle queue dynamics, which are one of the main components of corridor performance indicators and would get averaged out by longer simulation intervals. For the intended real-time operation, the one on execution times is a particularly stringent limitation.
 
 Sizing of the look-ahead window should strike a good compromise between execution times, responsiveness and control feedback, and values in the order of 10 minutes, or 5-10 signal cycles should be optimal for most applications, if the computing resources available allow it.
-Rough sizing calculations are presented in the relevant section (\ref{res:windowsizing}) of the \nameref{c:results} chapter, alongside performance results for the validation tests performed.
+Rough sizing calculations are presented in the relevant section (\ref{res:performance}) of the \nameref{c:results} chapter, alongside performance results for the validation tests performed.
 
 \section{TRE as Performance Function} \label{s:rollingtre}
 The Dynamic Traffic Assignment algorithm known as TRE (described in more detail in section \ref{s:TRE}) is used in this integration to provide the optimiser with the solution evaluation capabilities it requires for its own stochastic search algorithm.

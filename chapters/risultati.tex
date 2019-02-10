@@ -71,19 +71,20 @@ With the optimal population size determined as in section \ref{r:popsize} and th
 \end{table}
 
 
-\section{Bi-directional Slack Bandwidth}
-slackband section \ref{s:slackband}.
+\section{Bi-directional Slack Bandwidth} \label{res:slack}
+Although to better understand the optimiser's behaviour the tests presented in this chapter mainly concern \emph{one-way} offset optimisation, the methodology is easily extended to \emph{two-way} corridor optimisation. This comes at no greater computational cost if the two directions run through the same junctions, which is the most common real-world use case.
 
-\todo{Demonstrate how the two way corridor actually performs much better with the slack band solution:
-\begin{itemize}
-\item make graph
-\end{itemize}
-}
+In any case, the optimisation may account for a corridor \emph{and} its return corridor, if one is defined on the network model (see section \ref{s:corridor}), by selecting solutions based on a linear combination of the cost functions calculated separately for the two directions. The sum can be weighted to favour optimisation in the main direction and protect its progression e.g. \emph{in sight} of known traffic dynamics, although indicators such as the \emph{stop ratio} and \emph{time per kilometre} are intrinsically normalised on the number of vehicles as is evident from their definitions given in Chapter \ref{c:objectives}.
 
-\fig{htbp}{PIX/undoguy.png}{f:slackvhardres}{ Bar graph with 70-30\% main:return optimised slackband vs maxband , SsShMain, QsQhMain ... TsThReturn}{width=0.4\textwidth}
+Figure \ref{f:slackvhardres} shows how the simple \emph{slack band} method introduced in section \ref{s:slackband} of this work can provide better starting solutions for two-way optimisation compared to the equally simple canonical two-way all-or-nothing bandwidth maximisation approach.
+Results show that favouring long and wide \emph{partial} green waves over obtaining the narrowest \emph{continuous} band positively affects a much larger number of vehicles: consequently, the fraction of stopped vehicles drops.
 
-Slack Bandwidth section \ref{s:slackband} show it is much better than reg band for similar "progression" objectives (travel times) for a two-way band max problem with weights proportional to flows. \todo{rant about how novel this is.}
+Furthermore, the outcomes are much more consistent across different scenarios, since as it is more clearly understood by referring to Figure \ref{f:slackvhard}, accounting for the band \emph{fringes} arising from different green durations reduces the erratic wandering of the priming method amongst apparently equivalent solutions, which reveal their true efficacy when put to the test in simulation.
 
+\fig{htbp}{PIX/RES/slackstops.png}{f:slackvhardres}{Comparative fitness of the \emph{initial solutions} for two-way optimisation provided by bandwidth and slack band maximisation respectively.
+Cost function values are calculated for each direction and linearly combined as would happen during optimisation. Return direction weight is set at 30\%, and the sample consists of 100 randomly generated five-junction corridors, with random phase durations and internal offsets. }{width=0.8\textwidth}
+
+\pagebreak
 \section{Algorithm Parameters}
 This section presents results of the preliminary studies aimed at determining an optimal choice of parameters for the Genetic Algorithm.
 
