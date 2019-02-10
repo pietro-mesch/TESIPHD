@@ -57,22 +57,18 @@ Predictably, these large relative improvements are not as striking in terms of s
 
 
 \section{Computational Performance} \label{res:performance}
-All tests presented in this section were performed on an ordinary 3.4 GHz Intel\textregistered Core\texttrademark i7-2600 CPU running up to 8 parallel threads on four processor cores. The computation times obtained proved adequate for \emph{large} real world applications and entirely sufficient for smaller networks, as shown in Table \ref{t:performance}.
+All tests presented in this section were performed on a 3.4 GHz Intel\textregistered Core\texttrademark i7-2600 CPU running up to 8 parallel threads on four processor cores. The computation times already proved adequate for \emph{large} real world applications and entirely sufficient for smaller networks, as shown in Table \ref{t:performance}.
 
 Sizing of the optimisation look-ahead window must chiefly account for the lower bound imposed by the minimum time required by the optimiser to reach satisfying results, as discussed in Chapter \ref{c:optimiser}.
 
-in the graphs is around the 10th iteration mark. 
+With the optimal population size determined as in section \ref{r:popsize} and the performance goal set to the best gains obtained across other tests (during which no time limitation was imposed), it was ascertained that corridor optimisation is indeed possible within the desired rolling-horizon time window of 10 minutes.
 
-\todo{The average supply computation time is 220 ms, i.e. approximately four evaluations per second.}
-
-
-%\subsection{Look-Ahead Window Size} \label{res:windowsizing}
-
-%\todo{Considerations upon computation time issues and applicability, scaling.}
-%Different corridor lengths.
-
-%\todo{can be used for planning!}
-
+\begin{table}[h]
+\caption{\textsc{Optimisation Performance and Computation Times}} \label{t:performance}
+\begin{center}
+\includegraphics[width=0.9\textwidth]{PIX/RES/perftable.png}
+\end{center}
+\end{table}
 
 
 \section{Bi-directional Slack Bandwidth}
@@ -94,12 +90,16 @@ This section presents results of the preliminary studies aimed at determining an
 \subsection{Population Priming} \label{s:poppriming}
 Stochastic search methods are extremely sensitive to the choice of initial conditions. To speed up convergence and obtain better results, the present application initialises the genetic algorithm population using a geometrical solution (illustrated in section \ref{s:slackband}) that aims to align the green phases on the corridor so as to maximise the chance of driving through the longest possible distance without encountering a red light.
 
-As discussed in section \ref{s:seeding}, it is necessary to ensure that the more \emph{informed} starting point does not imply a much narrower-sighted search of the solution space, ultimately leading to early convergence and sub-optimal results. The problem is clearly \emph{not} independent of the population size, and intelligent priming becomes at the same time more useful \emph{and} more risky for smaller and smaller populations (which are preferable from the computational point of view).
+As discussed in section \ref{s:seeding}, it is necessary to ensure that the more \emph{informed} starting point does not imply a much narrower-sighted search of the solution space, ultimately leading to early convergence and sub-optimal results. The problem is clearly \emph{not} independent of the population size, and priming becomes at the same time more useful \emph{and} more risky for smaller and smaller populations (which might be preferable from the computational point of view).
 
-The choice of \emph{partial} population priming with slack band solutions made for the present application is the consequence of the results shown in Figure \ref{f:priming}, whereby it is evident that for a reasonably sized population \todo{see section \ref{r:popsize}} the best results are obtained by \todo{???}.
+The choice of \emph{partial} population priming with slack band solutions made for the present application is the consequence of the results shown in Figure \ref{f:priming}. For a reasonably sized population (see section \ref{r:popsize}) the best results are obtained by priming \emph{half} of the initial individuals with the geometrical solution, while the rest are generated randomly. 
 
-\fig{htbp}{PIX/RES/priming.png}{f:priming}{ Show effect of initial population mix on convergence. }{width=\textwidth}
+\fig{htbp}{PIX/RES/priming.png}{f:priming}{Average cost function evolution arising from different population priming methods (sample size 20 optimisation runs for each scenario). Different problems favour geometrical solutions (if congestion and side flows are negligible, see left-hand side) or an initially random, unbiased population (as traffic conditions become less predictable, see right-hand side).
+A mix of the two performs practically as well as either in its best case, but across the whole range of test scenarios.}{width=\textwidth}
 
+As expected, geometrical priming is particularly beneficial if the traffic conditions are close to the uncongested free flowing state on large sections of the corridor, while as delays and side flows increase an entirely random population performs better thanks to the more thorough and unbiased search of the solution space, but in a practical application the call could not be made a-priori without some complicated selection logic.
+
+However, provided with a mixed initial population, the Genetic Algorithm can effectively select those \emph{traits} of the geometrical solutions that apply to some corridor section, while including the diversity brought about by random solutions to yield near-optimal results across the whole range of tests performed with varying congestion and side flow levels.
 
 \subsection{Population Size} \label{r:popsize}
 In general, a larger population is able to preserve more diversity and avoid early convergence, ultimately reaching better results, but as the number of individuals increases so does the time required to complete one full generation and hence  improve solutions.
