@@ -21,7 +21,7 @@ To assess performance under \emph{sub-critical} traffic conditions, several opti
 
 Performance improvements over the simple geometrical solution are shown in Figure \ref{f:subcrit}. 
 
-\fig{h}{PIX/RES/cold_subcrit.png}{f:subcrit}{Evolution of cost function values for subcritical flows and high side flows between 10\% and 30\% : foreground solid lines represent the average trend of the corresponding lighter sets in the background.}{width=0.75\textwidth}
+\fig{h}{PIX/RES/cold_subcrit.png}{f:subcrit}{Evolution of cost function values for subcritical flows and high side flows between 10\% and 30\% : solid lines in the foreground represent the average trend of the corresponding lighter sets in the background.}{width=0.75\textwidth}
 
 It is also interesting to note that if the traffic conditions are close to the theoretical premises of the simple bandwidth maximisation approach (i.e. if congestion does not significantly affect travel times and side flows are almost negligible with respect to the main corridor flow) the solutions found by the optimiser, even with a \emph{completely random} initial population, never stray far from the geometrical solution, as shown in Figure \ref{f:similar}, and are \emph{identical} in case of no relevant side flows.
 
@@ -39,26 +39,31 @@ The proposed optimiser was therefore extensively tested under \emph{super-critic
 
 The first scenario considered reproduces the optimisation of a time window during which high demand volumes rapidly enter an otherwise tranquil network, and aims to assess the capacity of the optimiser to keep corridor performance indicators in check. Figure \ref{f:coldstart} confirms that compared to the geometrical solutions that would serve the uncongested scenario, optimised plans can considerably reduce the number of stops and the growth of queues on short arcs. 
 
-\fig{htb}{PIX/RES/cold_super.png}{f:coldstart}{ \todo{cold start graph} }{width=0.7\textwidth}
+\fig{htb}{PIX/RES/cold_super.png}{f:coldstart}{Evolution of cost function values for the optimisation window containing the onset of high demand flows. Solid lines in the foreground represent the average trend of the corresponding lighter sets in the background.}{width=0.7\textwidth}
 
 It appears that queue management is most susceptible to early convergence into locally optimal solutions, as shown by the evident fork in the relevant values across the sample of optimisation runs, which for the test scenario presented in Figure \ref{f:coldstart} represents a 66\% difference in gains over the starting solution between the worst and best cases; in every instance, however, gains are relevant and above 15\% of the initial cost. 
 
-The average travel time may \emph{seem} less sensitive to the optimisation, due to the relatively small improvement in the relevant cost function. However, if the metric is inverted for readability as shown on the left-hand side of Figure \ref{f:speedimpro}, it is plain that the effect is due to the average speed being high to begin with: in fact, the optimiser is able to improve the performance with respect to the maximum bandwidth solution by a respectable 3 km/h, almost as well as in the case of sub-critical demand.
+The average travel time may \emph{seem} less sensitive to optimisation, due to the relatively small improvement in the relevant cost function. However, if the metric is inverted for readability as shown on the left-hand side of Figure \ref{f:speedimpro}, it is plain that the effect is due to the average speed being high to begin with: in fact, the optimiser is able to improve the performance with respect to the maximum bandwidth solution by a respectable 3 km/h, almost as well as in the case of sub-critical demand.
 
-\fig{htbp}{PIX/RES/speed_impro2.png}{f:speedimpro}{ \todo{speeeddssss} }{width=\textwidth}
+\fig{htbp}{PIX/RES/speed_impro2.png}{f:speedimpro}{Improvements in progression speed, averages and standard deviations corresponding to the scenarios presented in Figures \ref{f:subcrit}, \ref{f:coldstart} (left) and \ref{f:rollingstart} (right). The average user speed can be maintained effectively and consistently as long as the corridor does not collapse under sustained flows above capacity, after which gains become almost irrelevant and the optimiser behaviour is less reliable.}{width=\textwidth}
 
-The second test scenario envisions an already heavily congested  corridor with standing queues on most arcs, as the optimiser would inevitably face either during normal operation at peak hours or upon being switched back on after a down time. 
+The second test scenario envisions an already heavily congested corridor with standing queues on most arcs, as the optimiser would inevitably face either during normal operation at peak hours or upon being switched back on after a down time. 
 
 It is plain to see from Figure \ref{f:rollingstart} that while the standing queues mean that little can be done to avoid further stops, the \emph{queue length} can be managed rather effectively and consistently, with improvements between 6\% and 8\% shown across all tests. The same gains are obtained with respect to travel times, which being the inverse of the average speed across the subcritical and hypercritical portions of each arc are directly correlated with the queue length, as discussed in section \ref{s:quel}.
 
 Predictably, these large relative improvements are not as striking in terms of speed, which would be low in any case due to congestion as shown by the right-hand side of Figure \ref{f:speedimpro}. Nevertheless, they represent a positive reduction in the time lost by users in peak-hour traffic, e.g. for the test corresponding to Figure \ref{f:rollingstart} users travelling the whole corridor would shave about two minutes off a seventeen minute trip in the best case scenario.
 
-\fig{htb}{PIX/RES/roll_super.png}{f:rollingstart}{ \todo{rolling start graph} }{width=0.9\textwidth}
+\fig{htb}{PIX/RES/roll_super.png}{f:rollingstart}{Evolution of cost function values for an already congested corridor experiencing sustained flows above capacity. Solid lines in the foreground represent the average trend of the corresponding lighter sets in the background.}{width=0.9\textwidth}
 
 
-\section{Computational Performance}
+\section{Computational Performance} \label{res:performance}
+All tests presented in this section were performed on an ordinary 3.4 GHz Intel\textregistered Core\texttrademark i7-2600 CPU running up to 8 parallel threads on four processor cores. The computation times obtained proved adequate for \emph{large} real world applications and entirely sufficient for smaller networks, as shown in Table \ref{t:performance}.
 
-The average supply computation time is 220 ms, i.e. approximately four evaluations per second.
+Sizing of the optimisation look-ahead window must chiefly account for the lower bound imposed by the minimum time required by the optimiser to reach satisfying results, as discussed in Chapter \ref{c:optimiser}.
+
+in the graphs is around the 10th iteration mark. 
+
+\todo{The average supply computation time is 220 ms, i.e. approximately four evaluations per second.}
 
 
 %\subsection{Look-Ahead Window Size} \label{res:windowsizing}
@@ -75,9 +80,6 @@ slackband section \ref{s:slackband}.
 
 \todo{Demonstrate how the two way corridor actually performs much better with the slack band solution:
 \begin{itemize}
-\item plan network
-\item recycle band optimiser (from home)
-\item draw picture \ref{f:slackvhard}
 \item make graph
 \end{itemize}
 }
@@ -92,19 +94,27 @@ This section presents results of the preliminary studies aimed at determining an
 \subsection{Population Priming} \label{s:poppriming}
 Stochastic search methods are extremely sensitive to the choice of initial conditions. To speed up convergence and obtain better results, the present application initialises the genetic algorithm population using a geometrical solution (illustrated in section \ref{s:slackband}) that aims to align the green phases on the corridor so as to maximise the chance of driving through the longest possible distance without encountering a red light.
 
-As discussed in section \ref{s:seeding}, it is necessary to ensure that the more \emph{informed} starting point does not imply a much narrower-sighted search of the solution space, ultimately leading to early convergence and sub-optimal results. The problem is clearly \emph{not} independent of the population size, and intelligent priming becomes at the same time more useful \emph{and} more risky for smaller and smaller populations (which are preferrable from the computational point of view).
+As discussed in section \ref{s:seeding}, it is necessary to ensure that the more \emph{informed} starting point does not imply a much narrower-sighted search of the solution space, ultimately leading to early convergence and sub-optimal results. The problem is clearly \emph{not} independent of the population size, and intelligent priming becomes at the same time more useful \emph{and} more risky for smaller and smaller populations (which are preferable from the computational point of view).
 
 The choice of \emph{partial} population priming with slack band solutions made for the present application is the consequence of the results shown in Figure \ref{f:priming}, whereby it is evident that for a reasonably sized population \todo{see section \ref{r:popsize}} the best results are obtained by \todo{???}.
 
 \fig{htbp}{PIX/RES/priming.png}{f:priming}{ Show effect of initial population mix on convergence. }{width=\textwidth}
 
 
-
 \subsection{Population Size} \label{r:popsize}
-The correlation between optimal population size and problem size (i.e. number of controlled junctions) was analysed by running randomly generated corridors with 2 to \todo{10} junctions through the optimiser, and varying the population size. 
-The results, classified by corridor length, were then examined to determine the point \todo{at which more pop, more time, not better} taken to be the \emph{most desirable} population size for that corridor class.
+In general, a larger population is able to preserve more diversity and avoid early convergence, ultimately reaching better results, but as the number of individuals increases so does the time required to complete one full generation and hence  improve solutions.
 
-Results shown in Figure \ref{f:popreq} might serve as a general rule of thumb for practical application sizing, considering that if resources are scarce it is still possible to settle for slightly undersized populations and obtain good results, while conversely if the problems are small enough it may still be desirable to invest in a larger population to increase (however marginally) the stability and quality of the solutions.
+The correlation between optimal population size and problem size (i.e. number of controlled junctions) was analysed by running randomly generated corridors with 3 to 10 junctions through the optimiser, and varying the population size between 8 and 256 individuals. 
+ 
+The results, classified by corridor length, were then examined to determine the point at which the performance advantages of increasing the population size are balanced out by the inflated computational costs involved; an operation that obviously presumes some limitation on the maximum computation time which for the present study was set at or possibly \emph{below} 8 minutes, i.e. the duration of the simulation time window minus the time required for a few DNL iterations (see section \ref{res:performance}).
+
+Despite the variability of results due to the diversity of traffic conditions and topology encountered by the optimiser, a clear pattern emerges for corridors of any length confirming the expected diminishing returns, as exemplified in Figure \ref{f:popsize} for the same class of problems presented in the previous sections.
+All corridors behave the same manner, with minor scaling along the temporal axis due to the size of the sub-network influencing the DNL duration, and the dominant factor in determining the largest useful population seems to be the cycle length over which the offsets are picked rather than the number of junctions (which is one order of magnitude smaller).
+
+\fig{htbp}{PIX/RES/popsize.png}{f:popsize}{ Optimum population size vs number of junctions }{width=0.8\textwidth}
+
+The ideal population size for the chosen operational constraints is evidently around 128 individuals. The balance between solution fitness and time to convergence is ideal, allowing on average to reach performance gains which the larger population can \emph{barely} match before the 8 minute mark, with about two minutes to spare on the imposed time limit.
+
+Ultimately, as in most cases relating to stochastic search methods, a general rule for population sizing is hard to obtain and would not necessarily apply effectively to all instances of the same problem. Results shown in Figure \ref{f:popsize} represent the application of a rule of thumb for practical application sizing.
 
 
-\fig{htbp}{PIX/undoguy.png}{f:popreq}{ Optimum population size vs number of junctions }{width=0.4\textwidth}
