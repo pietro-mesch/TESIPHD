@@ -1,17 +1,26 @@
 \chapter{Conclusions} \label{c:conclusions}
 
-The approach has proved successful in reducing kpis
+In the light of results presented in the previous chapter, it is possible to draw some conclusions regarding the endeavour undertaken in the context of this doctorate, and outline some of the major points of necessary improvement for the future of the proposed application.
 
-Performance allows gains of x in t time for a real world network of up to zfsdvjcnaei arcs
+Using an advanced Dynamic Traffic Assignment algorithm as heuristic for a Genetic Algorithm, the approach has proven to be effective in adjusting the offsets for a series of signal controlled junctions along a traffic corridor, to mitigate the undesirable consequences of traffic congestion and poor signal coordination.
 
-DIfferent functions different situaz
+Based on the supply and demand data provided by the Optima Real-Time Traffic Management environment, it was possible to significantly and reliably reduce the value of the selected cost functions, which describe the average progression speed, the number of stopped vehicles, and the queue lengths with the associated risk of gridlock.
 
-The slack band is good
+Each performance function better serves different traffic conditions, but the optimisation process was entirely stable for a large number of randomly generated corridors. Priming of the Genetic Algorithm solution pool using the slack band method showed very positive results in terms of repeatability of the performance for different test scenarios. Nevertheless, fine tuning of the algorithm parameters should be performed for specific applications, as no blanket rule could be determined based on the tests alone.
 
-Simulation based optimisation is viable computationally
+The corridor performance improvements, as determined by macroscopic traffic flow simulation, obviously vary with the saturation levels of the network and deteriorate rapidly as congestion increases, but remain relevant even in the worst case scenarios.
+
+The simulation-based optimiser could regularly achieve a reduction of no less than 5\% in the average queue length under heavy congestion, ranging all the way up to a 20\% reduction in the number of stops when more favourable conditions applied, when compared to simpler geometrical considerations known in literature; the advantages over fixed signal plans are bound to be even greater.
+
+Finally, Real-Time Simulation-Based Optimisation appears to be computationally viable, as the execution times of the proposed algorithm would allow the optimiser to operate in rolling-horizon with a look-ahead window of 10 minutes on large real-world networks.
+
+The simple application presented in this thesis therefore serves mainly as a proof of concept that signal optimisation may be fruitfully integrated into a real-time traffic management environment, allowing to make better objective-driven decisions based on more realistic models and more reliable data, and providing a stable and cost effective alternative to many of the currently commercialised solutions.
 
 
+\pagebreak
 \section{Future Work}
+The aim of this work was to explore the possibility 
+
 confronto con microsimulazione
 
 confronto con ottimizzatori esistenti
