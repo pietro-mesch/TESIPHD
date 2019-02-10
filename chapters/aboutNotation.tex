@@ -63,9 +63,14 @@ $ \simintd $ & s & duration of interval $\tau$\\[2pt]
 
 \subsubsection*{Simulation Results}
 \begin{tabu} to \textwidth {X[3,c] X[1,c] X[6,l]}
+$ \fcum{a,t} $ & \units{veh} & vehicles that entered arc $a$ before time $t$\\[2pt]
+$ \gcum{a,t} $ & \units{veh} & spaces that reached $\tail{a}$ before time $t$\\[2pt]
+$ \hcum{a,t} $ & \units{veh} & vehicles that reached $\head{a}$ before time $t$\\[2pt]
+$ \ecum{a,t} $ & \units{veh} & vehicles that left arc $a$ before time $t$\\[2pt]
 $ \nveh{a,t} $ & \units{veh} & vehicles on arc $a$ at time $t$\\[2pt]
 $ \traveltime{a,t} $ & \units{s} & travel time for arc $a$ entering at time $t$ \\[2pt]
 $ \quen{a,t} $ & \units{veh} & vehicles in the vertical queue at $\head{a}$ at time $t$\\[2pt]
+
 \end{tabu}
 
 \subsubsection*{Performance Indicators}
